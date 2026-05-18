@@ -43,20 +43,20 @@ class SecurityHeaders
 
         // Bangun kebijakan CSP secara dinamis
         $isLocal = config('app.env') === 'local';
-        
-        $scriptSrc = ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://kit.fontawesome.com", "https://cdn.tailwindcss.com", "https://unpkg.com", "https://cdn.jsdelivr.net"];
-        $styleSrc = ["'self'", "'unsafe-inline'", "https://fonts.bunny.net", "https://unpkg.com"];
-        $connectSrc = ["'self'", "https://ka-f.fontawesome.com"];
-        $imgSrc = ["'self'", "data:", "https://images.unsplash.com", "https://api.qrserver.com", "https://barcode.tec-it.com", "https://bwipjs-api.metafloor.com"];
-        $fontSrc = ["'self'", "data:", "https://fonts.bunny.net", "https://ka-f.fontawesome.com"];
+
+        $scriptSrc = ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://kit.fontawesome.com', 'https://cdn.tailwindcss.com', 'https://unpkg.com', 'https://cdn.jsdelivr.net'];
+        $styleSrc = ["'self'", "'unsafe-inline'", 'https://fonts.bunny.net', 'https://unpkg.com', 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'];
+        $connectSrc = ["'self'", 'https://ka-f.fontawesome.com', 'https://cdn.jsdelivr.net'];
+        $imgSrc = ["'self'", 'data:', 'https://images.unsplash.com', 'https://api.qrserver.com', 'https://barcode.tec-it.com', 'https://bwipjs-api.metafloor.com'];
+        $fontSrc = ["'self'", 'data:', 'https://fonts.bunny.net', 'https://ka-f.fontawesome.com', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'];
 
         // Jika di lingkungan local, izinkan aset dari Vite Dev Server
         if ($isLocal) {
             $viteUrls = [
-                "http://localhost:*", 
-                "ws://localhost:*", 
-                "http://127.0.0.1:*", 
-                "ws://127.0.0.1:*"
+                'http://localhost:*',
+                'ws://localhost:*',
+                'http://127.0.0.1:*',
+                'ws://127.0.0.1:*',
             ];
             $scriptSrc = array_merge($scriptSrc, $viteUrls);
             $styleSrc = array_merge($styleSrc, $viteUrls);
@@ -66,11 +66,11 @@ class SecurityHeaders
 
         $csp = [
             "default-src 'self'",
-            "script-src " . implode(' ', $scriptSrc),
-            "style-src " . implode(' ', $styleSrc),
-            "img-src " . implode(' ', $imgSrc),
-            "font-src " . implode(' ', $fontSrc),
-            "connect-src " . implode(' ', $connectSrc),
+            'script-src '.implode(' ', $scriptSrc),
+            'style-src '.implode(' ', $styleSrc),
+            'img-src '.implode(' ', $imgSrc),
+            'font-src '.implode(' ', $fontSrc),
+            'connect-src '.implode(' ', $connectSrc),
             "frame-src 'self' https://www.youtube.com https://youtube.com https://*.youtube.com https://www.youtube-nocookie.com https://www.google.com https://*.google.com", // Tambah wildcard youtube & google maps
             "object-src 'none'",
             "base-uri 'self'",

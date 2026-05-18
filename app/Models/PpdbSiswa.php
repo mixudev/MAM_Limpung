@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class PpdbSiswa extends Model
 {
@@ -28,8 +29,10 @@ class PpdbSiswa extends Model
         'sekolah_asal',
         'ukuran_baju',
         'foto_siswa',
+        'ttd_digital',
         'status',
         'catatan_admin',
+        'additional_fields',
         'submitted_at',
     ];
 
@@ -40,7 +43,8 @@ class PpdbSiswa extends Model
     {
         return [
             'tanggal_lahir' => 'date',
-            'submitted_at'  => 'datetime',
+            'submitted_at' => 'datetime',
+            'additional_fields' => 'array',
         ];
     }
 
@@ -55,10 +59,15 @@ class PpdbSiswa extends Model
             do {
                 // Generate a highly secure unique alphanumeric registration number
                 // Example: PPDB-2026-K7A9X
-                $number = 'PPDB-' . date('Y') . '-' . strtoupper(\Illuminate\Support\Str::random(5));
+                $number = 'PPDB-'.date('Y').'-'.strtoupper(Str::random(5));
             } while (self::where('nomor_registrasi', $number)->exists());
-            
+
             $model->nomor_registrasi = $number;
+
+            // Generate a secure unique digital signature barcode token
+            if (empty($model->ttd_digital)) {
+                $model->ttd_digital = 'MAM-SIG-'.strtoupper(Str::random(12));
+            }
         });
     }
 
@@ -91,7 +100,7 @@ class PpdbSiswa extends Model
     public function fotoUrl(): string
     {
         return $this->foto_siswa
-            ? asset('storage/' . $this->foto_siswa)
+            ? asset('storage/'.$this->foto_siswa)
             : asset('images/default-avatar.png');
     }
 
@@ -102,8 +111,8 @@ class PpdbSiswa extends Model
     {
         return match ($this->status) {
             'diterima' => 'Diterima',
-            'ditolak'  => 'Ditolak',
-            default    => 'Menunggu Verifikasi',
+            'ditolak' => 'Ditolak',
+            default => 'Menunggu Verifikasi',
         };
     }
 
@@ -114,8 +123,8 @@ class PpdbSiswa extends Model
     {
         return match ($this->status) {
             'diterima' => 'green',
-            'ditolak'  => 'red',
-            default    => 'yellow',
+            'ditolak' => 'red',
+            default => 'yellow',
         };
     }
 }

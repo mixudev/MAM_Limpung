@@ -55,7 +55,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.ppdb.index') }}" data-page="ppdb" class="sidebar-link {{ Route::is('admin.ppdb.*') ? 'active' : '' }}" aria-label="PPDB">
+                    <a href="#" class="sidebar-link dropdown-trigger {{ Route::is('admin.ppdb.*') ? 'active dropdown-open' : '' }}" aria-label="PPDB">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
                                 class="w-4 h-4">
@@ -64,10 +64,34 @@
                             </svg>
                         </span>
                         <span class="sidebar-label">PPDB</span>
-                        <span
-                            class="sidebar-badge ml-auto text-[10px] font-mono bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-sm">PPDB</span>
+                        <svg class="dropdown-chevron w-3.5 h-3.5 ml-auto text-white/60 dark:text-zinc-500 sidebar-label" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
                         <span class="sidebar-tooltip">PPDB</span>
                     </a>
+                    <ul class="sidebar-submenu">
+                        <div class="sidebar-submenu-inner">
+                            <li>
+                                <a href="{{ route('admin.ppdb.index') }}" class="sidebar-link text-xs py-1.5"
+                                    aria-label="Pendaftar PPDB">
+                                    <span class="sidebar-label">Pendaftar</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.ppdb.settings.edit') }}" class="sidebar-link text-xs py-1.5"
+                                    aria-label="Pengaturan PPDB">
+                                    <span class="sidebar-label">Pengaturan</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.ppdb.export') }}" class="sidebar-link text-xs py-1.5"
+                                    aria-label="Export PPDB">
+                                    <span class="sidebar-label">Export Data</span>
+                                </a>
+                            </li>
+                        </div>
+                    </ul>
                 </li>
             </ul>
         </div>

@@ -2,15 +2,17 @@
 
 use App\Models\PpdbSiswa;
 use App\Models\User;
-use Illuminate\Support\Carbon;
+use Database\Seeders\Auth\PermissionSeeder;
+use Database\Seeders\Auth\RoleSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     // Run core permission and role seeders
-    $this->seed(\Database\Seeders\Auth\PermissionSeeder::class);
-    $this->seed(\Database\Seeders\Auth\RoleSeeder::class);
+    $this->seed(PermissionSeeder::class);
+    $this->seed(RoleSeeder::class);
 });
 
 test('unauthenticated guest cannot access the ppdb admin panel', function () {
@@ -68,7 +70,7 @@ test('authorized admin can view applicant JSON details via show route', function
                 'nama_lengkap' => 'Zahra Aulia',
                 'nisn' => '0987654321',
                 'status' => 'pending',
-            ]
+            ],
         ]);
 });
 
@@ -135,4 +137,93 @@ test('rejection validation fails if reason is empty or too short', function () {
     ]);
 
     $response->assertSessionHasErrors('catatan_admin');
+});
+
+test('authorized admin can access print details route and see school Kop', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $student = PpdbSiswa::factory()->create([
+        'nama_lengkap' => 'Eka Putra',
+        'nisn' => '5556667778',
+        'sekolah_asal' => 'SMP Muhammadiyah Limpung',
+        'status' => 'diterima',
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.ppdb.print', $student->id));
+
+    $response->assertStatus(200)
+        ->assertViewIs('dashboard.admin.ppdb.print')
+        ->assertSee('Madrasah Aliyah Muhammadiyah Limpung')
+        ->assertSee('EKA PUTRA')
+        ->assertSee('5556667778')
+        ->assertSee('DITERIMA (TERVERIFIKASI)');
+});
+
+test('authorized admin can access the ppdb export page', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $response = $this->actingAs($admin)->get(route('admin.ppdb.export'));
+
+    $response->assertStatus(200)
+        ->assertViewIs('dashboard.admin.ppdb.export')
+        ->assertSee('Export Rekapitulasi Data PPDB')
+        ->assertSee('Microsoft Excel Spreadsheet')
+        ->assertSee('Dokumen PDF / Cetak Ledger');
+});
+
+test('authorized admin can download export data as CSV/Excel', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    PpdbSiswa::factory()->create([
+        'nama_lengkap' => 'Galih Pratama',
+        'nisn' => '8888777766',
+        'sekolah_asal' => 'SMP Negeri 2 Limpung',
+        'status' => 'diterima',
+        'submitted_at' => now(),
+    ]);
+
+    $response = $this->actingAs($admin)->post(route('admin.ppdb.export.download'), [
+        'format' => 'excel',
+        'tahun_ajaran' => (int) date('Y'),
+        'status' => 'diterima',
+        'fields' => ['nama_lengkap', 'nisn', 'sekolah_asal', 'status'],
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertHeader('Content-Disposition');
+
+    $disposition = $response->headers->get('Content-Disposition');
+    expect($disposition)->toContain('attachment')
+        ->toContain('LAPORAN_PPDB_MAM_LIMPUNG_')
+        ->toContain('.xlsx');
+});
+
+test('authorized admin can view/print export data as PDF', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    PpdbSiswa::factory()->create([
+        'nama_lengkap' => 'Indah Cahyani',
+        'nisn' => '9999888877',
+        'sekolah_asal' => 'MTs Negeri 1 Batang',
+        'status' => 'diterima',
+        'submitted_at' => now(),
+    ]);
+
+    $response = $this->actingAs($admin)->post(route('admin.ppdb.export.download'), [
+        'format' => 'pdf',
+        'tahun_ajaran' => (int) date('Y'),
+        'status' => 'diterima',
+        'fields' => ['nama_lengkap', 'nisn', 'sekolah_asal', 'status'],
+    ]);
+
+    $response->assertStatus(200)
+        ->assertViewIs('dashboard.admin.ppdb.export_pdf')
+        ->assertSee('Indah Cahyani')
+        ->assertSee('9999888877')
+        ->assertSee('MTs Negeri 1 Batang')
+        ->assertSee('window.print()');
 });

@@ -14,173 +14,105 @@
 <div class="space-y-6">
 
     <!-- 1. Header & Filter Area -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-6 border border-slate-200 dark:border-zinc-800 rounded-none shadow-sm">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white dark:bg-zinc-900 p-6 border border-slate-200 dark:border-zinc-800 rounded-none shadow-sm">
         <div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white leading-tight">Penerimaan Peserta Didik Baru (PPDB)</h1>
             <p class="text-sm text-slate-500 dark:text-zinc-400 mt-1">Kelola dan verifikasi pendaftaran calon siswa MAM Limpung secara tersentralisasi.</p>
         </div>
 
-        <!-- Filter Tahun Pelajaran -->
-        <form action="{{ route('admin.ppdb.index') }}" method="GET" id="filterForm" class="flex flex-wrap items-center gap-3">
-            @if(request('search'))
-                <input type="hidden" name="search" value="{{ request('search') }}">
-            @endif
-            @if(request('status'))
-                <input type="hidden" name="status" value="{{ request('status') }}">
-            @endif
+        <div class="flex flex-wrap items-end gap-4 lg:self-center">
+            <!-- Filter Tahun Pelajaran -->
+            <form action="{{ route('admin.ppdb.index') }}" method="GET" id="filterForm" class="flex flex-wrap items-center gap-3">
+                @if(request('search'))
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                @endif
+                @if(request('status'))
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                @endif
 
-            <div class="flex flex-col">
-                <label for="tahun_ajaran" class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">Tahun Pelajaran</label>
-                <select name="tahun_ajaran" id="tahun_ajaran" onchange="this.form.submit()" 
-                    class="bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-sm text-slate-700 dark:text-zinc-300 py-2 px-3.5 pr-8 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
-                    @foreach($years as $yr)
-                        <option value="{{ $yr }}" {{ $selectedYear === $yr ? 'selected' : '' }}>
-                            {{ $yr }}/{{ $yr + 1 }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        </form>
-    </div>
-
-    <!-- 2. KPI Metrics Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <!-- Total Applicants -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-none relative overflow-hidden shadow-sm">
-            <div class="absolute left-0 top-0 bottom-0 w-[4px] bg-[#4f45b2]"></div>
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Total Pendaftar</p>
-                    <h3 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 leading-none">{{ $stats['total'] }}</h3>
-                </div>
-                <div class="p-3 bg-[#4f45b2]/10 text-[#4f45b2] dark:text-[#8c84c8] rounded-none">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                </div>
-            </div>
-            <p class="text-xs text-slate-400 dark:text-zinc-500 mt-4 font-mono">Calon Siswa Terdaftar</p>
-        </div>
-
-        <!-- Pending Queue -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-none relative overflow-hidden shadow-sm">
-            <div class="absolute left-0 top-0 bottom-0 w-[4px] bg-amber-500"></div>
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Menunggu Verifikasi</p>
-                    <h3 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 leading-none text-amber-600 dark:text-amber-500">{{ $stats['pending'] }}</h3>
-                </div>
-                <div class="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-none">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-            </div>
-            <p class="text-xs text-slate-400 dark:text-zinc-500 mt-4 font-mono">Perlu Penilaian Segera</p>
-        </div>
-
-        <!-- Verified -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-none relative overflow-hidden shadow-sm">
-            <div class="absolute left-0 top-0 bottom-0 w-[4px] bg-emerald-500"></div>
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Terverifikasi</p>
-                    <h3 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 leading-none text-emerald-600 dark:text-emerald-500">{{ $stats['verified'] }}</h3>
-                </div>
-                <div class="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-none">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-            </div>
-            <p class="text-xs text-slate-400 dark:text-zinc-500 mt-4 font-mono">Telah Diterima Masuk</p>
-        </div>
-
-        <!-- Target Quota -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-none relative overflow-hidden shadow-sm">
-            <div class="absolute left-0 top-0 bottom-0 w-[4px] bg-blue-500"></div>
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Target Kuota PPDB</p>
-                    <h3 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 leading-none text-blue-600 dark:text-blue-400">{{ $stats['quota_percent'] }}%</h3>
-                </div>
-                <div class="p-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-none">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                    </svg>
-                </div>
-            </div>
-            <div class="mt-4">
-                <div class="flex items-center justify-between text-xs text-slate-400 dark:text-zinc-500 mb-1 font-mono">
-                    <span>Terpenuhi: {{ $stats['verified'] }}/{{ $stats['quota_target'] }}</span>
-                </div>
-                <div class="w-full bg-slate-100 dark:bg-zinc-800 h-1.5 rounded-none overflow-hidden">
-                    <div class="bg-blue-500 h-full transition-all duration-500" style="width: {{ $stats['quota_percent'] }}%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. Dual Column: Statistics & Distributions -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- School Origin Distribution -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-none shadow-sm lg:col-span-2">
-            <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-4">Top 5 Sekolah Asal Pendaftar</h3>
-            <div class="space-y-4">
-                @forelse($distributions['top_schools'] as $school)
-                    @php
-                        $percentage = $stats['total'] > 0 ? round(($school->count / $stats['total']) * 100) : 0;
-                    @endphp
-                    <div>
-                        <div class="flex items-center justify-between text-sm text-slate-700 dark:text-zinc-300 font-medium mb-1">
-                            <span class="truncate">{{ $school->sekolah_asal }}</span>
-                            <span class="font-mono text-xs">{{ $school->count }} Siswa ({{ $percentage }}%)</span>
-                        </div>
-                        <div class="w-full bg-slate-100 dark:bg-zinc-800 h-2 rounded-none overflow-hidden">
-                            <div class="bg-[#4f45b2] h-full" style="width: {{ $percentage }}%"></div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-center py-6 text-slate-400 dark:text-zinc-500 text-sm">Tidak ada data sekolah asal.</div>
-                @endforelse
-            </div>
-        </div>
-
-        <!-- Gender & Size Distribution Info -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-none shadow-sm flex flex-col justify-between">
-            <div>
-                <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-4">Metrik Distribusi Siswa</h3>
-                
-                <!-- Gender -->
-                <div class="mb-5">
-                    <p class="text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-2 font-mono uppercase tracking-wider">Jenis Kelamin</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-slate-50 dark:bg-zinc-800/50 p-3 border border-slate-100 dark:border-zinc-800/80 text-center rounded-none">
-                            <span class="text-xs text-slate-400 dark:text-zinc-500 font-medium block">Laki-laki</span>
-                            <span class="text-xl font-bold text-slate-800 dark:text-white font-mono mt-0.5 block">{{ $distributions['gender']['L'] }}</span>
-                        </div>
-                        <div class="bg-slate-50 dark:bg-zinc-800/50 p-3 border border-slate-100 dark:border-zinc-800/80 text-center rounded-none">
-                            <span class="text-xs text-slate-400 dark:text-zinc-500 font-medium block">Perempuan</span>
-                            <span class="text-xl font-bold text-slate-800 dark:text-white font-mono mt-0.5 block">{{ $distributions['gender']['P'] }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sizes -->
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-2 font-mono uppercase tracking-wider">Distribusi Ukuran Seragam</p>
-                    <div class="flex flex-wrap gap-1.5">
-                        @foreach($distributions['sizes'] as $sz => $cnt)
-                            <div class="px-2.5 py-1 text-xs font-mono border border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/40 text-slate-600 dark:text-zinc-400 rounded-none flex items-center gap-1.5">
-                                <span class="font-bold text-[#4f45b2] dark:text-[#8c84c8]">{{ $sz }}</span>
-                                <span class="bg-white dark:bg-zinc-700/50 px-1 border border-slate-200/50 dark:border-zinc-800 rounded-none text-[10px] font-bold">{{ $cnt }}</span>
-                            </div>
+                <div class="flex flex-col">
+                    <label for="tahun_ajaran" class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">Tahun Pelajaran</label>
+                    <select name="tahun_ajaran" id="tahun_ajaran" onchange="this.form.submit()" 
+                        class="bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-sm text-slate-700 dark:text-zinc-300 py-2 px-3.5 pr-8 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                        @foreach($years as $yr)
+                            <option value="{{ $yr }}" {{ $selectedYear === $yr ? 'selected' : '' }}>
+                                {{ $yr }}/{{ $yr + 1 }}
+                            </option>
                         @endforeach
-                    </div>
+                    </select>
+                </div>
+            </form>
+
+            <!-- Pengaturan Button -->
+            <div class="flex flex-col">
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-transparent mb-1 block select-none">Aksi</span>
+                <a href="{{ route('admin.ppdb.settings.edit') }}" class="inline-flex items-center gap-2 py-2.5 px-4 bg-[#4f45b2] hover:bg-[#4f45b2]/90 text-white font-bold text-xs uppercase tracking-wider rounded-none transition-all active:scale-[.98]">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Pengaturan
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Consolidated PPDB Analytics Grid (Small & Clean Boxes) -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+        
+        <!-- Card 1: Total Pendaftar -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3 rounded-none shadow-sm flex flex-col justify-between">
+            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Pendaftar</span>
+            <div class="flex items-baseline gap-1 mt-1">
+                <span class="text-xl font-extrabold text-slate-900 dark:text-white font-mono leading-none">{{ $stats['total'] }}</span>
+                <span class="text-[9px] text-slate-400 font-mono">Siswa</span>
+            </div>
+        </div>
+
+        <!-- Card 2: Menunggu -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3 rounded-none shadow-sm flex flex-col justify-between border-l-2 border-l-amber-500">
+            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Menunggu</span>
+            <div class="flex items-baseline gap-1 mt-1">
+                <span class="text-xl font-extrabold text-amber-600 dark:text-amber-500 font-mono leading-none">{{ $stats['pending'] }}</span>
+                <span class="text-[9px] text-slate-400 font-mono">Siswa</span>
+            </div>
+        </div>
+
+        <!-- Card 3: Terverifikasi -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3 rounded-none shadow-sm flex flex-col justify-between border-l-2 border-l-emerald-500">
+            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Terverifikasi</span>
+            <div class="flex items-baseline gap-1 mt-1">
+                <span class="text-xl font-extrabold text-emerald-600 dark:text-emerald-500 font-mono leading-none">{{ $stats['verified'] }}</span>
+                <span class="text-[9px] text-slate-400 font-mono">Siswa</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Target Kuota -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3 rounded-none shadow-sm flex flex-col justify-between border-l-2 border-l-blue-500">
+            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-semibold leading-none">Target Kuota</span>
+            <div class="mt-1">
+                <span class="text-xs font-bold text-slate-800 dark:text-zinc-300 font-mono leading-none">
+                    {{ $stats['verified'] }}/{{ $stats['quota_target'] }} ({{ $stats['quota_percent'] }}%)
+                </span>
+                <div class="w-full bg-slate-100 dark:bg-zinc-800 h-1 mt-1 rounded-none overflow-hidden">
+                    <div class="bg-blue-500 h-full" style="width: {{ $stats['quota_percent'] }}%"></div>
                 </div>
             </div>
         </div>
+
+        <!-- Card 5: Jenis Kelamin -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3 rounded-none shadow-sm flex flex-col justify-between">
+            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Gender</span>
+            <div class="flex items-center gap-1.5 mt-1">
+                <span class="text-[10px] font-mono text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-800/40 px-1 py-0.5 border border-slate-100/60 dark:border-zinc-800 rounded-none">
+                    L: <strong>{{ $distributions['gender']['L'] }}</strong>
+                </span>
+                <span class="text-[10px] font-mono text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-800/40 px-1 py-0.5 border border-slate-100/60 dark:border-zinc-800 rounded-none">
+                    P: <strong>{{ $distributions['gender']['P'] }}</strong>
+                </span>
+            </div>
+        </div>
+
     </div>
 
     <!-- 4. Interactive Data Table & Actions -->
@@ -271,6 +203,14 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                 <div class="inline-flex items-center gap-1.5">
+                                    <!-- Cetak Action -->
+                                    <button type="button" onclick="printStudent('{{ $student->id }}')" title="Cetak Laporan Biodata"
+                                        class="px-2 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white rounded-none transition-all active:scale-[.95]">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                        </svg>
+                                    </button>
+
                                     <!-- Detail Action -->
                                     <button type="button" onclick="openDetails('{{ $student->id }}')" 
                                         class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 font-bold text-xs rounded-none transition-all">
@@ -342,14 +282,26 @@
             <!-- Drawer Scrollable Content -->
             <div class="flex-1 overflow-y-auto pr-1 space-y-6">
                 <!-- Top Header Card -->
-                <div class="flex items-center gap-4 border-b border-slate-100 dark:border-zinc-800 pb-5">
-                    <div class="w-16 h-16 border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 overflow-hidden flex-shrink-0">
-                        <img id="d_foto" src="" alt="Avatar" class="w-full h-full object-cover">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-5 gap-4">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-16 h-16 border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 overflow-hidden flex-shrink-0">
+                            <img id="d_foto" src="" alt="Avatar" class="w-full h-full object-cover">
+                        </div>
+                        <div class="min-w-0">
+                            <span id="d_status" class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded-none uppercase tracking-wider mb-1.5"></span>
+                            <h2 id="d_nama" class="text-lg font-bold text-slate-900 dark:text-white truncate"></h2>
+                            <p id="d_nomor_registrasi" class="text-xs font-mono font-bold text-[#4f45b2] dark:text-[#8c84c8]"></p>
+                        </div>
                     </div>
-                    <div class="overflow-hidden">
-                        <span id="d_status" class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded-none uppercase tracking-wider mb-1.5"></span>
-                        <h2 id="d_nama" class="text-lg font-bold text-slate-900 dark:text-white truncate"></h2>
-                        <p id="d_nomor_registrasi" class="text-xs font-mono font-bold text-[#4f45b2] dark:text-[#8c84c8]"></p>
+                    
+                    <!-- Cetak Button -->
+                    <div class="flex-shrink-0 mr-6">
+                        <button type="button" id="d_print_btn" class="inline-flex items-center gap-1.5 py-1.5 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 font-mono font-bold text-[10px] uppercase tracking-wider rounded-none transition-all active:scale-[.98]">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            Cetak
+                        </button>
                     </div>
                 </div>
 
@@ -500,6 +452,7 @@
         const loading = document.getElementById('drawerLoading');
 
         // Reset forms
+        document.getElementById('d_print_btn').setAttribute('onclick', `printStudent('${studentId}')`);
         document.getElementById('drawerVerifyForm').action = `/admin/ppdb/${studentId}/verify`;
         document.getElementById('drawerActions').classList.add('hidden');
         document.getElementById('d_notes_section').classList.add('hidden');
@@ -596,5 +549,93 @@
         const modal = document.getElementById('rejectionModal');
         modal.classList.add('hidden');
     }
+
+    // ════════════ 4. Direct Background Print Injection ════════════
+    function printStudent(studentId) {
+        // Show a brief premium minimalist toast feedback
+        let toast = document.getElementById('print_toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'print_toast';
+            toast.className = 'fixed bottom-6 right-6 bg-slate-900 text-white font-mono text-[10px] uppercase tracking-widest px-4 py-2 border border-slate-800 z-[9999] transition-all duration-300 transform translate-y-10 opacity-0';
+            document.body.appendChild(toast);
+        }
+        
+        toast.innerText = 'Menyiapkan Lembar Cetak...';
+        toast.classList.remove('translate-y-10', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        // Fetch the official printable sheet HTML directly from the server
+        fetch(`/admin/ppdb/${studentId}/print`)
+            .then(res => res.text())
+            .then(html => {
+                // Parse the response html
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Extract styles and wrapper content
+                const printStyle = doc.querySelector('style').innerHTML;
+                const printContent = doc.querySelector('.print-wrapper').innerHTML;
+                
+                // Find or create print injection container
+                let container = document.getElementById('print-injection-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'print-injection-container';
+                    document.body.appendChild(container);
+                }
+                
+                // Inject the print page styles and wrapper content
+                container.innerHTML = `<style>${printStyle}</style><div class="print-wrapper">${printContent}</div>`;
+                
+                // Give the browser 500ms to parse the CSS and render assets (like the QR image)
+                setTimeout(() => {
+                    // Hide loading toast
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-10', 'opacity-0');
+                    
+                    // Directly trigger the print dialog for the current window!
+                    window.print();
+                }, 500);
+            })
+            .catch(err => {
+                console.error("Gagal melakukan pencetakan latar belakang:", err);
+                toast.innerText = 'Gagal memuat dokumen!';
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-10', 'opacity-0');
+                }, 2000);
+            });
+    }
+
+    // Clean up injected DOM when printing completes
+    window.addEventListener('afterprint', () => {
+        const container = document.getElementById('print-injection-container');
+        if (container) {
+            container.innerHTML = '';
+        }
+    });
 </script>
+
+<style>
+    /* Direct print injection stylesheet configurations */
+    #print-injection-container {
+        display: none;
+    }
+    @media print {
+        /* Force browser to hide entire admin dashboard layout */
+        body > *:not(#print-injection-container) {
+            display: none !important;
+        }
+        #print-injection-container {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            background: #fff;
+        }
+    }
+</style>
 @endsection
