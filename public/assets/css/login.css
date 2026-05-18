@@ -1,0 +1,184 @@
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    @keyframes fadeInSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes subtle-float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    @keyframes gradient-shift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .animate-slide-in {
+        animation: slideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .animate-float {
+        animation: subtle-float 6s ease-in-out infinite;
+    }
+
+    .gradient-bg {
+        background: linear-gradient(-45deg, #f8f9fa, #ecf0f5, #e8eef7, #f0f4f9);
+        background-size: 400% 400%;
+        animation: gradient-shift 15s ease infinite;
+    }
+
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .input-field {
+        position: relative;
+        background: rgba(248, 249, 250, 0.6);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 2px solid rgba(209, 213, 219, 0.4);
+    }
+
+    .input-field:focus {
+        background: rgba(255, 255, 255, 0.9);
+        border-color: rgba(59, 130, 246, 0.5);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08), inset 0 0 0 2px rgba(59, 130, 246, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .input-field::placeholder {
+        color: rgba(107, 114, 128, 0.6);
+    }
+
+    .btn-primary {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 2px solid rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.95) 0%, rgba(59, 130, 246, 0.95) 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+        border-color: rgba(37, 99, 235, 0.6);
+    }
+
+    .btn-secondary {
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 2px solid rgba(107, 114, 128, 0.2);
+        background: rgba(248, 249, 250, 0.5);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(248, 249, 250, 0.9);
+        border-color: rgba(59, 130, 246, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .divider-line {
+        background: linear-gradient(90deg, transparent, rgba(107, 114, 128, 0.2), transparent);
+    }
+
+    .input-icon {
+        transition: all 0.3s ease;
+        color: rgba(107, 114, 128, 0.5);
+    }
+
+    .input-field:focus ~ .input-icon,
+    .input-field:not(:placeholder-shown) ~ .input-icon {
+        color: rgba(59, 130, 246, 0.6);
+    }
+
+    .icon-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .accent-line {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.4), transparent);
+        margin-top: 2rem;
+    }
+
+    .footer-text {
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+        color: rgba(107, 114, 128, 0.5);
+    }

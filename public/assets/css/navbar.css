@@ -1,0 +1,162 @@
+
+        :root {
+            --eduka-green: #10b981;
+        }
+
+        .eduka-green {
+            color: var(--eduka-green);
+        }
+
+        /* Sidebar slide animation */
+        .sidebar-enter {
+            animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .sidebar-exit {
+            animation: slideOutLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutLeft {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+        }
+
+        /* Backdrop fade */
+        .backdrop-enter {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .backdrop-exit {
+            animation: fadeOut 0.2s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* Menu item stagger animation */
+        .menu-item {
+            animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        .menu-item:nth-child(1) { animation-delay: 0.1s; }
+        .menu-item:nth-child(2) { animation-delay: 0.15s; }
+        .menu-item:nth-child(3) { animation-delay: 0.2s; }
+        .menu-item:nth-child(4) { animation-delay: 0.25s; }
+        .menu-item:nth-child(5) { animation-delay: 0.3s; }
+        .menu-item:nth-child(6) { animation-delay: 0.35s; }
+        .menu-item:nth-child(7) { animation-delay: 0.4s; }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Hamburger animation */
+        .hamburger-line {
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+
+        .hamburger-active .line-1 {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .hamburger-active .line-2 {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+
+        .hamburger-active .line-3 {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Smooth dropdown */
+        .dropdown-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .dropdown-content.open {
+            max-height: 300px;
+        }
+
+        .dropdown-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-icon.rotate {
+            transform: rotate(180deg);
+        }
+
+        /* News Ticker Animation */
+        .animate-ticker {
+            display: inline-block;
+            animation: ticker 40s linear infinite;
+        }
+
+        .animate-ticker:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Ken Burns Effect */
+        @keyframes ken-burns {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.15);
+            }
+        }
+
+        .animate-ken-burns {
+            animation: ken-burns 20s ease-out infinite alternate;
+        }
