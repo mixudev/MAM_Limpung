@@ -368,6 +368,22 @@
                         </div>
                     </div>
 
+                    <!-- Informasi Tambahan (Dynamic Fields) -->
+                    <div id="d_additional_section" class="hidden">
+                        <h4 class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5">Informasi Tambahan</h4>
+                        <div id="d_additional_grid" class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-zinc-950 p-4 border border-slate-100 dark:border-zinc-800/80">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Berkas Persyaratan (Dynamic Uploads) -->
+                    <div id="d_requirements_section" class="hidden">
+                        <h4 class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5">Berkas Persyaratan Mandiri</h4>
+                        <div id="d_requirements_list" class="space-y-2 bg-slate-50 dark:bg-zinc-950 p-4 border border-slate-100 dark:border-zinc-800/80">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
                     <!-- Catatan Verifikasi -->
                     <div id="d_notes_section" class="hidden">
                         <h4 class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5">Catatan/Alasan Verifikator</h4>
@@ -433,7 +449,7 @@
         e.preventDefault();
         const form = e.target.closest('form');
         
-        AppPopup.confirm({
+        AppPopup.info({
             title: 'Verifikasi Calon Siswa',
             description: `Apakah Anda yakin ingin menyetujui dan memverifikasi pendaftaran dari <strong>${studentName}</strong>?`,
             confirmText: 'Ya, Setujui',
@@ -487,6 +503,51 @@
                     document.getElementById('d_email').textContent = d.email;
                     document.getElementById('d_ayah').textContent = d.nama_ayah;
                     document.getElementById('d_ibu').textContent = d.nama_ibu;
+
+                    // Populate dynamic additional fields (Informasi Tambahan)
+                    const addSection = document.getElementById('d_additional_section');
+                    const addGrid = document.getElementById('d_additional_grid');
+                    addGrid.innerHTML = '';
+                    
+                    if (d.mapped_additional && d.mapped_additional.length > 0) {
+                        d.mapped_additional.forEach(item => {
+                            const wrapper = document.createElement('div');
+                            if (item.type === 'textarea') {
+                                wrapper.className = 'col-span-2';
+                            }
+                            wrapper.innerHTML = `
+                                <span class="text-[10px] text-slate-400 dark:text-zinc-500 block uppercase font-mono">${item.label}</span>
+                                <span class="font-semibold text-slate-800 dark:text-zinc-200">${item.value}</span>
+                            `;
+                            addGrid.appendChild(wrapper);
+                        });
+                        addSection.classList.remove('hidden');
+                    } else {
+                        addSection.classList.add('hidden');
+                    }
+
+                    // Populate dynamic requirements checklist (Berkas Upload)
+                    const reqSection = document.getElementById('d_requirements_section');
+                    const reqList = document.getElementById('d_requirements_list');
+                    reqList.innerHTML = '';
+
+                    if (d.mapped_requirements && d.mapped_requirements.length > 0) {
+                        d.mapped_requirements.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-zinc-800 last:border-0';
+                            div.innerHTML = `
+                                <span class="text-xs text-slate-650 dark:text-zinc-400">${item.label}</span>
+                                <a href="${item.url}" target="_blank" class="inline-flex items-center gap-1.5 py-1 px-2.5 bg-cyan-600 hover:bg-cyan-700 text-white font-mono font-bold text-[9px] uppercase tracking-wider transition-all">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                    Lihat Berkas
+                                </a>
+                            `;
+                            reqList.appendChild(div);
+                        });
+                        reqSection.classList.remove('hidden');
+                    } else {
+                        reqSection.classList.add('hidden');
+                    }
 
                     // Status label setup
                     const statusSpan = document.getElementById('d_status');

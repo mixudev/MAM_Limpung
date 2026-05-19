@@ -85,6 +85,12 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="{{ route('admin.ppdb.google-sheets.edit') }}" class="sidebar-link text-xs py-1.5"
+                                    aria-label="Google Sheets PPDB">
+                                    <span class="sidebar-label">Google Sheets</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="{{ route('admin.ppdb.export') }}" class="sidebar-link text-xs py-1.5"
                                     aria-label="Export PPDB">
                                     <span class="sidebar-label">Export Data</span>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard\Ppdb;
 use App\Actions\Ppdb\RejectStudentAction;
 use App\Actions\Ppdb\VerifyStudentAction;
 use App\Http\Controllers\Controller;
+use App\Jobs\SyncPpdbToGoogleSheetsJob;
 use App\Models\PpdbSiswa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,9 @@ class AdminPpdbVerificationController extends Controller
     public function verify(Request $request, PpdbSiswa $ppdbSiswa, VerifyStudentAction $action): RedirectResponse
     {
         $action->execute($ppdbSiswa, $request->input('catatan_admin'));
+
+        // Sinkronisasi otomatis ke Google Sheets via background job
+        SyncPpdbToGoogleSheetsJob::dispatch($ppdbSiswa);
 
         return redirect()->back()->with(
             'success',
@@ -37,6 +41,9 @@ class AdminPpdbVerificationController extends Controller
         ]);
 
         $action->execute($ppdbSiswa, $request->input('catatan_admin'));
+
+        // Sinkronisasi otomatis ke Google Sheets via background job
+        SyncPpdbToGoogleSheetsJob::dispatch($ppdbSiswa);
 
         return redirect()->back()->with(
             'success',

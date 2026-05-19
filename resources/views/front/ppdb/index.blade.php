@@ -144,9 +144,19 @@
                     <a href="{{ route('frontend.ppdb.status') }}" class="px-5 py-3.5 border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 hover:text-blue-900 transition-colors text-center text-xs tracking-wide rounded">
                         Cek Status
                     </a>
-                    <a href="{{ route('frontend.ppdb.form') }}" class="bg-blue-600 text-white px-6 py-3.5 font-semibold hover:bg-blue-700 transition-colors text-center text-xs tracking-wide rounded">
-                        Isi Formulir Sekarang
-                    </a>
+                    @php
+                        $today = date('Y-m-d');
+                        $isOpen = $general['is_open'] && ($today >= $general['start_date'] && $today <= $general['end_date']);
+                    @endphp
+                    @if($isOpen)
+                        <a href="{{ route('frontend.ppdb.form') }}" class="bg-blue-600 text-white px-6 py-3.5 font-semibold hover:bg-blue-700 transition-colors text-center text-xs tracking-wide rounded">
+                            Isi Formulir Sekarang
+                        </a>
+                    @else
+                        <button disabled class="bg-gray-400 text-white px-6 py-3.5 font-semibold cursor-not-allowed text-center text-xs tracking-wide rounded shadow-sm">
+                            Pendaftaran Ditutup
+                        </button>
+                    @endif
                 </div>
             </div>
         </section>
@@ -293,7 +303,7 @@
                             <!-- Left: Card -->
                             <div class="w-full md:w-[42%] pl-12 md:pl-0 fade-right-init">
                                 <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80">
-                                    <span class="text-blue-600 font-bold text-xs tracking-wider block mb-1 uppercase">1 - 31 Januari 2025</span>
+                                    <span class="text-blue-600 font-bold text-xs tracking-wider block mb-1 uppercase">1 - 31 Januari {{ $general['tahun_ajaran'] }}</span>
                                     <h3 class="text-base font-bold text-gray-900 flex items-center gap-1.5">
                                         Gelombang 1 <span class="bg-blue-100 text-blue-800 text-[9px] px-1.5 py-0.5 rounded-sm font-medium">Early Bird</span>
                                     </h3>
@@ -320,7 +330,7 @@
                             <!-- Left: Card (Desktop sits right) -->
                             <div class="w-full md:w-[42%] pl-12 md:pl-0 fade-left-init">
                                 <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80">
-                                    <span class="text-emerald-600 font-bold text-xs tracking-wider block mb-1 uppercase">1 - 28 Februari 2025</span>
+                                    <span class="text-emerald-600 font-bold text-xs tracking-wider block mb-1 uppercase">1 - 28 Februari {{ $general['tahun_ajaran'] }}</span>
                                     <h3 class="text-base font-bold text-gray-900">Gelombang 2</h3>
                                     <p class="text-gray-500 mt-2 text-xs leading-relaxed">Pendaftaran gelombang reguler dibuka untuk melengkapi kuota rombongan belajar utama yang masih tersedia.</p>
                                     <div class="mt-4 flex items-center gap-2">
@@ -344,7 +354,7 @@
                             <!-- Left: Card -->
                             <div class="w-full md:w-[42%] pl-12 md:pl-0 fade-right-init">
                                 <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80">
-                                    <span class="text-amber-600 font-bold text-xs tracking-wider block mb-1 uppercase">5 - 10 Maret 2025</span>
+                                    <span class="text-amber-600 font-bold text-xs tracking-wider block mb-1 uppercase">5 - 10 Maret {{ $general['tahun_ajaran'] }}</span>
                                     <h3 class="text-base font-bold text-gray-900">Tes & Wawancara</h3>
                                     <p class="text-gray-500 mt-2 text-xs leading-relaxed">Evaluasi pemetaan kemampuan membaca Al-Qur'an dan wawancara minat bakat serta silaturahmi wali murid.</p>
                                     <div class="mt-4 flex items-center gap-2">
@@ -369,7 +379,7 @@
                             <!-- Left: Card -->
                             <div class="w-full md:w-[42%] pl-12 md:pl-0 fade-left-init">
                                 <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80">
-                                    <span class="text-violet-600 font-bold text-xs tracking-wider block mb-1 uppercase">17 - 25 Maret 2025</span>
+                                    <span class="text-violet-600 font-bold text-xs tracking-wider block mb-1 uppercase">17 - 25 Maret {{ $general['tahun_ajaran'] }}</span>
                                     <h3 class="text-base font-bold text-gray-900">Daftar Ulang Resmi</h3>
                                     <p class="text-gray-500 mt-2 text-xs leading-relaxed">Bagi calon peserta didik yang dinyatakan diterima, melakukan registrasi ulang berkas fisik dan pengukuran seragam madrasah.</p>
                                     <div class="mt-4 flex items-center gap-2">
@@ -420,49 +430,23 @@
                         </div>
 
                         <div class="space-y-4">
-                            <!-- Item 1 -->
-                            <div class="flex gap-3">
-                                <div class="mt-0.5 w-5 h-5 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 transition-all duration-200">
-                                    <i class="fa-solid fa-check text-[10px]"></i>
+                            @forelse($requirements as $req)
+                                <div class="flex gap-3">
+                                    <div class="mt-0.5 w-5 h-5 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 transition-all duration-200">
+                                        <i class="fa-solid fa-{{ $req['required'] ? 'check' : 'plus' }} text-[10px] {{ !$req['required'] ? 'text-amber-600 animate-pulse' : '' }}"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800 text-xs md:text-sm">{{ $req['label'] }}</h4>
+                                        <p class="text-[11px] text-gray-400 mt-0.5 leading-normal">
+                                            {{ $req['required'] ? 'Berkas wajib disiapkan/diunggah.' : 'Berkas tambahan opsional.' }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 text-xs md:text-sm">Fotocopy Rapor SMP/MTs (Semester 1 - 5)</h4>
-                                    <p class="text-[11px] text-gray-400 mt-0.5 leading-normal">Dipergunakan untuk evaluasi kemampuan dasar akademik.</p>
+                            @empty
+                                <div class="text-center py-6 text-xs text-gray-400">
+                                    Tidak ada persyaratan berkas yang dikonfigurasi.
                                 </div>
-                            </div>
-
-                            <!-- Item 2 -->
-                            <div class="flex gap-3">
-                                <div class="mt-0.5 w-5 h-5 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 transition-all duration-200">
-                                    <i class="fa-solid fa-check text-[10px]"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 text-xs md:text-sm">Fotocopy Ijazah & SKHUN / SKL (Surat Keterangan Lulus)</h4>
-                                    <p class="text-[11px] text-gray-400 mt-0.5 leading-normal">Berkas resmi tanda kelulusan sekolah asal. *Bisa menyusul apabila ijazah belum terbit.</p>
-                                </div>
-                            </div>
-
-                            <!-- Item 3 -->
-                            <div class="flex gap-3">
-                                <div class="mt-0.5 w-5 h-5 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 transition-all duration-200">
-                                    <i class="fa-solid fa-check text-[10px]"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 text-xs md:text-sm">Kartu Keluarga (KK) & Akta Kelahiran</h4>
-                                    <p class="text-[11px] text-gray-400 mt-0.5 leading-normal">Fotocopy sebanyak 2 lembar untuk sinkronisasi data Dapodik/EMIS Kemenag.</p>
-                                </div>
-                            </div>
-
-                            <!-- Item 4 -->
-                            <div class="flex gap-3">
-                                <div class="mt-0.5 w-5 h-5 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 transition-all duration-200">
-                                    <i class="fa-solid fa-check text-[10px]"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 text-xs md:text-sm">Pas Foto Berwarna Ukuran 3x4</h4>
-                                    <p class="text-[11px] text-gray-400 mt-0.5 leading-normal">Sebanyak 3 lembar (background merah untuk tahun kelahiran ganjil, biru untuk tahun genap).</p>
-                                </div>
-                            </div>
+                            @endforelse
                         </div>
                     </div>
 

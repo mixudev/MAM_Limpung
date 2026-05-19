@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -38,38 +39,36 @@ class PpdbService
     /**
      * Compile key metrics counts for a specific registration year.
      *
-     * @param int $year
      * @return array{total: int, pending: int, verified: int, rejected: int, quota_target: int, quota_percent: float}
      */
     public function getStats(int $year): array
     {
+        $general = PpdbSetting::getValue('general', [
+            'target_quota' => self::TARGET_QUOTA,
+        ]);
+        $quotaTarget = (int) ($general['target_quota'] ?? self::TARGET_QUOTA);
+
         $total = PpdbSiswa::whereYear('submitted_at', $year)->count();
         $pending = PpdbSiswa::whereYear('submitted_at', $year)->pending()->count();
         $verified = PpdbSiswa::whereYear('submitted_at', $year)->diterima()->count();
         $rejected = PpdbSiswa::whereYear('submitted_at', $year)->ditolak()->count();
 
-        $quotaPercent = self::TARGET_QUOTA > 0
-            ? round(($verified / self::TARGET_QUOTA) * 100, 1)
+        $quotaPercent = $quotaTarget > 0
+            ? round(($verified / $quotaTarget) * 100, 1)
             : 0;
 
         return [
-            'total'         => $total,
-            'pending'       => $pending,
-            'verified'      => $verified,
-            'rejected'      => $rejected,
-            'quota_target'  => self::TARGET_QUOTA,
+            'total' => $total,
+            'pending' => $pending,
+            'verified' => $verified,
+            'rejected' => $rejected,
+            'quota_target' => $quotaTarget,
             'quota_percent' => min($quotaPercent, 100.0),
         ];
     }
 
     /**
      * Retrieve paginated and filtered applicant records.
-     *
-     * @param int         $year
-     * @param string|null $search
-     * @param string|null $status
-     * @param int         $perPage
-     * @return LengthAwarePaginator
      */
     public function getApplicants(int $year, ?string $search = null, ?string $status = null, int $perPage = 10): LengthAwarePaginator
     {
@@ -82,9 +81,9 @@ class PpdbService
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%")
-                  ->orWhere('sekolah_asal', 'like', "%{$search}%")
-                  ->orWhere('nomor_registrasi', 'like', "%{$search}%");
+                    ->orWhere('nisn', 'like', "%{$search}%")
+                    ->orWhere('sekolah_asal', 'like', "%{$search}%")
+                    ->orWhere('nomor_registrasi', 'like', "%{$search}%");
             });
         }
 
@@ -96,7 +95,6 @@ class PpdbService
     /**
      * Compute statistics distributions (gender, shirt sizes, and top origin schools).
      *
-     * @param int $year
      * @return array{gender: array{L: int, P: int}, sizes: array<string, int>, top_schools: Collection}
      */
     public function getDistributions(int $year): array
@@ -129,11 +127,11 @@ class PpdbService
                 'P' => $genders['P'] ?? 0,
             ],
             'sizes' => [
-                'S'    => $sizes['S'] ?? 0,
-                'M'    => $sizes['M'] ?? 0,
-                'L'    => $sizes['L'] ?? 0,
-                'XL'   => $sizes['XL'] ?? 0,
-                'XXL'  => $sizes['XXL'] ?? 0,
+                'S' => $sizes['S'] ?? 0,
+                'M' => $sizes['M'] ?? 0,
+                'L' => $sizes['L'] ?? 0,
+                'XL' => $sizes['XL'] ?? 0,
+                'XXL' => $sizes['XXL'] ?? 0,
                 'XXXL' => $sizes['XXXL'] ?? 0,
             ],
             'top_schools' => $topSchools,

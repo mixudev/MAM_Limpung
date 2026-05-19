@@ -88,75 +88,64 @@ class AdminPpdbSettingController extends Controller
     }
 
     /**
-     * Add a custom form input field.
+     * Update dynamic custom form fields list in batch.
      */
-    public function storeField(Request $request): RedirectResponse
+    public function updateFields(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'label' => 'required|string|max:100',
-            'type' => 'required|string|in:text,number,select,date,textarea',
-            'options' => 'nullable|string',
-            'required' => 'required|boolean',
+            'fields' => 'nullable|array',
+            'fields.*.id' => 'required|string|alpha_dash',
+            'fields.*.label' => 'required|string|max:100',
+            'fields.*.type' => 'required|string|in:text,number,select,date,textarea',
+            'fields.*.options' => 'nullable|string',
+            'fields.*.required' => 'required|boolean',
         ]);
 
-        $id = Str::slug($validated['label'], '_');
-        if (empty($id)) {
-            return redirect()->back()->withErrors(['label' => 'Label input tidak valid.']);
-        }
-
-        // Prevent collisions with system core fields
+        $fieldsList = [];
         $reserved = [
             'nama_lengkap', 'nisn', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
             'nomor_hp', 'email', 'nama_ayah', 'nama_ibu', 'alamat_lengkap', 'sekolah_asal',
             'ukuran_baju', 'foto_siswa', 'status', 'catatan_admin', 'submitted_at',
         ];
-        if (in_array($id, $reserved)) {
-            return redirect()->back()->withErrors(['label' => 'Label ini bertabrakan dengan kolom sistem bawaan.']);
-        }
 
-        $fields = PpdbSetting::getValue('form_fields', []);
+        $seenIds = [];
 
-        // Check for duplicates
-        foreach ($fields as $field) {
-            if ($field['id'] === $id) {
-                return redirect()->back()->withErrors(['label' => 'Kolom input dengan label serupa sudah terdaftar.']);
+        if (! empty($validated['fields'])) {
+            foreach ($validated['fields'] as $f) {
+                $id = Str::slug($f['id'], '_');
+                if (empty($id)) {
+                    return redirect()->back()->withErrors(['fields' => 'Salah satu ID kolom kustom tidak valid.'])->withInput();
+                }
+
+                if (in_array($id, $reserved)) {
+                    return redirect()->back()->withErrors(['fields' => 'Kolom "'.$f['label'].'" bertabrakan dengan kolom inti sistem.'])->withInput();
+                }
+
+                if (in_array($id, $seenIds)) {
+                    return redirect()->back()->withErrors(['fields' => 'Kolom "'.$f['label'].'" terduplikasi dalam daftar.'])->withInput();
+                }
+
+                $seenIds[] = $id;
+
+                // Process select options (comma separated string)
+                $optionsArr = [];
+                if ($f['type'] === 'select' && ! empty($f['options'])) {
+                    $optionsArr = array_filter(array_map('trim', explode(',', $f['options'])));
+                }
+
+                $fieldsList[] = [
+                    'id' => $id,
+                    'label' => strip_tags($f['label']),
+                    'type' => $f['type'],
+                    'options' => $optionsArr,
+                    'required' => (bool) $f['required'],
+                ];
             }
         }
 
-        // Process dropdown options
-        $optionsArr = [];
-        if ($validated['type'] === 'select' && ! empty($validated['options'])) {
-            $optionsArr = array_filter(array_map('trim', explode(',', $validated['options'])));
-        }
-
-        $fields[] = [
-            'id' => $id,
-            'label' => strip_tags($validated['label']),
-            'type' => $validated['type'],
-            'options' => $optionsArr,
-            'required' => (bool) $validated['required'],
-        ];
-
-        PpdbSetting::setValue('form_fields', $fields);
+        PpdbSetting::setValue('form_fields', $fieldsList);
 
         return redirect()->route('admin.ppdb.settings.edit')
-            ->with('success', 'Pembangun Formulir|Kolom input baru berhasil ditambahkan.');
-    }
-
-    /**
-     * Delete a custom form input field.
-     */
-    public function destroyField(string $fieldId): RedirectResponse
-    {
-        $fields = PpdbSetting::getValue('form_fields', []);
-
-        $newFields = array_values(array_filter($fields, function ($field) use ($fieldId) {
-            return $field['id'] !== $fieldId;
-        }));
-
-        PpdbSetting::setValue('form_fields', $newFields);
-
-        return redirect()->route('admin.ppdb.settings.edit')
-            ->with('success', 'Pembangun Formulir|Kolom input kustom berhasil dihapus.');
+            ->with('success', 'Pembangun Formulir|Daftar kolom kustom berhasil diperbarui.');
     }
 }

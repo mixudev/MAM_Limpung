@@ -92,43 +92,35 @@ test('authorized admin can save dynamic document requirements checklist', functi
     $this->assertFalse($reqs[1]['required']);
 });
 
-test('authorized admin can store a new custom dynamic form field', function () {
+test('authorized admin can update custom dynamic form fields in batch', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');
 
-    $response = $this->actingAs($admin)->post(route('admin.ppdb.settings.fields.store'), [
-        'label' => 'Jalur Prestasi',
-        'type' => 'select',
-        'options' => 'Olahraga, Seni, Tahfidz',
-        'required' => '1',
+    $response = $this->actingAs($admin)->post(route('admin.ppdb.settings.fields.update'), [
+        'fields' => [
+            [
+                'id' => 'nama_wali',
+                'label' => 'Nama Wali Murid',
+                'type' => 'text',
+                'required' => '1',
+            ],
+            [
+                'id' => 'jalur_prestasi',
+                'label' => 'Jalur Prestasi',
+                'type' => 'select',
+                'options' => 'Olahraga, Seni, Tahfidz',
+                'required' => '0',
+            ],
+        ],
     ]);
 
     $response->assertRedirect(route('admin.ppdb.settings.edit'))
         ->assertSessionHas('success');
 
     $fields = PpdbSetting::getValue('form_fields');
-    $lastField = end($fields);
-
-    $this->assertEquals('jalur_prestasi', $lastField['id']);
-    $this->assertEquals('Jalur Prestasi', $lastField['label']);
-    $this->assertEquals('select', $lastField['type']);
-    $this->assertEquals(['Olahraga', 'Seni', 'Tahfidz'], $lastField['options']);
-    $this->assertTrue($lastField['required']);
-});
-
-test('authorized admin can delete a custom dynamic form field', function () {
-    $admin = User::factory()->create();
-    $admin->assignRole('admin');
-
-    // Make sure we have the initial field 'nama_wali' seeded
-    $fields = PpdbSetting::getValue('form_fields');
-    $this->assertTrue(collect($fields)->contains('id', 'nama_wali'));
-
-    $response = $this->actingAs($admin)->delete(route('admin.ppdb.settings.fields.destroy', 'nama_wali'));
-
-    $response->assertRedirect(route('admin.ppdb.settings.edit'))
-        ->assertSessionHas('success');
-
-    $newFields = PpdbSetting::getValue('form_fields');
-    $this->assertFalse(collect($newFields)->contains('id', 'nama_wali'));
+    $this->assertCount(2, $fields);
+    $this->assertEquals('nama_wali', $fields[0]['id']);
+    $this->assertEquals('jalur_prestasi', $fields[1]['id']);
+    $this->assertEquals(['Olahraga', 'Seni', 'Tahfidz'], $fields[1]['options']);
+    $this->assertFalse($fields[1]['required']);
 });

@@ -23,6 +23,32 @@
         </a>
     </div>
 
+    <!-- Alert Success / Errors -->
+    @if(session('success'))
+    <div class="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 p-4 text-emerald-800 dark:text-emerald-400 text-xs font-semibold flex items-center gap-3 animate-fadeIn">
+        <svg class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>
+            @php
+                $parts = explode('|', session('success'));
+                echo count($parts) > 1 ? "<strong>{$parts[0]}:</strong> {$parts[1]}" : session('success');
+            @endphp
+        </span>
+    </div>
+    @endif
+
+    @if ($errors->any())
+    <div class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/60 p-4 text-red-800 dark:text-red-400 text-xs font-semibold rounded-none">
+        <p class="font-bold mb-2">Terjadi kesalahan validasi:</p>
+        <ul class="list-disc list-inside space-y-1 font-mono">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
     <!-- Tab Selection Buttons -->
     <div class="border-b border-slate-200 dark:border-zinc-800 flex flex-wrap gap-2">
         <button onclick="switchTab('tab-umum')" id="btn-tab-umum" class="tab-btn px-5 py-3 text-xs font-mono font-bold uppercase tracking-wider border-b-2 border-[#4f45b2] text-[#4f45b2] dark:text-white transition-all rounded-none">
@@ -104,15 +130,16 @@
     <div id="tab-persyaratan" class="tab-content space-y-6 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-none shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-zinc-850 pb-3 mb-5">
-                <h3 class="text-sm font-mono font-bold uppercase tracking-widest text-[#4f45b2] dark:text-[#8c84c8]">
-                    Daftar Berkas Syarat Unggah
-                </h3>
-                <button type="button" onclick="addNewRequirementRow()" class="py-1 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 font-mono font-bold text-[10px] uppercase tracking-wider rounded-none">
+                <div>
+                    <h3 class="text-sm font-mono font-bold uppercase tracking-widest text-[#4f45b2] dark:text-[#8c84c8]">
+                        Daftar Berkas Syarat Unggah
+                    </h3>
+                    <p class="text-xs text-slate-400 dark:text-zinc-500 mt-1">Kelola dokumen scan yang wajib diunggah oleh calon siswa baru pada formulir pendaftaran.</p>
+                </div>
+                <button type="button" onclick="addNewRequirementRow()" class="py-2 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 font-mono font-bold text-[10px] uppercase tracking-wider rounded-none">
                     + Tambah Berkas Baru
                 </button>
             </div>
-
-            <p class="text-xs text-slate-400 dark:text-zinc-500 mb-6">Kelola dokumen scan yang wajib diunggah oleh calon siswa baru pada formulir pendaftaran.</p>
 
             <form action="{{ route('admin.ppdb.settings.requirements') }}" method="POST" id="requirementsForm">
                 @csrf
@@ -198,148 +225,162 @@
             </div>
         </div>
 
-        <!-- Custom Fields Workspace -->
+        <!-- Custom Fields Workspace (Interactive Table-Edit Batch) -->
         <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-none shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-zinc-850 pb-3 mb-5">
-                <h3 class="text-sm font-mono font-bold uppercase tracking-widest text-[#4f45b2] dark:text-[#8c84c8]">
-                    Daftar Kolom Kustom Dinamis
-                </h3>
-                <button type="button" onclick="openAddFieldModal()" class="py-1 px-3 bg-[#4f45b2] hover:bg-[#4f45b2]/90 text-white font-mono font-bold text-[10px] uppercase tracking-wider rounded-none transition-all active:scale-[.98]">
+                <div>
+                    <h3 class="text-sm font-mono font-bold uppercase tracking-widest text-[#4f45b2] dark:text-[#8c84c8]">
+                        Daftar Kolom Kustom Dinamis
+                    </h3>
+                    <p class="text-xs text-slate-400 dark:text-zinc-500 mt-1">Buat kolom isian tambahan sesuai kebutuhan sekolah Anda dan akan terintegrasi langsung di form pendaftaran siswa.</p>
+                </div>
+                <button type="button" onclick="addNewFormFieldRow()" class="py-2 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 font-mono font-bold text-[10px] uppercase tracking-wider rounded-none">
                     + Tambah Kolom Kustom
                 </button>
             </div>
 
-            <!-- Custom Fields List -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 dark:bg-zinc-800/40 border-b border-slate-100 dark:border-zinc-800/80">
-                            <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">ID Slug</th>
-                            <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Label Input</th>
-                            <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Tipe Data</th>
-                            <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Sifat</th>
-                            <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Keterangan Opsi</th>
-                            <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-zinc-800/50">
-                        @forelse($formFields as $field)
-                            <tr class="hover:bg-slate-50/20 transition-all">
-                                <td class="px-4 py-4 text-xs font-mono text-[#4f45b2] dark:text-[#8c84c8] font-bold">
-                                    {{ $field['id'] }}
-                                </td>
-                                <td class="px-4 py-4 text-sm font-semibold text-slate-800 dark:text-white">
-                                    {{ $field['label'] }}
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="px-2 py-0.5 text-[9px] font-mono font-bold bg-indigo-50 dark:bg-indigo-950/20 text-[#4f45b2] dark:text-[#8c84c8] border border-indigo-100 dark:border-indigo-900/30 uppercase rounded-none">
-                                        {{ $field['type'] }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4">
-                                    @if($field['required'])
-                                        <span class="text-xs font-semibold text-red-600 dark:text-red-400">Wajib Diisi</span>
-                                    @else
-                                        <span class="text-xs text-slate-400 dark:text-zinc-500">Opsional</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-4 text-xs text-slate-500 dark:text-zinc-400 max-w-[200px] truncate">
-                                    @if(!empty($field['options']))
-                                        {{ implode(', ', $field['options']) }}
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td class="px-4 py-4 text-right whitespace-nowrap text-sm">
-                                    <!-- Delete Field Form -->
-                                    <form action="{{ route('admin.ppdb.settings.fields.destroy', $field['id']) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" onclick="confirmFieldDelete(event, '{{ $field['label'] }}')"
-                                            class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 rounded-none font-bold text-[10px] transition-all">
-                                            Hapus
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-10 text-slate-400 dark:text-zinc-500 text-xs">Belum ada kolom kustom tambahan. Formulir pendaftaran hanya memuat kolom inti.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </div>
-
-</div>
-
-<!-- Modal Dialog: Tambah Field Baru -->
-<div id="addFieldModal" class="fixed inset-0 z-50 overflow-y-auto hidden" role="dialog" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen p-4 text-center">
-        <div class="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity" onclick="closeAddFieldModal()"></div>
-        
-        <div class="inline-block w-full max-w-md bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-2xl p-6 text-left transform transition-all rounded-none relative z-10">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Tambah Kolom Input Kustom</h3>
-            <p class="text-xs text-slate-500 dark:text-zinc-400 mb-4">Input baru ini akan langsung ditambahkan ke dalam formulir pendaftaran online siswa dan disimpan sebagai berkas digital tambahan.</p>
-            
-            <form action="{{ route('admin.ppdb.settings.fields.store') }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.ppdb.settings.fields.update') }}" method="POST" id="formFieldsForm">
                 @csrf
-                <!-- Label -->
-                <div>
-                    <label for="label" class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-1">Label Pertanyaan / Input</label>
-                    <input type="text" name="label" id="label" required placeholder="Contoh: Pekerjaan Ibu / Hobi Calon Siswa"
-                        class="w-full py-2 px-3 text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="formFieldsTable">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-zinc-800/40 border-b border-slate-100 dark:border-zinc-800/80">
+                                <th class="px-2 py-3.5 w-10 text-center text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500"></th>
+                                <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">ID Slug</th>
+                                <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Label Pertanyaan / Input</th>
+                                <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Tipe Input</th>
+                                <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Sifat</th>
+                                <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-zinc-800/50" id="formFieldsTableBody">
+                            @forelse($formFields as $index => $field)
+                                <tr class="hover:bg-slate-50/20 transition-all cursor-move" id="field-row-{{ $index }}" draggable="true">
+                                    <!-- Drag Handle -->
+                                    <td class="drag-handle px-2 py-3 text-center whitespace-nowrap text-slate-450 dark:text-zinc-600 cursor-grab active:cursor-grabbing">
+                                        <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                                        </svg>
+                                    </td>
+                                    <!-- ID Slug (Read-only for existing ones) -->
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <input type="text" name="fields[{{ $index }}][id]" value="{{ $field['id'] }}" required readonly
+                                            class="w-full bg-slate-100 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded-none text-xs font-mono text-slate-500 dark:text-zinc-400 py-1.5 px-2.5">
+                                    </td>
+                                    <!-- Label & Options -->
+                                    <td class="px-4 py-3">
+                                        <div class="space-y-2">
+                                            <input type="text" name="fields[{{ $index }}][label]" id="field-label-input-{{ $index }}" value="{{ $field['label'] }}" required
+                                                oninput="syncFieldSlug({{ $index }})"
+                                                class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                                            
+                                            <div id="field-options-wrapper-{{ $index }}" class="{{ $field['type'] !== 'select' ? 'hidden' : '' }}">
+                                                <span class="text-[10px] font-mono font-bold text-slate-400 dark:text-zinc-500 block mb-1">PILIHAN DROPDOWN (Pisahkan dengan koma):</span>
+                                                <input type="text" name="fields[{{ $index }}][options]" id="field-options-input-{{ $index }}"
+                                                    value="{{ !empty($field['options']) ? implode(', ', $field['options']) : '' }}"
+                                                    placeholder="e.g. Pilihan 1, Pilihan 2, Pilihan 3"
+                                                    class="w-full bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 rounded-none text-xs py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <!-- Type -->
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <select name="fields[{{ $index }}][type]" id="field-type-select-{{ $index }}" onchange="toggleOptionsInputRow({{ $index }})"
+                                            class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2">
+                                            <option value="text" {{ $field['type'] === 'text' ? 'selected' : '' }}>Teks Singkat</option>
+                                            <option value="number" {{ $field['type'] === 'number' ? 'selected' : '' }}>Angka</option>
+                                            <option value="select" {{ $field['type'] === 'select' ? 'selected' : '' }}>Dropdown Menu</option>
+                                            <option value="date" {{ $field['type'] === 'date' ? 'selected' : '' }}>Tanggal</option>
+                                            <option value="textarea" {{ $field['type'] === 'textarea' ? 'selected' : '' }}>Teks Panjang</option>
+                                        </select>
+                                    </td>
+                                    <!-- Required Toggle -->
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <select name="fields[{{ $index }}][required]" 
+                                            class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2">
+                                            <option value="0" {{ !$field['required'] ? 'selected' : '' }}>OPSIONAL</option>
+                                            <option value="1" {{ $field['required'] ? 'selected' : '' }}>WAJIB</option>
+                                        </select>
+                                    </td>
+                                    <!-- Delete Row -->
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <button type="button" onclick="removeFormFieldRow('{{ $index }}', '{{ $field['label'] }}')" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 rounded-none transition-all">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr id="no-fields-placeholder">
+                                    <td colspan="6" class="text-center py-10 text-slate-400 dark:text-zinc-500 text-xs">Belum ada kolom kustom tambahan. Formulir pendaftaran hanya memuat kolom inti.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- Type -->
-                <div>
-                    <label for="type" class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-1">Tipe Kolom Input</label>
-                    <select name="type" id="type" onchange="toggleOptionsInput()" required
-                        class="w-full py-2 px-3 text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
-                        <option value="text">Teks Singkat (Text)</option>
-                        <option value="number">Angka (Number)</option>
-                        <option value="select">Pilihan Ganda / Dropdown (Select)</option>
-                        <option value="date">Tanggal (Date)</option>
-                        <option value="textarea">Deskripsi / Teks Panjang (Textarea)</option>
-                    </select>
-                </div>
-
-                <!-- Dropdown options -->
-                <div id="options-field" class="hidden">
-                    <label for="options" class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-1">Pilihan Menu Dropdown (Pisahkan dengan Koma)</label>
-                    <input type="text" name="options" id="options" placeholder="Contoh: Pilihan 1, Pilihan 2, Pilihan 3"
-                        class="w-full py-2 px-3 text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
-                </div>
-
-                <!-- Required Toggle -->
-                <div>
-                    <label for="required" class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-1">Sifat Input</label>
-                    <select name="required" id="required"
-                        class="w-full py-2 px-3 text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
-                        <option value="0">OPSIONAL (Optional)</option>
-                        <option value="1">WAJIB DIISI (Required)</option>
-                    </select>
-                </div>
-
-                <div class="flex items-center gap-2.5 pt-2">
-                    <button type="button" onclick="closeAddFieldModal()" class="flex-1 py-2.5 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 font-bold text-xs rounded-none transition-all active:scale-[.98]">
-                        Batal
-                    </button>
-                    <button type="submit" class="flex-1 py-2.5 px-4 bg-[#4f45b2] hover:bg-[#4f45b2]/90 text-white font-bold text-xs rounded-none transition-all active:scale-[.98]">
-                        Tambah & Simpan
+                <div class="border-t border-slate-100 dark:border-zinc-850 pt-4 flex justify-end mt-4">
+                    <button type="submit" class="py-2.5 px-6 bg-[#4f45b2] hover:bg-[#4f45b2]/90 text-white font-bold text-xs uppercase tracking-wider rounded-none transition-all active:scale-[.98]">
+                        Simpan Daftar Kolom Kustom
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
 </div>
 
 <script>
-    // ════════════ 1. Tab Switching Controller ════════════
+    // ════════════ 1. State Pelacakan Perubahan (Dirty States) ════════════
+    let requirementsDirty = false;
+    let formFieldsDirty = false;
+
+    // Track dirty states on user input
+    document.getElementById('requirementsForm').addEventListener('input', () => {
+        requirementsDirty = true;
+    });
+
+    document.getElementById('formFieldsForm').addEventListener('input', () => {
+        formFieldsDirty = true;
+    });
+
+    // Reset dirty state when forms are successfully submitted
+    document.getElementById('requirementsForm').addEventListener('submit', () => {
+        requirementsDirty = false;
+    });
+
+    document.getElementById('formFieldsForm').addEventListener('submit', () => {
+        formFieldsDirty = false;
+    });
+
+    // Native browser confirm dialog on page close or reload
+    window.addEventListener('beforeunload', function (e) {
+        if (requirementsDirty || formFieldsDirty) {
+            e.preventDefault();
+            e.returnValue = 'Perubahan Anda belum disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?';
+        }
+    });
+
+    // ════════════ 2. Tab Switching Controller ════════════
     function switchTab(tabId) {
+        const activeTab = localStorage.getItem('active_ppdb_setting_tab') || 'tab-umum';
+        
+        // Interrupt tab switching if there are unsaved changes
+        if (activeTab === 'tab-persyaratan' && requirementsDirty) {
+            if (!confirm('Perubahan pada Persyaratan Berkas belum disimpan. Lanjutkan ke tab lain tanpa menyimpan?')) {
+                return;
+            }
+            requirementsDirty = false; // Reset if user chooses to proceed anyway
+        }
+
+        if (activeTab === 'tab-formulir' && formFieldsDirty) {
+            if (!confirm('Perubahan pada Pembangun Formulir belum disimpan. Lanjutkan ke tab lain tanpa menyimpan?')) {
+                return;
+            }
+            formFieldsDirty = false; // Reset if user chooses to proceed anyway
+        }
+
         // Hide all tabs
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
         // Show active tab
@@ -368,7 +409,7 @@
         }
     });
 
-    // ════════════ 2. Interactive Requirements Table Manager ════════════
+    // ════════════ 3. Interactive Requirements Table Manager ════════════
     let reqIndexCount = {{ count($requirements) }};
 
     function addNewRequirementRow() {
@@ -409,6 +450,7 @@
         `;
         tableBody.appendChild(newRow);
         reqIndexCount++;
+        requirementsDirty = true; // Mark as modified
     }
 
     function removeRequirementRow(rowId) {
@@ -416,6 +458,7 @@
         if (row) {
             row.remove();
         }
+        requirementsDirty = true; // Mark as modified
 
         const tableBody = document.getElementById('requirementsTableBody');
         if (tableBody.children.length === 0) {
@@ -431,7 +474,6 @@
         const label = document.getElementById(`req-label-input-${rowId}`).value;
         const idInput = document.getElementById(`req-id-input-${rowId}`);
         if (idInput && label) {
-            // Slugify the label into camel_case/snake_case
             const slugged = label.toLowerCase()
                                  .replace(/[^a-z0-9_]+/g, '_')
                                  .replace(/^_+|_+$/g, '');
@@ -439,43 +481,275 @@
         }
     }
 
-    // ════════════ 3. Form Builder Modal & Options ════════════
-    function openAddFieldModal() {
-        document.getElementById('addFieldModal').classList.remove('hidden');
-    }
+    // ════════════ 4. Interactive Form Builder Table Manager ════════════
+    let fieldIndexCount = {{ count($formFields) }};
 
-    function closeAddFieldModal() {
-        document.getElementById('addFieldModal').classList.add('hidden');
-    }
-
-    function toggleOptionsInput() {
-        const typeSelect = document.getElementById('type');
-        const optionsField = document.getElementById('options-field');
-        const optionsInput = document.getElementById('options');
-
-        if (typeSelect.value === 'select') {
-            optionsField.classList.remove('hidden');
-            optionsInput.required = true;
-        } else {
-            optionsField.classList.add('hidden');
-            optionsInput.required = false;
-            optionsInput.value = '';
+    function addNewFormFieldRow() {
+        const tableBody = document.getElementById('formFieldsTableBody');
+        const placeholder = document.getElementById('no-fields-placeholder');
+        if (placeholder) {
+            placeholder.remove();
         }
+
+        const newRow = document.createElement('tr');
+        newRow.id = `field-row-${fieldIndexCount}`;
+        newRow.className = 'hover:bg-slate-50/20 transition-all cursor-move';
+        newRow.draggable = true;
+        newRow.innerHTML = `
+            <!-- Drag Handle -->
+            <td class="drag-handle px-2 py-3 text-center whitespace-nowrap text-slate-455 dark:text-zinc-650 cursor-grab active:cursor-grabbing">
+                <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </td>
+            <!-- ID Slug -->
+            <td class="px-4 py-3 whitespace-nowrap">
+                <input type="text" name="fields[${fieldIndexCount}][id]" id="field-id-input-${fieldIndexCount}" required placeholder="e.g. pekerjaan_ibu"
+                    class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs font-mono text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]"
+                    oninput="syncFieldSlug(${fieldIndexCount})">
+            </td>
+            <!-- Label & Options -->
+            <td class="px-4 py-3">
+                <div class="space-y-2">
+                    <input type="text" name="fields[${fieldIndexCount}][label]" id="field-label-input-${fieldIndexCount}" required placeholder="e.g. Pekerjaan Ibu Kandung"
+                        class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]"
+                        oninput="syncFieldSlug(${fieldIndexCount})">
+                    
+                    <div id="field-options-wrapper-${fieldIndexCount}" class="hidden">
+                        <span class="text-[10px] font-mono font-bold text-slate-400 dark:text-zinc-500 block mb-1">PILIHAN DROPDOWN (Pisahkan dengan koma):</span>
+                        <input type="text" name="fields[${fieldIndexCount}][options]" id="field-options-input-${fieldIndexCount}" placeholder="e.g. Pilihan 1, Pilihan 2, Pilihan 3"
+                            class="w-full bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 rounded-none text-xs py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                    </div>
+                </div>
+            </td>
+            <!-- Type -->
+            <td class="px-4 py-3 whitespace-nowrap">
+                <select name="fields[${fieldIndexCount}][type]" id="field-type-select-${fieldIndexCount}"
+                    class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2"
+                    onchange="toggleOptionsInputRow(${fieldIndexCount})">
+                    <option value="text">Teks Singkat</option>
+                    <option value="number">Angka</option>
+                    <option value="select">Dropdown Menu</option>
+                    <option value="date">Tanggal</option>
+                    <option value="textarea">Teks Panjang</option>
+                </select>
+            </td>
+            <!-- Required -->
+            <td class="px-4 py-3 whitespace-nowrap">
+                <select name="fields[${fieldIndexCount}][required]" 
+                    class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2">
+                    <option value="0">OPSIONAL</option>
+                    <option value="1">WAJIB</option>
+                </select>
+            </td>
+            <!-- Delete Action -->
+            <td class="px-4 py-3 text-right whitespace-nowrap">
+                <button type="button" onclick="removeFormFieldRow('${fieldIndexCount}')" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 rounded-none transition-all">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(newRow);
+        addDragListeners(newRow);
+        fieldIndexCount++;
+        formFieldsDirty = true;
     }
 
-    function confirmFieldDelete(e, label) {
-        e.preventDefault();
-        const form = e.target.closest('form');
-        
+    function removeFormFieldRow(rowId, fieldLabel = '') {
+        const title = fieldLabel ? `Hapus ${fieldLabel}` : 'Hapus Kolom';
+        const desc = fieldLabel 
+            ? `Apakah Anda yakin ingin menghapus kolom kustom <strong>${fieldLabel}</strong> dari pendaftaran? Semua isian calon siswa pada kolom ini akan hilang setelah form disimpan.` 
+            : 'Apakah Anda yakin ingin menghapus kolom kustom ini?';
+
         AppPopup.confirm({
-            title: 'Hapus Kolom Kustom',
-            description: `Apakah Anda yakin ingin menghapus kolom kustom <strong>${label}</strong>? Seluruh data isian berkas yang telah dikirim calon siswa pada kolom ini akan hilang!`,
+            title: title,
+            description: desc,
             confirmText: 'Ya, Hapus',
             cancelText: 'Batal',
             onConfirm: () => {
-                form.submit();
+                const row = document.getElementById(`field-row-${rowId}`);
+                if (row) {
+                    row.remove();
+                }
+                formFieldsDirty = true; // Mark as modified
+                reindexFormFields();
+
+                const tableBody = document.getElementById('formFieldsTableBody');
+                if (tableBody.children.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr id="no-fields-placeholder">
+                            <td colspan="6" class="text-center py-10 text-slate-400 dark:text-zinc-500 text-xs">Belum ada kolom kustom tambahan. Formulir pendaftaran hanya memuat kolom inti.</td>
+                        </tr>
+                    `;
+                }
             }
         });
     }
+
+    function syncFieldSlug(rowId) {
+        const label = document.getElementById(`field-label-input-${rowId}`).value;
+        const idInput = document.getElementById(`field-id-input-${rowId}`);
+        if (idInput && label) {
+            const slugged = label.toLowerCase()
+                                 .replace(/[^a-z0-9_]+/g, '_')
+                                 .replace(/^_+|_+$/g, '');
+            idInput.value = slugged;
+        }
+    }
+
+    function toggleOptionsInputRow(rowId) {
+        const typeSelect = document.getElementById(`field-type-select-${rowId}`);
+        const optionsWrapper = document.getElementById(`field-options-wrapper-${rowId}`);
+        const optionsInput = document.getElementById(`field-options-input-${rowId}`);
+        
+        if (typeSelect && optionsWrapper && optionsInput) {
+            if (typeSelect.value === 'select') {
+                optionsWrapper.classList.remove('hidden');
+                optionsInput.required = true;
+            } else {
+                optionsWrapper.classList.add('hidden');
+                optionsInput.required = false;
+                optionsInput.value = '';
+            }
+        }
+    }
+
+    function reindexFormFields() {
+        const rows = document.querySelectorAll('#formFieldsTableBody tr');
+        let idx = 0;
+        rows.forEach(row => {
+            if (row.id === 'no-fields-placeholder') return;
+            
+            row.id = `field-row-${idx}`;
+            
+            const idInput = row.querySelector('input[name$="[id]"]');
+            if (idInput) {
+                idInput.name = `fields[${idx}][id]`;
+                idInput.id = `field-id-input-${idx}`;
+                idInput.setAttribute('oninput', `syncFieldSlug(${idx})`);
+            }
+            
+            const labelInput = row.querySelector('input[name$="[label]"]');
+            if (labelInput) {
+                labelInput.name = `fields[${idx}][label]`;
+                labelInput.id = `field-label-input-${idx}`;
+                labelInput.setAttribute('oninput', `syncFieldSlug(${idx})`);
+            }
+            
+            const typeSelect = row.querySelector('select[name$="[type]"]');
+            if (typeSelect) {
+                typeSelect.name = `fields[${idx}][type]`;
+                typeSelect.id = `field-type-select-${idx}`;
+                typeSelect.setAttribute('onchange', `toggleOptionsInputRow(${idx})`);
+            }
+            
+            const requiredSelect = row.querySelector('select[name$="[required]"]');
+            if (requiredSelect) {
+                requiredSelect.name = `fields[${idx}][required]`;
+            }
+            
+            const optionsInput = row.querySelector('input[name$="[options]"]');
+            if (optionsInput) {
+                optionsInput.name = `fields[${idx}][options]`;
+                optionsInput.id = `field-options-input-${idx}`;
+            }
+            
+            const optionsWrapper = row.querySelector('[id^="field-options-wrapper-"]');
+            if (optionsWrapper) {
+                optionsWrapper.id = `field-options-wrapper-${idx}`;
+            }
+            
+            const deleteBtn = row.querySelector('button[onclick^="removeFormFieldRow"]');
+            if (deleteBtn) {
+                const labelVal = labelInput ? labelInput.value.replace(/'/g, "\\'") : '';
+                deleteBtn.setAttribute('onclick', `removeFormFieldRow(${idx}, '${labelVal}')`);
+            }
+            
+            idx++;
+        });
+        fieldIndexCount = idx;
+    }
+
+    // Drag and Drop implementation for Form Fields Table Rows
+    let dragSrcEl = null;
+
+    function addDragListeners(row) {
+        row.addEventListener('dragstart', handleDragStart, false);
+        row.addEventListener('dragover', handleDragOver, false);
+        row.addEventListener('dragenter', handleDragEnter, false);
+        row.addEventListener('dragleave', handleDragLeave, false);
+        row.addEventListener('drop', handleDrop, false);
+        row.addEventListener('dragend', handleDragEnd, false);
+    }
+
+    function handleDragStart(e) {
+        const handle = e.target.closest('td');
+        if (!handle || !handle.classList.contains('drag-handle')) {
+            e.preventDefault();
+            return;
+        }
+        this.classList.add('opacity-40', 'bg-slate-100', 'dark:bg-zinc-800');
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.outerHTML);
+    }
+
+    function handleDragOver(e) {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+        this.classList.add('border-t-2', 'border-[#4f45b2]');
+        return false;
+    }
+
+    function handleDragEnter(e) {
+        // Already handled by dragover styling
+    }
+
+    function handleDragLeave(e) {
+        this.classList.remove('border-t-2', 'border-[#4f45b2]');
+    }
+
+    function handleDrop(e) {
+        if (e.stopPropagation) {
+            e.stopPropagation();
+        }
+        
+        this.classList.remove('border-t-2', 'border-[#4f45b2]');
+        
+        if (dragSrcEl !== this) {
+            const list = Array.from(this.parentNode.children);
+            const dragIdx = list.indexOf(dragSrcEl);
+            const targetIdx = list.indexOf(this);
+            
+            if (dragIdx < targetIdx) {
+                this.parentNode.insertBefore(dragSrcEl, this.nextSibling);
+            } else {
+                this.parentNode.insertBefore(dragSrcEl, this);
+            }
+            
+            reindexFormFields();
+            formFieldsDirty = true;
+        }
+        return false;
+    }
+
+    function handleDragEnd(e) {
+        this.classList.remove('opacity-40', 'bg-slate-100', 'dark:bg-zinc-800');
+        document.querySelectorAll('#formFieldsTableBody tr').forEach(row => {
+            row.classList.remove('border-t-2', 'border-[#4f45b2]');
+        });
+    }
+
+    // Initialize drag events for existing rows
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('#formFieldsTableBody tr').forEach(row => {
+            if (row.id !== 'no-fields-placeholder') {
+                addDragListeners(row);
+            }
+        });
+    });
 </script>
 @endsection

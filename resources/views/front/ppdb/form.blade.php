@@ -2,11 +2,79 @@
 
 @section('content')
 
-<section class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
+<section class="max-w-6xl mx-auto px-4 py-8 sm:py-12" x-data="{
+    step: 1,
+    form: {
+        nama_lengkap: '',
+        nisn: '',
+        nomor_hp: '',
+        email: '',
+        jenis_kelamin: '',
+        tanggal_lahir: '',
+        tempat_lahir: '',
+        nama_ayah: '',
+        nama_ibu: '',
+        alamat_lengkap: '',
+        sekolah_asal: '',
+        ukuran_baju: '',
+        @foreach($formFields as $field)
+            {{ $field['id'] }}: '',
+        @endforeach
+    },
+    init() {
+        const saved = localStorage.getItem('ppdb_form_draft');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                Object.keys(this.form).forEach(key => {
+                    if (parsed[key] !== undefined) {
+                        this.form[key] = parsed[key];
+                    }
+                });
+            } catch(e) {
+                console.error('Gagal memuat draf formulir:', e);
+            }
+        }
+        
+        // Watch for changes and save to localStorage
+        this.$watch('form', value => {
+            localStorage.setItem('ppdb_form_draft', JSON.stringify(value));
+        }, { deep: true });
+    },
+    clearDraft() {
+        localStorage.removeItem('ppdb_form_draft');
+    },
+    nextStep() {
+        // Validate inputs inside current step container
+        const currentContainer = document.getElementById('step-' + this.step);
+        const inputs = currentContainer.querySelectorAll('input, select, textarea');
+        let isValid = true;
+        
+        for (let input of inputs) {
+            if (!input.checkValidity()) {
+                input.reportValidity();
+                isValid = false;
+                break;
+            }
+        }
+        
+        if (isValid) {
+            this.step++;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    },
+    prevStep() {
+        this.step--;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}">
     <!-- Header Section -->
     <div class="text-center mb-8">
-        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-3">Formulir Pendaftaran Siswa Baru</h1>
-        <p class="text-gray-600 text-sm sm:text-base">Silakan lengkapi data diri Anda dengan benar dan lengkap</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">Formulir Pendaftaran Siswa Baru</h1>
+        <span class="inline-block bg-cyan-100 text-cyan-800 text-[10px] font-bold px-3 py-1 rounded-sm uppercase tracking-widest font-mono mb-2">
+            Tahun Pelajaran {{ $general['tahun_ajaran'] }}/{{ $general['tahun_ajaran'] + 1 }}
+        </span>
+        <p class="text-gray-600 text-sm sm:text-base">Silakan lengkapi data diri Anda secara jujur, benar, dan lengkap</p>
     </div>
 
     <!-- Error Alert - Display All Errors -->
@@ -28,241 +96,372 @@
     </div>
     @endif
 
-    <!-- Success Alert -->
-    @if (session('success'))
-    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-sm shadow-md">
-        <div class="flex items-center">
-            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-            <p class="font-medium">{{ session('success') }}</p>
+    <!-- Form Container -->
+    <div class="bg-white rounded-none p-6 sm:p-10 border border-gray-300 shadow-sm relative">
+        
+        <!-- Progress Stepper (Minimalist, Tegas) -->
+        <div class="mb-10 border-b border-slate-100 pb-8">
+            <div class="flex items-center justify-between max-w-md mx-auto relative">
+                <!-- Progress Line -->
+                <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[2px] bg-slate-200 z-0"></div>
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-emerald-800 transition-all duration-300 z-0" :style="'width: ' + ((step - 1) * 50) + '%'"></div>
+                
+                <!-- Step 1 -->
+                <div class="relative z-10 flex flex-col items-center gap-1.5 cursor-pointer" @click="if(step > 1) step = 1">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2"
+                        :class="step >= 1 ? 'bg-emerald-800 border-emerald-800 text-white' : 'bg-white border-slate-300 text-slate-400'">
+                        1
+                    </div>
+                    <span class="text-[9px] font-bold uppercase tracking-wider font-mono text-slate-500">Profil</span>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="relative z-10 flex flex-col items-center gap-1.5 cursor-pointer" @click="if(step > 2) step = 2">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2"
+                        :class="step >= 2 ? 'bg-emerald-800 border-emerald-800 text-white' : 'bg-white border-slate-300 text-slate-400'">
+                        2
+                    </div>
+                    <span class="text-[9px] font-bold uppercase tracking-wider font-mono text-slate-500">Kontak & Wali</span>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="relative z-10 flex flex-col items-center gap-1.5">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2"
+                        :class="step >= 3 ? 'bg-emerald-800 border-emerald-800 text-white' : 'bg-white border-slate-300 text-slate-400'">
+                        3
+                    </div>
+                    <span class="text-[9px] font-bold uppercase tracking-wider font-mono text-slate-500">Dokumen</span>
+                </div>
+            </div>
         </div>
-    </div>
-    @endif
 
-    <!-- Form Section -->
-    <div class="bg-white rounded-sm p-6 sm:p-8 border border-gray-300 shadow-lg">
-        <form method="POST" action="{{ route('frontend.ppdb.store') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('frontend.ppdb.store') }}" enctype="multipart/form-data" @submit="clearDraft()">
             @csrf
-            <!-- Row 1: Personal Data & Photo -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Left Column: Personal Inputs -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2">Nama Lengkap *</label>
-                        <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" class="w-full px-4 py-2 border @error('nama_lengkap') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 placeholder:text-sm focus:ring-amber-500 focus:border-transparent outline-none" placeholder="Masukkan nama lengkap" required>
-                        @error('nama_lengkap')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
+
+            <!-- ════════════ LANGKAH 1: DATA PRIBADI ════════════ -->
+            <div id="step-1" x-show="step === 1" class="space-y-6">
+                <div class="border-b border-slate-100 pb-3 mb-6">
+                    <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider font-mono">Langkah 1: Profil Calon Siswa</h2>
+                    <p class="text-xs text-slate-400 mt-1">Lengkapi biodata diri utama Anda sesuai dokumen resmi keluarga.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left: Biodata Fields (2 cols) -->
+                    <div class="lg:col-span-2 space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nama Lengkap *</label>
+                                <input type="text" name="nama_lengkap" x-model="form.nama_lengkap" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Masukkan nama lengkap sesuai ijazah/akta" required>
+                                @error('nama_lengkap')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">NISN *</label>
+                                <input type="text" name="nisn" x-model="form.nisn" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="10 digit nomor NISN" required>
+                                @error('nisn')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Jenis Kelamin *</label>
+                                <select name="jenis_kelamin" x-model="form.jenis_kelamin" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 outline-none transition-all" required>
+                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                    <option value="L">Laki-laki</option>
+                                    <option value="P">Perempuan</option>
+                                </select>
+                                @error('jenis_kelamin')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Tempat Lahir *</label>
+                                <input type="text" name="tempat_lahir" x-model="form.tempat_lahir" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Kota kelahiran" required>
+                                @error('tempat_lahir')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Tanggal Lahir *</label>
+                                <input type="date" name="tanggal_lahir" x-model="form.tanggal_lahir" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 outline-none transition-all" required>
+                                @error('tanggal_lahir')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Ukuran Seragam *</label>
+                                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                    @foreach(['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
+                                    <label class="flex items-center justify-center rounded-none cursor-pointer">
+                                        <input type="radio" name="ukuran_baju" value="{{ $size }}" x-model="form.ukuran_baju" class="hidden peer" required>
+                                        <div class="border border-gray-300 peer-checked:border-emerald-800 peer-checked:bg-emerald-50 peer-checked:text-emerald-800 w-full text-center font-bold p-2.5 text-xs uppercase tracking-wider transition-all">
+                                            {{ $size }}
+                                        </div>
+                                    </label>
+                                    @endforeach
+                                </div>
+                                @error('ukuran_baju')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Alamat Lengkap *</label>
+                                <textarea name="alamat_lengkap" x-model="form.alamat_lengkap" rows="3" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none resize-none transition-all" placeholder="Masukkan alamat RT/RW, Dusun, Kelurahan, Kecamatan" required></textarea>
+                                @error('alamat_lengkap')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2">NISN *</label>
-                        <input type="text" name="nisn" value="{{ old('nisn') }}" class="w-full px-4 py-2 border @error('nisn') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 placeholder:text-sm focus:ring-amber-500 focus:border-transparent outline-none" placeholder="Masukkan NISN" required>
-                        @error('nisn')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
+
+                    <!-- Right: Photo Upload (1 col) -->
+                    <div class="lg:col-span-1">
+                        <div class="border border-slate-200 p-5 bg-slate-50 sticky top-4">
+                            <label class="block text-xs font-bold text-slate-800 uppercase tracking-widest font-mono mb-3">Pas Foto Resmi *</label>
+                            
+                            <div id="dropZone" class="min-h-[220px] border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer bg-white p-4 hover:border-emerald-800 transition-colors">
+                                <div id="dropZoneContent" class="text-center">
+                                    <svg class="w-10 h-10 text-slate-400 mb-3 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <p class="text-slate-700 text-xs font-bold mb-1">Unggah Pas Foto</p>
+                                    <p class="text-slate-400 text-[10px] mb-3">Seret & lepas berkas di sini</p>
+                                    <button type="button" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-355 text-slate-700 text-[10px] font-bold uppercase tracking-wider transition-colors">Pilih File</button>
+                                </div>
+                            </div>
+                            <input type="file" name="foto_siswa" id="fileInput" class="hidden" accept="image/*" {{ empty(old('foto_siswa')) ? 'required' : '' }}>
+                            
+                            <div class="mt-4 space-y-2">
+                                <p class="text-[10px] text-slate-455 leading-normal flex items-start gap-1">
+                                    <span>⚠️</span>
+                                    <span>Gunakan pas foto resmi berseragam dengan latar belakang merah atau biru.</span>
+                                </p>
+                                <p class="text-[10px] text-slate-455 leading-normal flex items-start gap-1">
+                                    <span>📁</span>
+                                    <span>Maksimal 2MB, format file .jpg, .jpeg, .png</span>
+                                </p>
+                            </div>
+                            @error('foto_siswa')
+                            <p class="text-red-500 text-xs mt-2 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ════════════ LANGKAH 2: KONTAK & ORANG TUA ════════════ -->
+            <div id="step-2" x-show="step === 2" class="space-y-6" style="display: none;">
+                <div class="border-b border-slate-100 pb-3 mb-6">
+                    <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider font-mono">Langkah 2: Kontak & Wali Orang Tua</h2>
+                    <p class="text-xs text-slate-400 mt-1">Lengkapi data komunikasi utama dan nama orang tua kandung pendaftar.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2">Nomor HP *</label>
-                        <input type="tel" name="nomor_hp" value="{{ old('nomor_hp') }}" class="w-full px-4 py-2 border @error('nomor_hp') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 placeholder:text-sm focus:ring-amber-500 focus:border-transparent outline-none" placeholder="Contoh: 08123456789" required>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nomor HP / WhatsApp *</label>
+                        <input type="tel" name="nomor_hp" x-model="form.nomor_hp" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Contoh: 08123456789" required>
                         @error('nomor_hp')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2">Email *</label>
-                        <input type="email" name="email" value="{{ old('email') }}" class="w-full px-4 py-2 border @error('email') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 placeholder:text-sm focus:ring-amber-500 focus:border-transparent outline-none" placeholder="contoh@email.com" required>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Email Aktif *</label>
+                        <input type="email" name="email" x-model="form.email" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="contoh@email.com" required>
                         @error('email')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-                </div>
 
-                <!-- Right Column: Photo Upload -->
-                <div class="lg:p-8 mb-5">
-                    <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2">Foto Siswa *</label>
-                    <div id="dropZone" class="h-full min-h-[280px] border-2 border-dashed @error('foto_siswa') border-red-500 @else border-gray-300 @enderror rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 transition-colors bg-gray-50">
-                        <div id="dropZoneContent">
-                            <svg class="w-12 h-12 text-gray-400 mb-3 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            <p class="text-gray-600 text-sm mb-1 text-center">Seret & lepas foto di sini</p>
-                            <p class="text-gray-400 text-xs mb-3 text-center">atau</p>
-                            <div class="text-center">
-                                <button type="button" class="px-6 py-2 rounded text-sm text-gray-500 hover:border-amber-500 hover:text-amber-500 border border-gray-500">Pilih File</button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Hidden Input File - Tetap ada di form -->
-                    <input type="file" name="foto_siswa" id="fileInput" class="hidden" accept="image/*" required>
-                    @error('foto_siswa')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Select Jenis Kelamin -->
-            <div class="flex flex-col lg:flex-row items-center w-full gap-4 mb-6">
-                <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2 w-full lg:w-48">Jenis Kelamin *</label>
-                <div class="w-full flex-1">
-                    <div class="grid grid-cols-2 gap-3 lg:max-w-md w-full">
-                        <label class="flex items-center justify-center rounded-sm cursor-pointer hover:border-amber-500 transition-colors">
-                            <input type="radio" name="jenis_kelamin" value="L" {{ old('jenis_kelamin') == 'L' ? 'checked' : '' }} class="hidden peer" required>
-                            <div class="border-2 border-gray-300 peer-checked:border-amber-500 peer-checked:text-amber-500 w-full text-center font-medium rounded p-2">
-                                Laki-laki
-                            </div>
-                        </label>
-                        <label class="flex items-center justify-center rounded-sm cursor-pointer hover:border-amber-500 transition-colors">
-                            <input type="radio" name="jenis_kelamin" value="P" {{ old('jenis_kelamin') == 'P' ? 'checked' : '' }} class="hidden peer" required>
-                            <div class="border-2 border-gray-300 peer-checked:border-amber-500 peer-checked:text-amber-500 w-full text-center font-medium rounded p-2">
-                                Perempuan
-                            </div>
-                        </label>
-                    </div>
-                    @error('jenis_kelamin')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Tanggal Lahir -->
-            <div class="flex flex-col lg:flex-row items-center w-full gap-4 mb-6">
-                <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2 w-full lg:w-48">Tanggal Lahir *</label>
-                <div class="w-full lg:max-w-md flex-1">
-                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" class="w-full px-4 py-2 border @error('tanggal_lahir') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 focus:ring-amber-500 placeholder:text-sm focus:border-transparent outline-none" required>
-                    @error('tanggal_lahir')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Tempat Lahir -->
-            <div class="flex flex-col lg:flex-row items-center w-full gap-4 mb-6">
-                <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2 w-full lg:w-48">Tempat Lahir *</label>
-                <div class="w-full flex-1">
-                    <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir') }}" class="w-full px-4 py-2 border @error('tempat_lahir') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 focus:ring-amber-500 placeholder:text-sm focus:border-transparent outline-none" placeholder="Kota kelahiran" required>
-                    @error('tempat_lahir')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Nama Ayah -->
-            <div class="mb-6 flex flex-col lg:flex-row items-center w-full gap-4">
-                <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2 w-full lg:w-48">Nama Ayah Kandung *</label>
-                <div class="w-full flex-1">
-                    <input type="text" name="nama_ayah" value="{{ old('nama_ayah') }}" class="w-full px-4 py-2 border @error('nama_ayah') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 focus:ring-amber-500 placeholder:text-sm focus:border-transparent outline-none" placeholder="Nama lengkap ayah" required>
-                    @error('nama_ayah')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Nama Ibu -->
-            <div class="mb-6 flex flex-col lg:flex-row items-center w-full gap-4">
-                <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2 w-full lg:w-48">Nama Ibu Kandung *</label>
-                <div class="w-full flex-1">
-                    <input type="text" name="nama_ibu" value="{{ old('nama_ibu') }}" class="w-full px-4 py-2 border @error('nama_ibu') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 focus:ring-amber-500 placeholder:text-sm focus:border-transparent outline-none" placeholder="Nama lengkap ibu" required>
-                    @error('nama_ibu')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Alamat -->
-            <div class="mb-6 flex flex-col lg:flex-row items-center w-full gap-4">
-                <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2 w-full lg:w-48">Alamat Lengkap *</label>
-                <div class="w-full flex-1">
-                    <textarea name="alamat_lengkap" rows="3" class="w-full px-4 py-2 border @error('alamat_lengkap') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 focus:ring-amber-500 placeholder:text-sm focus:border-transparent outline-none resize-none" placeholder="Masukkan alamat lengkap" required>{{ old('alamat_lengkap') }}</textarea>
-                    @error('alamat_lengkap')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Nama Sekolah Asal -->
-            <div class="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6">
-                <div class="flex flex-col lg:flex-row items-center w-full gap-4">
-                    <label class="block text-sm font-medium text-gray-700 w-full lg:w-48">Nama Sekolah Asal *</label>
-                    <div class="flex-1 w-full">
-                        <input type="text" name="sekolah_asal" value="{{ old('sekolah_asal') }}" class="w-full px-4 py-2 border @error('sekolah_asal') border-red-500 @else border-gray-300 @enderror rounded-sm focus:ring-2 focus:ring-amber-500 placeholder:text-sm focus:border-transparent outline-none" placeholder="Nama sekolah asal" required>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nama Sekolah Asal (SMP/MTs) *</label>
+                        <input type="text" name="sekolah_asal" x-model="form.sekolah_asal" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Masukkan nama sekolah asal lengkap" required>
                         @error('sekolah_asal')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nama Ayah Kandung *</label>
+                        <input type="text" name="nama_ayah" x-model="form.nama_ayah" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Nama lengkap ayah sesuai berkas" required>
+                        @error('nama_ayah')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nama Ibu Kandung *</label>
+                        <input type="text" name="nama_ibu" x-model="form.nama_ibu" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Nama lengkap ibu sesuai berkas" required>
+                        @error('nama_ibu')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
             </div>
 
-            <!-- Ukuran Baju -->
-            <div class="mb-8 flex flex-col lg:flex-row items-center w-full gap-4">
-                <label class="block text-sm font-medium text-gray-700 mt-2 mb-1 lg:mb-2 w-full lg:w-48">Ukuran Baju Seragam *</label>
-                <div class="w-full flex-1">
-                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                        @foreach(['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
-                        <label class="flex items-center justify-center rounded-sm cursor-pointer hover:border-amber-500 transition-colors">
-                            <input type="radio" name="ukuran_baju" value="{{ $size }}" {{ old('ukuran_baju') == $size ? 'checked' : '' }} class="hidden peer" required>
-                            <div class="border-2 border-gray-300 peer-checked:border-amber-500 peer-checked:text-amber-500 w-full text-center font-medium rounded p-2">{{ $size }}</div>
-                        </label>
+            <!-- ════════════ LANGKAH 3: DOKUMEN & LAINNYA ════════════ -->
+            <div id="step-3" x-show="step === 3" class="space-y-6" style="display: none;">
+                <div class="border-b border-slate-100 pb-3 mb-6">
+                    <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider font-mono">Langkah 3: Berkas Persyaratan & Informasi Kustom</h2>
+                    <p class="text-xs text-slate-400 mt-1">Unggah scan kelengkapan dokumen pendukung dan lengkapi kolom kustom PPDB.</p>
+                </div>
+
+                <!-- Auto-Save Alert Message (Tegas & Tenang) -->
+                <div class="bg-slate-50 border border-slate-200 p-4 text-xs text-slate-500 leading-normal flex items-start gap-2.5">
+                    <svg class="w-4 h-4 text-emerald-800 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>
+                        <strong>Draf Tersimpan Otomatis:</strong> Isian teks Anda telah tersimpan secara otomatis di browser lokal. Apabila Anda tidak sengaja keluar, data teks akan tetap ada. Namun, demi alasan keamanan browser, <strong>berkas dokumen dan foto</strong> di bawah harus diunggah ulang apabila Anda memuat ulang halaman ini.
+                    </span>
+                </div>
+
+                <!-- Dynamic Requirement Document Scans -->
+                @if(!empty($requirements))
+                <div class="space-y-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">Dokumen Persyaratan Mandiri</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach($requirements as $req)
+                        @if($req['id'] !== 'foto') {{-- Already handled by foto_siswa dropzone in Step 1 --}}
+                        <div class="bg-slate-50 border border-slate-200 p-4 rounded-sm hover:border-amber-500 transition-all">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">
+                                {{ $req['label'] }}{{ $req['required'] ? ' *' : '' }}
+                            </label>
+                            <input type="file" name="{{ $req['id'] }}" 
+                                class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border file:border-slate-300 file:text-xs file:font-bold file:bg-white file:text-slate-700 hover:file:bg-slate-50 cursor-pointer"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                {{ $req['required'] ? 'required' : '' }}>
+                            @error($req['id'])
+                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        @endif
                         @endforeach
                     </div>
-                    @error('ukuran_baju')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
                 </div>
+                @endif
+
+                <!-- Dynamic Custom Fields (Informasi Tambahan) -->
+                @if(!empty($formFields))
+                <div class="space-y-6 border-t border-slate-100 pt-6">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">Informasi Pelengkap Lainnya</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        @foreach($formFields as $field)
+                        <div class="{{ $field['type'] === 'textarea' ? 'sm:col-span-2' : '' }}">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">
+                                {{ $field['label'] }}{{ $field['required'] ? ' *' : '' }}
+                            </label>
+                            @if($field['type'] === 'textarea')
+                                <textarea name="{{ $field['id'] }}" x-model="form.{{ $field['id'] }}" rows="3" 
+                                    class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none resize-none transition-all" 
+                                    placeholder="Masukkan {{ strtolower($field['label']) }}" 
+                                    {{ $field['required'] ? 'required' : '' }}></textarea>
+                            @elseif($field['type'] === 'select')
+                                <select name="{{ $field['id'] }}" x-model="form.{{ $field['id'] }}" 
+                                    class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 outline-none transition-all"
+                                    {{ $field['required'] ? 'required' : '' }}>
+                                    <option value="">-- Pilih {{ $field['label'] }} --</option>
+                                    @foreach($field['options'] as $option)
+                                        <option value="{{ $option }}">{{ $option }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <input type="{{ $field['type'] }}" name="{{ $field['id'] }}" x-model="form.{{ $field['id'] }}" 
+                                    class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-xs outline-none transition-all" 
+                                    placeholder="Masukkan {{ strtolower($field['label']) }}" 
+                                    {{ $field['required'] ? 'required' : '' }}>
+                            @endif
+                            @error($field['id'])
+                            <p class="text-red-500 text-xs mt-1.5 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
 
-            <!-- Submit Button -->
-            <div class="flex justify-center lg:justify-end mt-5">
-                <button type="submit" class="px-8 py-3 bg-cyan-600 text-white font-medium rounded-sm hover:bg-cyan-700 transition-colors">
-                    Daftar Sekarang
-                </button>
+            <!-- ════════════ NAVIGASI WIZARD BUTTONS (Tegas & Profesional) ════════════ -->
+            <div class="flex items-center justify-between mt-10 pt-6 border-t border-slate-100">
+                <!-- Back Button -->
+                <div>
+                    <button type="button" @click="prevStep()" x-show="step > 1" 
+                        class="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-none hover:bg-slate-50 transition-colors"
+                        style="display: none;">
+                        Sebelumnya
+                    </button>
+                </div>
+
+                <!-- Next or Submit Button -->
+                <div>
+                    <!-- Next Button -->
+                    <button type="button" @click="nextStep()" x-show="step < 3" 
+                        class="px-6 py-2.5 bg-slate-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider rounded-none transition-colors">
+                        Selanjutnya
+                    </button>
+
+                    <!-- Submit Button -->
+                    <button type="submit" x-show="step === 3" 
+                        class="px-7 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs uppercase tracking-wider rounded-none transition-colors"
+                        style="display: none;">
+                        Kirim Pendaftaran
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 </section>
 
 <script>
+    // ════════════ Pas Foto Dropzone Scripts ════════════
     const dropZone = document.getElementById('dropZone');
     const dropZoneContent = document.getElementById('dropZoneContent');
     const fileInput = document.getElementById('fileInput');
 
-    dropZone.addEventListener('click', () => fileInput.click());
+    if (dropZone && fileInput) {
+        dropZone.addEventListener('click', () => fileInput.click());
 
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('border-amber-500', 'bg-amber-50');
-    });
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-emerald-800', 'bg-slate-50');
+        });
 
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('border-amber-500', 'bg-amber-50');
-    });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-emerald-800', 'bg-slate-50');
+        });
 
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('border-amber-500', 'bg-amber-50');
-        
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            fileInput.files = files;
-            displayFileName(files[0]);
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-emerald-800', 'bg-slate-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                displayFileName(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                displayFileName(e.target.files[0]);
+            }
+        });
+
+        function displayFileName(file) {
+            dropZoneContent.innerHTML = `
+                <svg class="w-10 h-10 text-emerald-800 mb-2 mx-auto animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <p class="text-slate-800 font-bold text-xs text-center truncate max-w-[200px] mx-auto">${file.name}</p>
+                <p class="text-slate-400 text-[10px] mt-1 text-center font-mono">Klik dropzone untuk mengubah</p>
+            `;
         }
-    });
-
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            displayFileName(e.target.files[0]);
-        }
-    });
-
-    function displayFileName(file) {
-        // Update hanya konten visual, bukan input file
-        dropZoneContent.innerHTML = `
-            <svg class="w-12 h-12 text-green-500 mb-3 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <p class="text-gray-700 font-medium text-center">${file.name}</p>
-            <p class="text-gray-400 text-sm mt-2 text-center">Klik untuk mengubah foto</p>
-        `;
     }
 </script>
 

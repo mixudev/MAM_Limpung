@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard\Ppdb;
 
 use App\Http\Controllers\Controller;
+use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
 use App\Services\PpdbService;
 use Illuminate\Http\JsonResponse;
@@ -46,6 +47,40 @@ class AdminPpdbController extends Controller
      */
     public function show(PpdbSiswa $ppdbSiswa): JsonResponse
     {
+        $formFields = PpdbSetting::getValue('form_fields', []);
+        $requirements = PpdbSetting::getValue('requirements', []);
+
+        $mappedAdditional = [];
+        $additional = $ppdbSiswa->additional_fields ?? [];
+
+        // Map dynamic form fields
+        foreach ($formFields as $field) {
+            $value = $additional[$field['id']] ?? null;
+            if ($value !== null && $value !== '') {
+                $mappedAdditional[] = [
+                    'label' => $field['label'],
+                    'value' => $value,
+                    'type' => $field['type'],
+                ];
+            }
+        }
+
+        // Map dynamic requirement files (except photo which is handled as foto_siswa)
+        $mappedRequirements = [];
+        foreach ($requirements as $req) {
+            if ($req['id'] === 'foto') {
+                continue;
+            }
+            $value = $additional[$req['id']] ?? null;
+            if ($value !== null && $value !== '') {
+                $mappedRequirements[] = [
+                    'label' => $req['label'],
+                    'url' => asset('storage/'.$value),
+                    'filename' => basename($value),
+                ];
+            }
+        }
+
         return response()->json([
             'success' => true,
             'data' => array_merge($ppdbSiswa->toArray(), [
@@ -54,6 +89,8 @@ class AdminPpdbController extends Controller
                 'status_color' => $ppdbSiswa->statusColor(),
                 'formatted_dob' => $ppdbSiswa->tanggal_lahir?->format('d F Y'),
                 'formatted_submission' => $ppdbSiswa->submitted_at?->format('d F Y H:i'),
+                'mapped_additional' => $mappedAdditional,
+                'mapped_requirements' => $mappedRequirements,
             ]),
         ]);
     }
