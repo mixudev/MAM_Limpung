@@ -8,6 +8,7 @@ use App\Models\PpdbSiswa;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PpdbService
@@ -25,17 +26,21 @@ class PpdbService
      */
     public function getAvailableYears(): Collection
     {
-        $years = PpdbSiswa::selectRaw('YEAR(submitted_at) as year')
-            ->distinct()
-            ->orderBy('year', 'desc')
-            ->pluck('year')
-            ->filter();
+        /** @var array<int, int> $years */
+        $years = Cache::remember('ppdb_available_years', 300, function () {
+            $years = PpdbSiswa::selectRaw('YEAR(submitted_at) as year')
+                ->distinct()
+                ->orderBy('year', 'desc')
+                ->pluck('year')
+                ->filter()
+                ->map(fn ($y) => (int) $y)
+                ->values()
+                ->all(); // Store as plain PHP array — avoids __PHP_Incomplete_Class on deserialization
 
-        if ($years->isEmpty()) {
-            return collect([(int) date('Y')]);
-        }
+            return empty($years) ? [(int) date('Y')] : $years;
+        });
 
-        return $years->map(fn ($y) => (int) $y);
+        return collect($years);
     }
 
     /**
@@ -50,33 +55,35 @@ class PpdbService
         ]);
         $quotaTarget = (int) ($general['target_quota'] ?? self::TARGET_QUOTA);
 
-        $start = "{$year}-01-01 00:00:00";
-        $end = "{$year}-12-31 23:59:59";
+        return Cache::remember("ppdb_stats_{$year}", 300, function () use ($year, $quotaTarget) {
+            $start = "{$year}-01-01 00:00:00";
+            $end = "{$year}-12-31 23:59:59";
 
-        // Query status counts in a single group-by query
-        $counts = PpdbSiswa::whereBetween('submitted_at', [$start, $end])
-            ->select('status', DB::raw('count(*) as count'))
-            ->groupBy('status')
-            ->pluck('count', 'status')
-            ->toArray();
+            // Query status counts in a single group-by query
+            $counts = PpdbSiswa::whereBetween('submitted_at', [$start, $end])
+                ->select('status', DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->pluck('count', 'status')
+                ->toArray();
 
-        $pending = $counts['pending'] ?? 0;
-        $verified = $counts['diterima'] ?? 0;
-        $rejected = $counts['ditolak'] ?? 0;
-        $total = $pending + $verified + $rejected;
+            $pending = $counts['pending'] ?? 0;
+            $verified = $counts['diterima'] ?? 0;
+            $rejected = $counts['ditolak'] ?? 0;
+            $total = $pending + $verified + $rejected;
 
-        $quotaPercent = $quotaTarget > 0
-            ? round(($verified / $quotaTarget) * 100, 1)
-            : 0;
+            $quotaPercent = $quotaTarget > 0
+                ? round(($verified / $quotaTarget) * 100, 1)
+                : 0;
 
-        return [
-            'total' => $total,
-            'pending' => $pending,
-            'verified' => $verified,
-            'rejected' => $rejected,
-            'quota_target' => $quotaTarget,
-            'quota_percent' => min($quotaPercent, 100.0),
-        ];
+            return [
+                'total' => $total,
+                'pending' => $pending,
+                'verified' => $verified,
+                'rejected' => $rejected,
+                'quota_target' => $quotaTarget,
+                'quota_percent' => min($quotaPercent, 100.0),
+            ];
+        });
     }
 
     /**

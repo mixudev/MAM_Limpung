@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class PpdbSiswa extends Model
@@ -68,6 +69,18 @@ class PpdbSiswa extends Model
             if (empty($model->ttd_digital)) {
                 $model->ttd_digital = 'MAM-SIG-'.strtoupper(Str::random(12));
             }
+        });
+
+        static::saved(function ($model) {
+            $year = $model->submitted_at ? $model->submitted_at->year : (int) date('Y');
+            Cache::forget("ppdb_stats_{$year}");
+            Cache::forget('ppdb_available_years');
+        });
+
+        static::deleted(function ($model) {
+            $year = $model->submitted_at ? $model->submitted_at->year : (int) date('Y');
+            Cache::forget("ppdb_stats_{$year}");
+            Cache::forget('ppdb_available_years');
         });
     }
 

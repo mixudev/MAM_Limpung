@@ -33,7 +33,7 @@ Route::name('frontend.')->group(function () {
     Route::prefix('ppdb')->name('ppdb.')->group(function () {
         Route::get('/', [PpdbController::class, 'index'])->name('index');
         Route::get('/daftar', [PpdbController::class, 'form'])->name('form');
-        Route::post('/daftar', [PpdbController::class, 'store'])->name('store')->middleware('throttle:5,1');
+        Route::post('/daftar', [PpdbController::class, 'store'])->name('store')->middleware('throttle:ppdb-submit');
         Route::get('/sukses/{ppdbSiswa:nomor_registrasi}', [PpdbController::class, 'success'])->name('success')->middleware('signed');
         Route::get('/verifikasi/{nomor_registrasi}', [PpdbController::class, 'verify'])->name('verify');
         Route::get('/status', [PpdbController::class, 'statusForm'])->name('status');

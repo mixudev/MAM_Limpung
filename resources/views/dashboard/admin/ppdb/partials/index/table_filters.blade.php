@@ -16,8 +16,8 @@
             <select name="tahun_ajaran" onchange="this.form.submit()"
                 class="w-full py-2 px-3 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                 @foreach($years as $yr)
-                    <option value="{{ $yr }}" {{ $selectedYear === $yr ? 'selected' : '' }}>
-                        Tahun: {{ $yr }}/{{ $yr + 1 }}
+                    <option value="{{ $yr }}" {{ (int) $selectedYear === (int) $yr ? 'selected' : '' }}>
+                        Tahun: {{ $yr }}/{{ (int) $yr + 1 }}
                     </option>
                 @endforeach
             </select>
