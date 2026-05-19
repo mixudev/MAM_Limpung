@@ -15,6 +15,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         ->middleware('permission:access-admin-dashboard|access-super-admin-dashboard')
         ->group(function () {
             Route::get('/', [AdminPpdbController::class, 'index'])->name('index');
+            Route::get('/create', [AdminPpdbController::class, 'create'])->name('create');
+            Route::post('/', [AdminPpdbController::class, 'store'])->name('store');
 
             // Settings Panel
             Route::get('/settings', [AdminPpdbSettingController::class, 'edit'])->name('settings.edit');

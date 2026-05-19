@@ -135,6 +135,22 @@
             border-radius: 0px !important;
         }
 
+        /* ── DISABLED SIDEBAR LINK ── */
+        .sidebar-link.disabled,
+        .sidebar-link.disabled:hover {
+            opacity: 0.55;
+            cursor: not-allowed;
+            background: transparent !important;
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        .dark .sidebar-link.disabled,
+        .dark .sidebar-link.disabled:hover {
+            opacity: 0.4;
+            background: transparent !important;
+            color: rgba(161, 161, 170, 0.6) !important;
+        }
+
         /* ── SIDEBAR WIDTH TRANSITION ── */
         #sidebar {
             transition: width 300ms ease-in-out, transform 300ms ease;
@@ -611,6 +627,12 @@
         };
         document.querySelectorAll('.sidebar-link').forEach(link => {
             link.addEventListener('click', function(e) {
+                if (this.classList.contains('disabled')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+
                 if (this.classList.contains('dropdown-trigger')) {
                     e.preventDefault();
                     // If collapsed, expand first
@@ -636,8 +658,6 @@
                 }
 
                 e.preventDefault();
-                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
                 const page = this.dataset.page;
                 if (page) {
                     document.getElementById('pageTitle').textContent = pageLabels[page] || page;

@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\NewAccessToken;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -45,9 +45,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'last_login_at'     => 'datetime',
-            'password'          => 'hashed',
-            'is_active'         => 'boolean',
+            'last_login_at' => 'datetime',
+            'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -79,10 +79,10 @@ class User extends Authenticatable
     {
         return match ($this->primaryRole()) {
             'super-admin' => 'super-admin.dashboard',
-            'admin'       => 'admin.dashboard',
-            'guru'        => 'guru.dashboard',
-            'siswa'       => 'siswa.dashboard',
-            default       => 'home',
+            'admin' => 'admin.dashboard',
+            'guru' => 'guru.dashboard',
+            'siswa' => 'siswa.dashboard',
+            default => 'frontend.home',
         };
     }
 
@@ -116,7 +116,7 @@ class User extends Authenticatable
     /**
      * Issue a scoped API token with optional expiry.
      */
-    public function issueToken(string $name, array $abilities = ['*'], ?int $expiresInMinutes = null): \Laravel\Sanctum\NewAccessToken
+    public function issueToken(string $name, array $abilities = ['*'], ?int $expiresInMinutes = null): NewAccessToken
     {
         $expiresAt = $expiresInMinutes ? now()->addMinutes($expiresInMinutes) : null;
 

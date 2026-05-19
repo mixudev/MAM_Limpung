@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard\Ppdb;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Dashboard\Ppdb\StorePpdbApplicantRequest;
 use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
 use App\Services\PpdbService;
@@ -93,5 +94,37 @@ class AdminPpdbController extends Controller
                 'mapped_requirements' => $mappedRequirements,
             ]),
         ]);
+    }
+
+    /**
+     * Show the form to create a new applicant.
+     */
+    public function create(): View
+    {
+        $formFields = PpdbSetting::getValue('form_fields', []);
+        $requirements = PpdbSetting::getValue('requirements', []);
+        $general = PpdbSetting::getValue('general', [
+            'tahun_ajaran' => (int) date('Y'),
+        ]);
+
+        return view('dashboard.admin.ppdb.create', [
+            'formFields' => $formFields,
+            'requirements' => $requirements,
+            'general' => $general,
+        ]);
+    }
+
+    /**
+     * Store a newly created applicant.
+     */
+    public function store(StorePpdbApplicantRequest $request)
+    {
+        $validated = $request->validated();
+        $files = $request->allFiles();
+
+        $ppdbSiswa = $this->ppdbService->storeApplicant($validated, $files);
+
+        return redirect()->route('admin.ppdb.index')
+            ->with('success', "Pendaftar {$ppdbSiswa->nama_lengkap} berhasil ditambahkan dengan Nomor Registrasi {$ppdbSiswa->nomor_registrasi}.");
     }
 }

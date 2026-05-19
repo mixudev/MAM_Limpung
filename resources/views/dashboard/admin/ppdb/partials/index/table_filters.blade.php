@@ -1,0 +1,49 @@
+<!-- Table Filters -->
+<div class="p-6 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/50">
+    <form action="{{ route('admin.ppdb.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        
+        <!-- Search Input (Col-span 2) -->
+        <div class="relative md:col-span-2">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NISN, registrasi, sekolah..."
+                class="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+        </div>
+
+        <!-- Tahun Pelajaran Filter (Col-span 1) -->
+        <div>
+            <select name="tahun_ajaran" onchange="this.form.submit()"
+                class="w-full py-2 px-3 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                @foreach($years as $yr)
+                    <option value="{{ $yr }}" {{ $selectedYear === $yr ? 'selected' : '' }}>
+                        Tahun: {{ $yr }}/{{ $yr + 1 }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Status Filter (Col-span 1) -->
+        <div>
+            <select name="status" onchange="this.form.submit()"
+                class="w-full py-2 px-3 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                <option value="">Semua Status</option>
+                <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                <option value="diterima" {{ request('status') === 'diterima' ? 'selected' : '' }}>Diterima (Terverifikasi)</option>
+                <option value="ditolak" {{ request('status') === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+            </select>
+        </div>
+
+        <!-- Filter Actions (Col-span 1) -->
+        <div class="flex items-center gap-2">
+            <button type="submit" class="flex-1 py-2 px-4 bg-[#4f45b2] hover:bg-[#4f45b2]/90 text-white font-bold text-sm rounded-none tracking-wide transition-all active:scale-[.98]">
+                Terapkan
+            </button>
+            @if(request('search') || request('status') || request('tahun_ajaran'))
+                <a href="{{ route('admin.ppdb.index') }}" class="py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 font-bold text-sm rounded-none text-center">
+                    Reset
+                </a>
+            @endif
+        </div>
+    </form>
+</div>

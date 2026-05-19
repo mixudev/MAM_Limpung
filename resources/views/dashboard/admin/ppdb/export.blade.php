@@ -23,48 +23,7 @@
         </a>
     </div>
 
-    <!-- Brief Summary Metrics (Geometric Cards) -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <!-- Total -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3.5 rounded-none shadow-sm flex flex-col justify-between">
-            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Total Pendaftar</span>
-            <div class="flex items-baseline gap-1 mt-1">
-                <span class="text-xl font-extrabold text-slate-900 dark:text-white font-mono leading-none">{{ $stats['total'] }}</span>
-                <span class="text-[9px] text-slate-400 font-mono">Calon Siswa</span>
-            </div>
-        </div>
-
-        <!-- Pending -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3.5 rounded-none shadow-sm flex flex-col justify-between border-l-2 border-l-amber-500">
-            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Menunggu Verifikasi</span>
-            <div class="flex items-baseline gap-1 mt-1">
-                <span class="text-xl font-extrabold text-amber-600 dark:text-amber-500 font-mono leading-none">{{ $stats['pending'] }}</span>
-                <span class="text-[9px] text-slate-400 font-mono">Berkas</span>
-            </div>
-        </div>
-
-        <!-- Verified -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3.5 rounded-none shadow-sm flex flex-col justify-between border-l-2 border-l-emerald-500">
-            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Terverifikasi (Diterima)</span>
-            <div class="flex items-baseline gap-1 mt-1">
-                <span class="text-xl font-extrabold text-emerald-600 dark:text-emerald-500 font-mono leading-none">{{ $stats['verified'] }}</span>
-                <span class="text-[9px] text-slate-400 font-mono">Siswa</span>
-            </div>
-        </div>
-
-        <!-- Target Kuota -->
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3.5 rounded-none shadow-sm flex flex-col justify-between border-l-2 border-l-blue-500">
-            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Target Kuota Tampung</span>
-            <div class="mt-1">
-                <span class="text-xs font-bold text-slate-800 dark:text-zinc-300 font-mono leading-none">
-                    {{ $stats['verified'] }}/{{ $stats['quota_target'] }} ({{ $stats['quota_percent'] }}%)
-                </span>
-                <div class="w-full bg-slate-100 dark:bg-zinc-800 h-1 mt-1 rounded-none overflow-hidden">
-                    <div class="bg-blue-500 h-full" style="width: {{ $stats['quota_percent'] }}%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('dashboard.admin.ppdb.partials.export.stats')
 
     <!-- Export Configurations Panel -->
     <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-none shadow-sm">
@@ -82,7 +41,6 @@
                     <label class="relative border border-slate-200 dark:border-zinc-800 hover:border-emerald-500 dark:hover:border-emerald-500 p-5 flex items-start gap-4 cursor-pointer transition-all bg-slate-50/30 dark:bg-zinc-900/30 select-none group">
                         <input type="radio" name="format" value="excel" checked class="mt-1 accent-emerald-600 h-4 w-4" onchange="toggleFormatDetails('excel')">
                         <div class="flex-shrink-0 p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-all">
-                            <!-- Excel icon -->
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
@@ -97,7 +55,6 @@
                     <label class="relative border border-slate-200 dark:border-zinc-800 hover:border-red-500 dark:hover:border-red-500 p-5 flex items-start gap-4 cursor-pointer transition-all bg-slate-50/30 dark:bg-zinc-900/30 select-none group">
                         <input type="radio" name="format" value="pdf" class="mt-1 accent-red-600 h-4 w-4" onchange="toggleFormatDetails('pdf')">
                         <div class="flex-shrink-0 p-3 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 group-hover:scale-105 transition-all">
-                            <!-- PDF icon -->
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
@@ -168,111 +125,7 @@
                 </div>
             </div>
 
-            <!-- STEP 3: Fields Checklist selection -->
-            <div>
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-zinc-850 pb-3 mb-4 gap-2">
-                    <h3 class="text-xs font-mono font-bold uppercase tracking-widest text-[#4f45b2] dark:text-[#8c84c8]">
-                        3. Pilih Kolom Data untuk Diexport
-                    </h3>
-                    <div class="flex items-center gap-3">
-                        <button type="button" onclick="toggleAllCheckboxes(true)" class="text-[10px] font-mono text-[#4f45b2] dark:text-[#8c84c8] hover:underline font-bold uppercase">Pilih Semua</button>
-                        <span class="text-slate-300 dark:text-zinc-700">|</span>
-                        <button type="button" onclick="toggleAllCheckboxes(false)" class="text-[10px] font-mono text-red-500 hover:underline font-bold uppercase">Hapus Semua</button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
-                    
-                    <!-- Kategori 1: Data Peserta Utama -->
-                    <div class="bg-slate-50/50 dark:bg-zinc-900/30 p-5 border border-slate-100 dark:border-zinc-800/80 space-y-3">
-                        <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-[#4f45b2] dark:text-[#8c84c8] border-b border-slate-200 dark:border-zinc-800 pb-2 mb-3">
-                            A. Data Peserta Utama
-                        </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="nomor_registrasi" checked class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Nomor Registrasi</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="nama_lengkap" checked class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Nama Lengkap</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="nisn" checked class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>NISN</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="jenis_kelamin" checked class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Jenis Kelamin (L/P)</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="sekolah_asal" checked class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Sekolah Asal</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="nomor_hp" checked class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Nomor HP / WhatsApp</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="status" checked class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Status Verifikasi</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="submitted_at" class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Tanggal Pendaftaran</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Kategori 2: Data Detail Pendukung -->
-                    <div class="bg-slate-50/50 dark:bg-zinc-900/30 p-5 border border-slate-100 dark:border-zinc-800/80 space-y-3">
-                        <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-[#4f45b2] dark:text-[#8c84c8] border-b border-slate-200 dark:border-zinc-800 pb-2 mb-3">
-                            B. Data Detail Pendukung
-                        </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="tempat_lahir" class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Tempat Lahir</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="tanggal_lahir" class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Tanggal Lahir</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="ukuran_baju" class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Ukuran Baju Olahraga</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="email" class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Email</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="alamat_lengkap" class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Alamat Rumah Lengkap</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="nama_ayah" class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Nama Ayah</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                <input type="checkbox" name="fields[]" value="nama_ibu" class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                <span>Nama Ibu</span>
-                            </label>
-                            
-                            <!-- Dynamic Custom Input Fields under Detail category -->
-                            @if(!empty($customFields))
-                                @foreach($customFields as $field)
-                                    <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
-                                        <input type="checkbox" name="fields[]" value="{{ $field['id'] }}" class="accent-[#4f45b2] h-4 w-4 rounded-none">
-                                        <span>{{ $field['id'] === 'nama_wali' ? 'Nama Wali' : $field['label'] }}</span>
-                                    </label>
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+            @include('dashboard.admin.ppdb.partials.export.fields')
 
             <!-- Download Button -->
             <div class="border-t border-slate-100 dark:border-zinc-850 pt-6 flex justify-end">
@@ -351,10 +204,8 @@
                 const formatVal = checkedRadio ? checkedRadio.value : 'excel';
                 
                 if (formatVal === 'pdf') {
-                    // Double check and strictly enforce target _blank for PDF
                     form.setAttribute('target', '_blank');
                     
-                    // Show premium toast feedback
                     if (toast) {
                         toast.classList.remove('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
                         setTimeout(function() {
@@ -362,7 +213,6 @@
                         }, 3000);
                     }
                 } else {
-                    // Double check and strictly enforce target to hidden iframe for Excel
                     form.setAttribute('target', 'export-target-iframe');
                 }
             });
