@@ -10,9 +10,12 @@ class AdminDashboardController extends Controller
 {
     public function __invoke(Request $request): View
     {
-        return view('dashboard.admin', [
-            'user'        => $request->user(),
-            'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+        $user = $request->user()->load('roles', 'permissions');
+
+        return view('dashboard.index', [
+            'user' => $user,
+            'roles' => $user->getRoleNames(),
+            'permissions' => $user->getAllPermissions()->pluck('name'),
         ]);
     }
 }

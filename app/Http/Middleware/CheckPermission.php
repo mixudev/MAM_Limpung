@@ -66,6 +66,6 @@ class CheckPermission
             return response()->json(['message' => $message], 403);
         }
 
-        abort(403, $message);
+        return redirect()->route('frontend.home')->with('error', $message);
     }
 }

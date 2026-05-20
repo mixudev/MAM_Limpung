@@ -25,14 +25,14 @@ test('unauthenticated guest cannot access the ppdb create form or store data', f
 });
 
 test('unauthorized user cannot access the ppdb create form or store data', function () {
-    $user = User::factory()->create();
-    $user->assignRole('siswa');
+    $siswa = User::factory()->create();
+    $siswa->assignRole('siswa');
 
-    $response = $this->actingAs($user)->get(route('admin.ppdb.create'));
-    $response->assertStatus(403);
+    $response = $this->actingAs($siswa)->get(route('admin.ppdb.create'));
+    $response->assertStatus(302)->assertRedirect(route('frontend.home'));
 
-    $responseStore = $this->actingAs($user)->post(route('admin.ppdb.store'), []);
-    $responseStore->assertStatus(403);
+    $responseStore = $this->actingAs($siswa)->post(route('admin.ppdb.store'), []);
+    $responseStore->assertStatus(302)->assertRedirect(route('frontend.home'));
 });
 
 test('authorized admin can load the create form page', function () {

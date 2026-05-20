@@ -27,6 +27,9 @@
 <script src="https://kit.fontawesome.com/fd9d533b12.js" crossorigin="anonymous"></script>
 </head>
     <body class="font-sans antialiased bg-white overflow-x-hidden"> 
+        <!-- Announcements, Popups, and Banners Overlay -->
+        @include('partials.announcement_overlays')
+
         <!-- Preloader -->
         {{-- @include('partials.loader') --}}
 

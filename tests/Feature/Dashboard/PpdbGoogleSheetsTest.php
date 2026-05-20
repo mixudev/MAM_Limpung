@@ -23,7 +23,7 @@ beforeEach(function () {
 
 test('unauthorized users cannot access google sheets settings page', function () {
     $response = $this->actingAs($this->user)->get(route('admin.ppdb.google-sheets.edit'));
-    $response->assertStatus(403);
+    $response->assertStatus(302)->assertRedirect(route('frontend.home'));
 });
 
 test('authorized admin can access google sheets settings page', function () {

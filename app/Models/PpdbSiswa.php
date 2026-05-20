@@ -50,6 +50,14 @@ class PpdbSiswa extends Model
     }
 
     /**
+     * Use UUID as the route model binding key (prevents ID enumeration).
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
+    /**
      * Boot method to generate a unique random registration number.
      */
     protected static function boot()
@@ -57,6 +65,11 @@ class PpdbSiswa extends Model
         parent::boot();
 
         static::creating(function ($model) {
+            // Generate UUID for safe route binding
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
+            }
+
             do {
                 // Generate a highly secure unique alphanumeric registration number
                 // Example: PPDB-2026-K7A9X

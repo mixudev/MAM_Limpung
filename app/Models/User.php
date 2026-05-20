@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\NewAccessToken;
 use Spatie\Permission\Traits\HasRoles;
@@ -49,6 +50,33 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
         ];
+    }
+
+    // -----------------------------------------------------------------------
+    //  Route Key
+    // -----------------------------------------------------------------------
+
+    /**
+     * Use UUID as the route model binding key (prevents ID enumeration).
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
+    // -----------------------------------------------------------------------
+    //  Boot
+    // -----------------------------------------------------------------------
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (self $model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
+            }
+        });
     }
 
     // -----------------------------------------------------------------------

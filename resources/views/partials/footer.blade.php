@@ -7,39 +7,50 @@
                 <!-- School Info -->
                 <div class="lg:col-span-2">
                     <div class="flex items-center space-x-3 mb-6">
-                        <div class="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
-                            <i class="fas fa-graduation-cap text-xl text-white"></i>
-                        </div>
+                        @if(!empty($siteSettings->logo_path))
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 overflow-hidden">
+                                <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="w-full h-full object-contain" alt="Logo {{ $siteSettings->school_name ?? 'MAM Limpung' }}">
+                            </div>
+                        @else
+                            <div class="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-graduation-cap text-xl text-white"></i>
+                            </div>
+                        @endif
                         <div>
                             <h3 class="text-2xl font-bold">
-                                <span class="text-amber-400">MAM</span> Limpung
+                                <span class="text-amber-400">{{ $siteSettings->school_name ?? 'MAM Limpung' }}</span>
                             </h3>
                             <p class="text-blue-200 text-sm">Madrasah Aliyah Muhammadiyah</p>
                         </div>
                     </div>
                     <p class="text-blue-100 mb-6 leading-relaxed">
-                        MAM Limpung adalah lembaga pendidikan Islam yang berkomitmen untuk membentuk generasi yang berakhlak mulia, cerdas, dan siap menghadapi tantangan masa depan dengan landasan nilai-nilai Islam dan kemajuan teknologi.
+                        {{ $siteSettings->about_short ?: 'MAM Limpung adalah lembaga pendidikan Islam yang berkomitmen untuk membentuk generasi yang berakhlak mulia, cerdas, dan siap menghadapi tantangan masa depan dengan landasan nilai-nilai Islam.' }}
                     </p>
                     
                     <!-- Contact Info -->
                     <div class="space-y-3">
+                        @if($siteSettings->address)
                         <div class="flex items-start space-x-3">
                             <i class="fas fa-map-marker-alt text-amber-400 mt-1"></i>
                             <div>
                                 <p class="text-blue-100 text-sm">
-                                    Jl. Cokronegoro No.34, Gepor, Limpung<br>
-                                    Kabupaten Batang, Jawa Tengah 51271
+                                    {{ $siteSettings->address }}
                                 </p>
                             </div>
                         </div>
+                        @endif
+                        @if($siteSettings->phone)
                         <div class="flex items-center space-x-3">
                             <i class="fas fa-phone text-amber-400"></i>
-                            <p class="text-blue-100 text-sm">+62 21 1234 5678</p>
+                            <p class="text-blue-100 text-sm">{{ $siteSettings->phone }}</p>
                         </div>
+                        @endif
+                        @if($siteSettings->email)
                         <div class="flex items-center space-x-3">
                             <i class="fas fa-envelope text-amber-400"></i>
-                            <p class="text-blue-100 text-sm">info@mamlimpung.sch.id</p>
+                            <p class="text-blue-100 text-sm">{{ $siteSettings->email }}</p>
                         </div>
+                        @endif
                     </div>
                 </div>
 
@@ -70,18 +81,31 @@
                     <div>
                         <h5 class="font-semibold mb-4 text-amber-400">Ikuti Kami</h5>
                         <div class="flex space-x-3">
-                            <a href="https://facebook.com" target="_blank" class="w-10 h-10 bg-blue-700 hover:bg-amber-500 rounded-full flex items-center justify-center transition-colors group">
+                            @if($siteSettings->facebook_url)
+                            <a href="{{ $siteSettings->facebook_url }}" target="_blank" class="w-10 h-10 bg-blue-700 hover:bg-amber-500 rounded-full flex items-center justify-center transition-colors group">
                                 <i class="fab fa-facebook text-white group-hover:scale-110 transition-transform"></i>
                             </a>
-                            <a href="https://instagram.com" target="_blank" class="w-10 h-10 bg-blue-700 hover:bg-amber-500 rounded-full flex items-center justify-center transition-colors group">
+                            @endif
+                            @if($siteSettings->instagram_url)
+                            <a href="{{ $siteSettings->instagram_url }}" target="_blank" class="w-10 h-10 bg-blue-700 hover:bg-amber-500 rounded-full flex items-center justify-center transition-colors group">
                                 <i class="fab fa-instagram text-white group-hover:scale-110 transition-transform"></i>
                             </a>
-                            <a href="https://youtube.com" target="_blank" class="w-10 h-10 bg-blue-700 hover:bg-amber-500 rounded-full flex items-center justify-center transition-colors group">
+                            @endif
+                            @if($siteSettings->youtube_url)
+                            <a href="{{ $siteSettings->youtube_url }}" target="_blank" class="w-10 h-10 bg-blue-700 hover:bg-amber-500 rounded-full flex items-center justify-center transition-colors group">
                                 <i class="fab fa-youtube text-white group-hover:scale-110 transition-transform"></i>
                             </a>
-                            <a href="https://wa.me/628123456789" target="_blank" class="w-10 h-10 bg-blue-700 hover:bg-amber-500 rounded-full flex items-center justify-center transition-colors group">
+                            @endif
+                            @if($siteSettings->whatsapp)
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $siteSettings->whatsapp) }}" target="_blank" class="w-10 h-10 bg-blue-700 hover:bg-amber-500 rounded-full flex items-center justify-center transition-colors group">
                                 <i class="fab fa-whatsapp text-white group-hover:scale-110 transition-transform"></i>
                             </a>
+                            @endif
+                            @if($siteSettings->twitter_url)
+                            <a href="{{ $siteSettings->twitter_url }}" target="_blank" class="w-10 h-10 bg-blue-700 hover:bg-amber-500 rounded-full flex items-center justify-center transition-colors group">
+                                <i class="fa-brands fa-x-twitter text-white group-hover:scale-110 transition-transform"></i>
+                            </a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -120,10 +144,10 @@
                 <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                     <div class="text-center md:text-left">
                         <p class="text-blue-200 text-sm">
-                            &copy; 2025 MAM Limpung. Hak Cipta Dilindungi Undang-Undang.
+                            &copy; {{ date('Y') }} {{ $siteSettings->school_name }}. Hak Cipta Dilindungi Undang-Undang.
                         </p>
                         <p class="text-blue-300 text-xs mt-1">
-                            Dikembangkan oleh Tim IT MAM Limpung
+                            Dikembangkan oleh Tim IT {{ $siteSettings->school_name }}
                         </p>
                     </div>
                     

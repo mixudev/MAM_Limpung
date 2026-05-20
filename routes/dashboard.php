@@ -27,13 +27,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         ->group(function () {
             Route::get('/dashboard', SuperAdminDashboardController::class)->name('dashboard');
 
-            Route::middleware('permission:view-users')->group(function () {
-                Route::get('/users', fn () => view('placeholder', ['section' => 'Users List']))->name('users.index');
-            });
-
-            Route::middleware('permission:assign-roles')->group(function () {
-                Route::get('/roles', fn () => view('placeholder', ['section' => 'Role Management']))->name('roles.index');
-            });
+            // Super Admin custom security routes are defined in modular files
         });
 
     // -------------------------------------------------------------------------
@@ -44,10 +38,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         ->middleware('permission:access-admin-dashboard')
         ->group(function () {
             Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
-
-            Route::middleware('permission:view-users')->group(function () {
-                Route::get('/users', fn () => view('placeholder', ['section' => 'Users List']))->name('users.index');
-            });
 
             Route::middleware('permission:view-courses')->group(function () {
                 Route::get('/courses', fn () => view('placeholder', ['section' => 'Course Management']))->name('courses.index');
@@ -93,7 +83,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // -------------------------------------------------------------------------
     //  Dynamic Modular Routes (e.g. PPDB, etc.)
     // -------------------------------------------------------------------------
-    foreach (glob(__DIR__ . '/dashboard/*.php') as $routeFile) {
+    foreach (glob(__DIR__.'/dashboard/*.php') as $routeFile) {
         require $routeFile;
     }
 });

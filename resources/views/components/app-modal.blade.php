@@ -82,7 +82,7 @@
         width: 100%;
         padding: 0.625rem 0.75rem;
         font-size: 0.875rem;
-        border-radius: 0.5rem;
+        border-radius: 0;
         background-color: #f8fafc;
         border: 1px solid #e2e8f0;
         color: #1e293b;
@@ -109,7 +109,7 @@
     .modal-body input[type="file"] { width: 100%; font-size: 0.875rem; color: #64748b; cursor: pointer; }
     .dark .modal-body input[type="file"] { color: #94a3b8; }
     .modal-body input[type="file"]::file-selector-button {
-        margin-right: 1rem; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none;
+        margin-right: 1rem; padding: 0.5rem 1rem; border-radius: 0; border: none;
         font-size: 0.75rem; font-weight: 600; background-color: #eef2ff; color: #4f46e5;
         cursor: pointer; transition: all 0.2s;
     }
@@ -126,7 +126,7 @@
 
     /* --- Elegant Action Buttons (Firm/Tegas, No Glow) --- */
     .modal-btn-primary {
-        padding: 0.625rem 1.25rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.625rem;
+        padding: 0.625rem 1.25rem; font-size: 0.75rem; font-weight: 700; border-radius: 0;
         background-color: #4f46e5; color: #ffffff; border: 1px solid #4338ca; cursor: pointer; transition: all 0.2s;
         display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     }
@@ -134,7 +134,7 @@
     .modal-btn-primary:active { transform: scale(0.98); }
 
     .modal-btn-danger {
-        padding: 0.625rem 1.25rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.625rem;
+        padding: 0.625rem 1.25rem; font-size: 0.75rem; font-weight: 700; border-radius: 0;
         background-color: #dc2626; color: #ffffff; border: 1px solid #b91c1c; cursor: pointer; transition: all 0.2s;
         display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     }
@@ -142,7 +142,7 @@
     .modal-btn-danger:active { transform: scale(0.98); }
 
     .modal-btn-cancel {
-        padding: 0.625rem 1.25rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.625rem;
+        padding: 0.625rem 1.25rem; font-size: 0.75rem; font-weight: 700; border-radius: 0;
         background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;
         display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     }
@@ -166,7 +166,7 @@
     <div class="modal-backdrop absolute inset-0 bg-black/50 backdrop-blur-sm cursor-pointer"></div>
 
     <!-- Modal Card -->
-    <div class="modal-box relative w-full {{ $maxWidthClass }} mx-auto overflow-hidden bg-white border border-black/[0.06] shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_20px_60px_-10px_rgba(0,0,0,0.18),0_8px_24px_-4px_rgba(0,0,0,0.08)] dark:bg-[#18181f] dark:border-white/[0.07] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_20px_60px_-10px_rgba(0,0,0,0.7),0_8px_24px_-4px_rgba(0,0,0,0.4)] flex flex-col max-h-[90vh] rounded-xl">
+    <div class="modal-box relative w-full {{ $maxWidthClass }} mx-auto overflow-hidden bg-white border border-black/[0.06] shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_20px_60px_-10px_rgba(0,0,0,0.18),0_8px_24px_-4px_rgba(0,0,0,0.08)] dark:bg-[#18181f] dark:border-white/[0.07] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_20px_60px_-10px_rgba(0,0,0,0.7),0_8px_24px_-4px_rgba(0,0,0,0.4)] flex flex-col max-h-[90vh] rounded-none">
         
         <!-- Header -->
         <div class="modal-header px-6 py-5 border-b border-gray-100 dark:border-white/[0.08] flex items-center justify-between shrink-0">
@@ -195,7 +195,7 @@
                 </div>
             @endif
 
-            <button type="button" aria-label="Tutup" onclick="AppModal.close('{{ $id }}')" class="modal-close-x w-8 h-8 flex items-center justify-center rounded-[10px] bg-transparent border-0 cursor-pointer text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-600 dark:hover:bg-white/[0.08] dark:hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300">
+            <button type="button" aria-label="Tutup" onclick="AppModal.close('{{ $id }}')" class="modal-close-x w-8 h-8 flex items-center justify-center rounded-none bg-transparent border-0 cursor-pointer text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-600 dark:hover:bg-white/[0.08] dark:hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>

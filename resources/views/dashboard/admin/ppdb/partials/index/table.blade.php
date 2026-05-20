@@ -45,7 +45,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                         <div class="inline-flex items-center gap-1.5">
                             <!-- Cetak Action -->
-                            <button type="button" onclick="printStudent('{{ $student->id }}')" title="Cetak Laporan Biodata"
+                            <button type="button" onclick="printStudent('{{ $student->uuid }}')" title="Cetak Laporan Biodata"
                                 class="px-2 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white rounded-none transition-all active:scale-[.95]">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -53,14 +53,14 @@
                             </button>
 
                             <!-- Detail Action -->
-                            <button type="button" onclick="openDetails('{{ $student->id }}')" 
+                            <button type="button" onclick="openDetails('{{ $student->uuid }}')" 
                                 class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 font-bold text-xs rounded-none transition-all">
                                 Detail
                             </button>
 
                             @if($student->status === 'pending')
                                 <!-- Verify Action Form -->
-                                <form action="{{ route('admin.ppdb.verify', $student->id) }}" method="POST" class="inline">
+                                <form action="{{ route('admin.ppdb.verify', $student) }}" method="POST" class="inline">
                                     @csrf
                                     <button type="submit" onclick="confirmVerification(event, '{{ $student->nama_lengkap }}')"
                                         class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-none transition-all active:scale-[.98]">
@@ -69,7 +69,7 @@
                                 </form>
 
                                 <!-- Reject Action Modal Trigger -->
-                                <button type="button" onclick="openRejectionModal('{{ $student->id }}', '{{ $student->nama_lengkap }}')"
+                                <button type="button" onclick="openRejectionModal('{{ $student->uuid }}', '{{ $student->nama_lengkap }}')"
                                     class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-bold text-xs rounded-none transition-all active:scale-[.98]">
                                     Tolak
                                 </button>

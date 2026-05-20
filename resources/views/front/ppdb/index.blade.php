@@ -4,7 +4,7 @@
 
     <!-- Inject Inter Font & Manual Animation Styles -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
         .font-inter { font-family: 'Inter', sans-serif; }
 
         /* Manual GPU-Accelerated Animate on Scroll Styles */
@@ -35,7 +35,7 @@
     </style>
 
     <div class="font-inter bg-gray-50 pb-24">
-
+ 
         <!-- Fullscreen Image Slider Hero -->
         <section class="relative h-[70vh] w-full overflow-hidden bg-gray-900 group" 
              x-data="{ 
@@ -218,7 +218,7 @@
              x-init="updateActive()"
              @scroll.window="updateActive()"
              @resize.window="updateActive()"
-             class="sticky top-[64px] z-40 bg-white border-b border-gray-200/80 shadow-sm transition-all duration-300">
+             class="static md:sticky md:top-[64px] z-[40] bg-white border-b border-gray-200/80 shadow-sm transition-all duration-300">
             <div class="max-w-6xl mx-auto px-6 py-2.5">
                 
                 <!-- Desktop Viewport: Tabs -->

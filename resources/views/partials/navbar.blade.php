@@ -9,49 +9,66 @@
                 <p class="flex items-center space-x-1 text-xs">
                     Follow Link : 
                 </p>
-                <a href="#" class="hover:text-blue-200 transition-colors flex items-center space-x-1">
+                @if($siteSettings->facebook_url)
+                <a href="{{ $siteSettings->facebook_url }}" target="_blank" class="hover:text-blue-200 transition-colors flex items-center space-x-1">
                     <i class="fa-brands fa-facebook"></i>
                 </a>
-                <a href="#" class="hover:text-blue-200 transition-colors flex items-center space-x-1">
+                @endif
+                @if($siteSettings->instagram_url)
+                <a href="{{ $siteSettings->instagram_url }}" target="_blank" class="hover:text-blue-200 transition-colors flex items-center space-x-1">
                     <i class="fa-brands fa-instagram"></i>
                 </a>
-                <a href="#" class="hover:text-blue-200 transition-colors flex items-center space-x-1">
+                @endif
+                @if($siteSettings->youtube_url)
+                <a href="{{ $siteSettings->youtube_url }}" target="_blank" class="hover:text-blue-200 transition-colors flex items-center space-x-1">
                     <i class="fa-brands fa-youtube"></i>
                 </a>
+                @endif
+                @if($siteSettings->twitter_url)
+                <a href="{{ $siteSettings->twitter_url }}" target="_blank" class="hover:text-blue-200 transition-colors flex items-center space-x-1">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+                @endif
             </div>
             
             <!-- Contact Info -->
             <div class="flex flex-row items-center justify-center text-center w-[70%] gap-10 px-5 py-2">
+                @if($siteSettings->address)
                 <span class="flex items-center">
                     <i class="fa-solid fa-location-dot mr-2"></i>
-                    <span class="text-xs">Jl. Cokronegoro No.34, Gepor, Limpung</span>
+                    {{-- maksimal 30karakter --}}
+                    <span class="text-xs">{{ Str::limit($siteSettings->address, 57) }}</span>
                 </span>
+                @endif
+                @if($siteSettings->email)
                 <span class="flex items-center">
                     <i class="fa-solid fa-envelope mr-2"></i>
-                    <span class="text-xs">info@mamlimpung.sch</span>
+                    <span class="text-xs">{{ $siteSettings->email }}</span>
                 </span>
+                @endif
+                @if($siteSettings->phone)
                 <span class="flex items-center ">
                     <i class="fa-solid fa-phone mr-2"></i>
-                    <span class="text-xs">+62 21 1234 5678</span>
+                    <span class="text-xs">{{ $siteSettings->phone }}</span>
                 </span>
+                @endif
             </div>
         </div>
     </div>
 
     <!-- Main Navbar -->
-    <nav class="bg-white shadow-lg sticky top-0 z-35 transition-all duration-300" id="navbar">
+    <nav class="bg-white shadow-lg sticky top-0 z-[50] transition-all duration-300" id="navbar">
         <div class="max-w-6xl mx-auto px-5">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex items-center space-x-3">
-                    <img src="{{ asset('assets/img/logo.png') }}" class="w-12 h-12 object-contain" alt="Logo MAM Limpung">
+                    <img src="{{ !empty($siteSettings->logo_path) ? asset('storage/' . $siteSettings->logo_path) : asset('assets/img/logo.png') }}" class="w-12 h-12 object-contain" alt="Logo {{ $siteSettings->school_name ?? 'MAM Limpung' }}">
                     <div class="flex flex-col">
                         <h1 class="text-xl font-bold leading-tight tracking-tight">
-                            <span class="text-blue-900">MAM</span>
-                            <span class="text-gray-800">Limpung</span>
+                            <span class="text-blue-900">{{ $siteSettings->school_name ?? 'MAM Limpung' }}</span>
                         </h1>
                         <p class="text-[10px] text-gray-600 font-light uppercase tracking-widest -mt-0.5">
-                            Unggul dan Berprestasi
+                            {{ !empty($siteSettings->meta_title) ? $siteSettings->meta_title : 'Unggul dan Berprestasi' }}
                         </p>
                     </div>
                 </div>
@@ -74,7 +91,10 @@
     </nav>
     
     <!-- News Ticker (Only on Home Page) -->
-    @if(request()->is('/'))
+    @php
+        $runningTexts = \App\Models\AnnounceText::active()->get();
+    @endphp
+    @if(request()->is('/') && $runningTexts->isNotEmpty())
     <div class="bg-gray-100 border-b border-gray-200 overflow-hidden h-10 flex items-center">
         <div class="container mx-auto px-5 flex items-center">
             <!-- Label -->
@@ -85,16 +105,15 @@
             <!-- Ticker Content -->
             <div class="relative flex-1 overflow-hidden h-full flex items-center ml-4">
                 <div class="animate-ticker whitespace-nowrap flex items-center">
-                    <span class="text-xs text-gray-600 font-medium mx-6"> Penerimaan Peserta Didik Baru (PPDB) Tahun Pelajaran 2025/2026 telah dibuka. Daftar Segera!</span>
-                    <span class="text-gray-300">|</span>
-                    <span class="text-xs text-gray-600 font-medium mx-6"> Selamat kepada Tim Robotik MAM Limpung atas Juara 1 Tingkat Provinsi.</span>
-                    <span class="text-gray-300">|</span>
-                    <span class="text-xs text-gray-600 font-medium mx-6"> Ujian Akhir Semester Genap akan dilaksanakan mulai tanggal 2 Juni 2025.</span>
-                    <span class="text-gray-300">|</span>
+                    @foreach($runningTexts as $text)
+                        <span class="text-xs text-gray-600 font-medium mx-6">{{ $text->content }}</span>
+                        <span class="text-gray-300">|</span>
+                    @endforeach
                     <!-- Duplicate for seamless loop -->
-                    <span class="text-xs text-gray-600 font-medium mx-6"> Penerimaan Peserta Didik Baru (PPDB) Tahun Pelajaran 2025/2026 telah dibuka. Daftar Segera!</span>
-                    <span class="text-gray-300">|</span>
-                    <span class="text-xs text-gray-600 font-medium mx-6"> Selamat kepada Tim Robotik MAM Limpung atas Juara 1 Tingkat Provinsi.</span>
+                    @foreach($runningTexts as $text)
+                        <span class="text-xs text-gray-600 font-medium mx-6">{{ $text->content }}</span>
+                        <span class="text-gray-300">|</span>
+                    @endforeach
                 </div>
             </div>
         </div>
@@ -102,10 +121,10 @@
     @endif
 
     <!-- Mobile Sidebar Backdrop -->
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-38" id="sidebarBackdrop"></div>
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-[80]" id="sidebarBackdrop"></div>
 
     <!-- Mobile Sidebar Menu -->
-    <div class="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl hidden z-40 flex flex-col transition-all" id="mobileSidebar">
+    <div class="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl hidden z-[100] flex flex-col transition-all" id="mobileSidebar">
 
         @include('partials.navbar.mobile-nav')
 

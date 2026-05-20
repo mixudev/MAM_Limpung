@@ -23,7 +23,7 @@ test('guest or unauthorized users are blocked from ppdb settings', function () {
     $user->assignRole('siswa');
 
     $response = $this->actingAs($user)->get(route('admin.ppdb.settings.edit'));
-    $response->assertStatus(403);
+    $response->assertStatus(302)->assertRedirect(route('frontend.home'));
 });
 
 test('authorized admin can access ppdb settings page and see defaults', function () {

@@ -29,7 +29,116 @@
             }
         }
     </script>
+    <script>
+        // Inline script to prevent theme FOUC (flicker)
+        (function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <style>
+        /* ── GLOBAL PREMIUM DASHBOARD LABELS ── */
+        label {
+            display: block !important;
+            font-size: 0.725rem !important; /* text-[11.5px] */
+            font-weight: 600 !important; /* Semibold (clean, not harsh) */
+            color: #475569 !important; /* Muted slate-600 (soft on eyes) */
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            margin-bottom: 0.4rem !important;
+            font-family: system-ui, -apple-system, sans-serif !important;
+        }
+        .dark label {
+            color: #cbd5e1 !important; /* White / light slate in Dark Mode */
+        }
+
+        /* ── GLOBAL PREMIUM DASHBOARD INPUTS ── */
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100% !important;
+            padding: 0.55rem 0.85rem !important;
+            font-size: 0.8rem !important; /* text-[13px] */
+            color: #334155 !important; /* text-slate-700 */
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important; /* border-slate-300 - clear but not distracting */
+            border-radius: 0.25rem !important; /* rounded-sm */
+            outline: none !important;
+            transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        /* Dark mode compatibility */
+        .dark input[type="text"],
+        .dark input[type="number"],
+        .dark input[type="email"],
+        .dark input[type="password"],
+        .dark input[type="tel"],
+        .dark input[type="date"],
+        .dark input[type="file"],
+        .dark select,
+        .dark textarea {
+            color: #f4f4f5 !important;
+            background-color: #18181b !important;
+            border: 1px solid #3f3f46 !important;
+        }
+
+        /* Muted placeholders */
+        input::placeholder,
+        textarea::placeholder {
+            color: #94a3b8 !important; /* slate-400 */
+            opacity: 0.85 !important;
+            font-size: 0.775rem !important;
+        }
+        .dark input::placeholder,
+        .dark textarea::placeholder {
+            color: #71717a !important; /* zinc-500 */
+        }
+
+        /* Focus states - smooth, soft shadow ring */
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="tel"]:focus,
+        input[type="date"]:focus,
+        input[type="file"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #6366f1 !important; /* focus:border-indigo-500 */
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08) !important; /* focus:ring-4 focus:ring-indigo-500/8 */
+        }
+        .dark input[type="text"]:focus,
+        .dark input[type="number"]:focus,
+        .dark input[type="email"]:focus,
+        .dark input[type="password"]:focus,
+        .dark input[type="tel"]:focus,
+        .dark input[type="date"]:focus,
+        .dark input[type="file"]:focus,
+        .dark select:focus,
+        .dark textarea:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12) !important;
+        }
+
+        /* Styled select options */
+        select option {
+            font-size: 0.8rem !important;
+            background-color: #ffffff !important;
+            color: #334155 !important;
+        }
+        .dark select option {
+            background-color: #18181b !important;
+            color: #f4f4f5 !important;
+        }
+
         body {
             transition: background-color 200ms, color 200ms;
         }
@@ -561,17 +670,19 @@
             document.getElementById('iconSun').classList.toggle('hidden');
             localStorage.setItem('theme', isDark() ? 'dark' : 'light');
             setTimeout(() => {
-                rebuildCharts();
+                if (typeof rebuildCharts === 'function') rebuildCharts();
             }, 50);
         }
-        (function initTheme() {
-            const saved = localStorage.getItem('theme');
-            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-                document.getElementById('iconMoon').classList.add('hidden');
-                document.getElementById('iconSun').classList.remove('hidden');
+        
+        // Sync icon state after DOM loads since the head script already applied the class
+        document.addEventListener('DOMContentLoaded', () => {
+            if (isDark()) {
+                const moon = document.getElementById('iconMoon');
+                const sun = document.getElementById('iconSun');
+                if (moon) moon.classList.add('hidden');
+                if (sun) sun.classList.remove('hidden');
             }
-        })();
+        });
 
         // ─── SIDEBAR (mobile slide)
         function toggleSidebar() {

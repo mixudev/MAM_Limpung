@@ -83,7 +83,6 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Run Artisan commands directly via the command line (e.g., `php artisan route:list`). Use `php artisan list` to discover available commands and `php artisan [command] --help` to check parameters.
 - Inspect routes with `php artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
 - Read configuration values using dot notation: `php artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
-- To check environment variables, read the `.env` file directly.
 
 ## Tinker
 
@@ -160,37 +159,5 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - The `{name}` argument should not include the test suite directory. Use `php artisan make:test --pest SomeFeatureTest` instead of `php artisan make:test --pest Feature/SomeFeatureTest`.
 - Run tests: `php artisan test --compact` or filter: `php artisan test --compact --filter=testName`.
 - Do NOT delete tests without approval.
-
-=== architecture & file limits rules ===
-
-# Architecture & File Limits Guidelines for AI Agent
-
-You MUST follow these rules when creating or modifying files for new menus, submenus, or features:
-
-## 1. File Size Limits (STRICT)
-- **Controllers & Service Classes**: MUST NOT exceed 200 lines. If a Controller grows larger, you MUST split it into Single Action (Invokable) Controllers or partition it into multiple Controller classes.
-- **Blade Views**: MUST NOT exceed 300 lines. If a Blade view is larger, you MUST extract structural blocks into sub-views using `@include('path.to.partials')` or custom Blade components.
-- **Route Files**: MUST NOT exceed 100 lines.
-
-## 2. Menu & Submenu Architecture
-When adding a feature with a main menu and submenus, you MUST structure it as follows:
-- **Namespace Grouping**: Place controllers in `app/Http/Controllers/Dashboard/<FeatureName>/` (e.g. `Ppdb/`, `Piket/`). Do NOT put them all in the base `Dashboard/` folder.
-- **Controller Splitting**: Create one controller per sub-resource or submenu item.
-- **Modular Views**: Create a dedicated subdirectory in `resources/views/dashboard/admin/<feature_name>/` and use a `partials/` subfolder for shared or large view segments.
-- **Modular Routing**: Create a separate route file in `routes/dashboard/<feature_name>.php` and include it in `routes/web.php` or `bootstrap/app.php`. Do NOT write all routes in a single main route file.
-
-## 3. Thin Controllers & Logic Placement
-- **Slim Controllers**: Controllers MUST only handle HTTP requests, invoke Services or Eloquent Models, and return a redirect or response. They MUST NOT contain business logic or validation code.
-- **Form Requests**: You MUST use custom Form Requests (`app/Http/Requests/`) for any validation. Do NOT call `$request->validate()` inside controller methods.
-- **Service Layer**: Place any complex business logic, external API integrations, or heavy computations in service classes under `app/Services/<FeatureName>/`.
-- **Query Scopes**: Prefer Eloquent Query Scopes for re-usable database queries instead of setting up a complex Repository Pattern, unless explicitly instructed.
-
-## 4. Naming Conventions
-- **Models**: Singular PascalCase (e.g., `JadwalPiket`).
-- **Controllers**: PascalCase ending in `Controller` (e.g., `AdminPpdbSettingController`).
-- **Services**: PascalCase ending in `Service` (e.g., `GoogleSheetsSyncService`).
-- **Form Requests**: PascalCase ending in `Request` (e.g., `StorePendaftarRequest`).
-- **Blade Views**: Lowercase with snake_case or kebab-case.
-- **Routes**: Lowercase dot-notation (e.g., `admin.ppdb.settings.update`).
 
 </laravel-boost-guidelines>

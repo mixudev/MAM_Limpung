@@ -94,7 +94,9 @@
             </div>
         </div>
     </section>
-
+    
+    <x-announcement.ad-horizontal />
+    
     <!-- Section Vidio Profile: Unique & Engaging -->
     <section class="py-24 bg-white relative overflow-hidden">
         <!-- Decorative Background -->

@@ -25,7 +25,7 @@ test('unauthorized user without access-admin-dashboard permission cannot access 
     $user->assignRole('siswa'); // Assign a low level role
 
     $response = $this->actingAs($user)->get(route('admin.ppdb.index'));
-    $response->assertStatus(403);
+    $response->assertStatus(302)->assertRedirect(route('frontend.home'));
 });
 
 test('authorized admin can access the ppdb admin dashboard index and view stats', function () {
@@ -61,7 +61,7 @@ test('authorized admin can view applicant JSON details via show route', function
         'submitted_at' => now(),
     ]);
 
-    $response = $this->actingAs($admin)->getJson(route('admin.ppdb.show', $student->id));
+    $response = $this->actingAs($admin)->getJson(route('admin.ppdb.show', $student));
 
     $response->assertStatus(200)
         ->assertJson([
@@ -84,7 +84,7 @@ test('authorized admin can verify and accept an applicant', function () {
         'submitted_at' => now(),
     ]);
 
-    $response = $this->actingAs($admin)->post(route('admin.ppdb.verify', $student->id), [
+    $response = $this->actingAs($admin)->post(route('admin.ppdb.verify', $student), [
         'catatan_admin' => 'Berkas lengkap dan terverifikasi.',
     ]);
 
@@ -108,7 +108,7 @@ test('authorized admin can reject an applicant with a valid custom reason', func
         'submitted_at' => now(),
     ]);
 
-    $response = $this->actingAs($admin)->post(route('admin.ppdb.reject', $student->id), [
+    $response = $this->actingAs($admin)->post(route('admin.ppdb.reject', $student), [
         'catatan_admin' => 'Scan Kartu Keluarga buram dan tidak terbaca.',
     ]);
 
@@ -132,7 +132,7 @@ test('rejection validation fails if reason is empty or too short', function () {
         'submitted_at' => now(),
     ]);
 
-    $response = $this->actingAs($admin)->post(route('admin.ppdb.reject', $student->id), [
+    $response = $this->actingAs($admin)->post(route('admin.ppdb.reject', $student), [
         'catatan_admin' => 'Info', // Too short (min 5 characters)
     ]);
 
@@ -150,7 +150,7 @@ test('authorized admin can access print details route and see school Kop', funct
         'status' => 'diterima',
     ]);
 
-    $response = $this->actingAs($admin)->get(route('admin.ppdb.print', $student->id));
+    $response = $this->actingAs($admin)->get(route('admin.ppdb.print', $student));
 
     $response->assertStatus(200)
         ->assertViewIs('dashboard.admin.ppdb.print')

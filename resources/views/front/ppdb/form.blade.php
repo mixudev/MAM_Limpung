@@ -2,6 +2,41 @@
 
 @section('content')
 
+<!-- Form Design Style Customizations (Premium, Soft, Eye-Friendly) -->
+<style>
+    .form-input-premium {
+        width: 100% !important;
+        padding: 0.625rem 1rem !important; /* px-4 py-2.5 */
+        font-size: 0.75rem !important; /* text-xs */
+        color: #334155 !important; /* text-slate-700 */
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important; /* border-slate-200 */
+        border-radius: 0px !important; /* rounded-none */
+        outline: none !important;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .form-input-premium::placeholder {
+        color: #94a3b8 !important; /* text-slate-400 */
+        font-size: 0.75rem !important; /* text-xs */
+        opacity: 0.85 !important;
+    }
+    .form-input-premium:focus {
+        border-color: #059669 !important; /* focus:border-emerald-600 */
+        box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.05) !important; /* focus:ring-4 focus:ring-emerald-600/5 */
+    }
+    /* Semibold, elegant, eye-friendly labels for premium visual comfort */
+    .form-label-premium {
+        display: block !important;
+        font-size: 0.725rem !important; /* text-[11.5px] */
+        font-weight: 600 !important; /* Semibold (clean, not harsh) */
+        color: #475569 !important; /* Muted slate-600 (soft on eyes) */
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        margin-bottom: 0.4rem !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+    }
+</style>
+
 <section class="max-w-6xl mx-auto px-4 py-8 sm:py-12" x-data="{
     step: 1,
     form: {
@@ -99,38 +134,45 @@
     <!-- Form Container -->
     <div class="bg-white rounded-none p-6 sm:p-10 border border-gray-300 shadow-sm relative">
         
-        <!-- Progress Stepper (Minimalist, Tegas) -->
-        <div class="mb-10 border-b border-slate-100 pb-8">
+        <!-- Progress Stepper (Interactive & Elegant) -->
+        <div class="mb-12 border-b border-slate-100 pb-8">
             <div class="flex items-center justify-between max-w-md mx-auto relative">
-                <!-- Progress Line -->
-                <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[2px] bg-slate-200 z-0"></div>
-                <div class="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-emerald-800 transition-all duration-300 z-0" :style="'width: ' + ((step - 1) * 50) + '%'"></div>
+                <!-- Progress Line Background (Dashed Slate) -->
+                <div class="absolute left-6 right-6 top-[18px] h-0.5 border-t-2 border-dashed border-slate-200 z-0"></div>
+                <!-- Interactive Active Progress Line (Dashed Emerald) -->
+                <div class="absolute left-6 top-[18px] h-0.5 border-t-2 border-dashed border-emerald-800 transition-all duration-500 ease-out z-0" 
+                     :style="'width: ' + ((step - 1) * 50) + '%'"></div>
                 
                 <!-- Step 1 -->
-                <div class="relative z-10 flex flex-col items-center gap-1.5 cursor-pointer" @click="if(step > 1) step = 1">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2"
-                        :class="step >= 1 ? 'bg-emerald-800 border-emerald-800 text-white' : 'bg-white border-slate-300 text-slate-400'">
-                        1
+                <div class="relative z-10 flex flex-col items-center gap-2 cursor-pointer group" @click="if(step > 1) step = 1">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2 z-10"
+                        :class="step > 1 ? 'bg-emerald-800 border-emerald-800 text-white shadow-md group-hover:scale-105 group-hover:bg-emerald-900' : (step === 1 ? 'bg-emerald-800 border-emerald-800 text-white shadow-lg ring-4 ring-emerald-800/10 scale-110 font-bold' : 'bg-white border-slate-300 text-slate-400 group-hover:border-slate-400')">
+                        <span x-show="step > 1"><i class="fa-solid fa-check text-[10px]"></i></span>
+                        <span x-show="step <= 1">1</span>
                     </div>
-                    <span class="text-[9px] font-bold uppercase tracking-wider font-mono text-slate-500">Profil</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider font-mono transition-colors duration-200"
+                        :class="step >= 1 ? 'text-emerald-800' : 'text-slate-400'">Profil</span>
                 </div>
                 
                 <!-- Step 2 -->
-                <div class="relative z-10 flex flex-col items-center gap-1.5 cursor-pointer" @click="if(step > 2) step = 2">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2"
-                        :class="step >= 2 ? 'bg-emerald-800 border-emerald-800 text-white' : 'bg-white border-slate-300 text-slate-400'">
-                        2
+                <div class="relative z-10 flex flex-col items-center gap-2 cursor-pointer group" @click="if(step > 2) step = 2">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2 z-10"
+                        :class="step > 2 ? 'bg-emerald-800 border-emerald-800 text-white shadow-md group-hover:scale-105 group-hover:bg-emerald-900' : (step === 2 ? 'bg-emerald-800 border-emerald-800 text-white shadow-lg ring-4 ring-emerald-800/10 scale-110 font-bold' : 'bg-white border-slate-300 text-slate-400 group-hover:border-slate-400')">
+                        <span x-show="step > 2"><i class="fa-solid fa-check text-[10px]"></i></span>
+                        <span x-show="step <= 2">2</span>
                     </div>
-                    <span class="text-[9px] font-bold uppercase tracking-wider font-mono text-slate-500">Kontak & Wali</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider font-mono transition-colors duration-200"
+                        :class="step >= 2 ? 'text-emerald-800' : 'text-slate-400'">Kontak & Wali</span>
                 </div>
                 
                 <!-- Step 3 -->
-                <div class="relative z-10 flex flex-col items-center gap-1.5">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2"
-                        :class="step >= 3 ? 'bg-emerald-800 border-emerald-800 text-white' : 'bg-white border-slate-300 text-slate-400'">
-                        3
+                <div class="relative z-10 flex flex-col items-center gap-2 group">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2 z-10"
+                        :class="step === 3 ? 'bg-emerald-800 border-emerald-800 text-white shadow-lg ring-4 ring-emerald-800/10 scale-110 font-bold' : 'bg-white border-slate-300 text-slate-400'">
+                        <span>3</span>
                     </div>
-                    <span class="text-[9px] font-bold uppercase tracking-wider font-mono text-slate-500">Dokumen</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider font-mono transition-colors duration-200"
+                        :class="step === 3 ? 'text-emerald-800' : 'text-slate-400'">Dokumen</span>
                 </div>
             </div>
         </div>
@@ -150,25 +192,25 @@
                     <div class="lg:col-span-2 space-y-5">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div class="sm:col-span-2">
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nama Lengkap *</label>
-                                <input type="text" name="nama_lengkap" x-model="form.nama_lengkap" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Masukkan nama lengkap sesuai ijazah/akta" required>
+                                <label class="form-label-premium">Nama Lengkap *</label>
+                                <input type="text" name="nama_lengkap" x-model="form.nama_lengkap" class="form-input-premium" placeholder="Masukkan nama lengkap sesuai ijazah/akta" required>
                                 @error('nama_lengkap')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">NISN *</label>
-                                <input type="text" name="nisn" x-model="form.nisn" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="10 digit nomor NISN" required>
+                                <label class="form-label-premium">NISN *</label>
+                                <input type="text" name="nisn" x-model="form.nisn" class="form-input-premium" placeholder="10 digit nomor NISN" required>
                                 @error('nisn')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Jenis Kelamin *</label>
-                                <select name="jenis_kelamin" x-model="form.jenis_kelamin" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 outline-none transition-all" required>
-                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                <label class="form-label-premium">Jenis Kelamin *</label>
+                                <select name="jenis_kelamin" x-model="form.jenis_kelamin" class="form-input-premium" required>
+                                    <option value="">Pilih Jenis Kelamin</option>
                                     <option value="L">Laki-laki</option>
                                     <option value="P">Perempuan</option>
                                 </select>
@@ -178,28 +220,28 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Tempat Lahir *</label>
-                                <input type="text" name="tempat_lahir" x-model="form.tempat_lahir" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Kota kelahiran" required>
+                                <label class="form-label-premium">Tempat Lahir *</label>
+                                <input type="text" name="tempat_lahir" x-model="form.tempat_lahir" class="form-input-premium" placeholder="Kota kelahiran" required>
                                 @error('tempat_lahir')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Tanggal Lahir *</label>
-                                <input type="date" name="tanggal_lahir" x-model="form.tanggal_lahir" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 outline-none transition-all" required>
+                                <label class="form-label-premium">Tanggal Lahir *</label>
+                                <input type="date" name="tanggal_lahir" x-model="form.tanggal_lahir" class="form-input-premium" required>
                                 @error('tanggal_lahir')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div class="sm:col-span-2">
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Ukuran Seragam *</label>
+                                <label class="form-label-premium">Ukuran Seragam *</label>
                                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                     @foreach(['S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
                                     <label class="flex items-center justify-center rounded-none cursor-pointer">
                                         <input type="radio" name="ukuran_baju" value="{{ $size }}" x-model="form.ukuran_baju" class="hidden peer" required>
-                                        <div class="border border-gray-300 peer-checked:border-emerald-800 peer-checked:bg-emerald-50 peer-checked:text-emerald-800 w-full text-center font-bold p-2.5 text-xs uppercase tracking-wider transition-all">
+                                        <div class="border border-slate-200 peer-checked:border-emerald-800 peer-checked:bg-emerald-50 peer-checked:text-emerald-800 w-full text-center font-bold p-2 text-xs uppercase tracking-wider transition-all">
                                             {{ $size }}
                                         </div>
                                     </label>
@@ -211,8 +253,8 @@
                             </div>
 
                             <div class="sm:col-span-2">
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Alamat Lengkap *</label>
-                                <textarea name="alamat_lengkap" x-model="form.alamat_lengkap" rows="3" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none resize-none transition-all" placeholder="Masukkan alamat RT/RW, Dusun, Kelurahan, Kecamatan" required></textarea>
+                                <label class="form-label-premium">Alamat Lengkap *</label>
+                                <textarea name="alamat_lengkap" x-model="form.alamat_lengkap" rows="3" class="form-input-premium resize-none" placeholder="Masukkan alamat RT/RW, Dusun, Kelurahan, Kecamatan" required></textarea>
                                 @error('alamat_lengkap')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -264,40 +306,40 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nomor HP / WhatsApp *</label>
-                        <input type="tel" name="nomor_hp" x-model="form.nomor_hp" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Contoh: 08123456789" required>
+                        <label class="form-label-premium">Nomor HP / WhatsApp *</label>
+                        <input type="tel" name="nomor_hp" x-model="form.nomor_hp" class="form-input-premium" placeholder="Contoh: 08123456789" required>
                         @error('nomor_hp')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Email Aktif *</label>
-                        <input type="email" name="email" x-model="form.email" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="contoh@email.com" required>
+                        <label class="form-label-premium">Email Aktif *</label>
+                        <input type="email" name="email" x-model="form.email" class="form-input-premium" placeholder="contoh@email.com" required>
                         @error('email')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nama Sekolah Asal (SMP/MTs) *</label>
-                        <input type="text" name="sekolah_asal" x-model="form.sekolah_asal" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Masukkan nama sekolah asal lengkap" required>
+                        <label class="form-label-premium">Nama Sekolah Asal (SMP/MTs) *</label>
+                        <input type="text" name="sekolah_asal" x-model="form.sekolah_asal" class="form-input-premium" placeholder="Masukkan nama sekolah asal lengkap" required>
                         @error('sekolah_asal')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nama Ayah Kandung *</label>
-                        <input type="text" name="nama_ayah" x-model="form.nama_ayah" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Nama lengkap ayah sesuai berkas" required>
+                        <label class="form-label-premium">Nama Ayah Kandung *</label>
+                        <input type="text" name="nama_ayah" x-model="form.nama_ayah" class="form-input-premium" placeholder="Nama lengkap ayah sesuai berkas" required>
                         @error('nama_ayah')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">Nama Ibu Kandung *</label>
-                        <input type="text" name="nama_ibu" x-model="form.nama_ibu" class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none transition-all" placeholder="Nama lengkap ibu sesuai berkas" required>
+                        <label class="form-label-premium">Nama Ibu Kandung *</label>
+                        <input type="text" name="nama_ibu" x-model="form.nama_ibu" class="form-input-premium" placeholder="Nama lengkap ibu sesuai berkas" required>
                         @error('nama_ibu')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -330,11 +372,11 @@
                         @foreach($requirements as $req)
                         @if($req['id'] !== 'foto') {{-- Already handled by foto_siswa dropzone in Step 1 --}}
                         <div class="bg-slate-50 border border-slate-200 p-4 rounded-sm hover:border-amber-500 transition-all">
-                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">
+                            <label class="form-label-premium">
                                 {{ $req['label'] }}{{ $req['required'] ? ' *' : '' }}
                             </label>
                             <input type="file" name="{{ $req['id'] }}" 
-                                class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border file:border-slate-300 file:text-xs file:font-bold file:bg-white file:text-slate-700 hover:file:bg-slate-50 cursor-pointer"
+                                class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border file:border-slate-200 file:text-xs file:font-bold file:bg-white file:text-slate-650 hover:file:bg-slate-50 cursor-pointer"
                                 accept=".pdf,.jpg,.jpeg,.png"
                                 {{ $req['required'] ? 'required' : '' }}>
                             @error($req['id'])
@@ -354,26 +396,26 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         @foreach($formFields as $field)
                         <div class="{{ $field['type'] === 'textarea' ? 'sm:col-span-2' : '' }}">
-                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 font-mono">
+                            <label class="form-label-premium">
                                 {{ $field['label'] }}{{ $field['required'] ? ' *' : '' }}
                             </label>
                             @if($field['type'] === 'textarea')
                                 <textarea name="{{ $field['id'] }}" x-model="form.{{ $field['id'] }}" rows="3" 
-                                    class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-sm outline-none resize-none transition-all" 
+                                    class="form-input-premium resize-none" 
                                     placeholder="Masukkan {{ strtolower($field['label']) }}" 
                                     {{ $field['required'] ? 'required' : '' }}></textarea>
                             @elseif($field['type'] === 'select')
                                 <select name="{{ $field['id'] }}" x-model="form.{{ $field['id'] }}" 
-                                    class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 outline-none transition-all"
+                                    class="form-input-premium"
                                     {{ $field['required'] ? 'required' : '' }}>
-                                    <option value="">-- Pilih {{ $field['label'] }} --</option>
+                                    <option value="">Pilih {{ $field['label'] }}</option>
                                     @foreach($field['options'] as $option)
                                         <option value="{{ $option }}">{{ $option }}</option>
                                     @endforeach
                                 </select>
                             @else
                                 <input type="{{ $field['type'] }}" name="{{ $field['id'] }}" x-model="form.{{ $field['id'] }}" 
-                                    class="w-full px-4 py-2.5 border border-gray-300 focus:border-emerald-800 rounded-none focus:ring-4 focus:ring-emerald-800/5 placeholder:text-gray-400 placeholder:text-xs outline-none transition-all" 
+                                    class="form-input-premium" 
                                     placeholder="Masukkan {{ strtolower($field['label']) }}" 
                                     {{ $field['required'] ? 'required' : '' }}>
                             @endif
