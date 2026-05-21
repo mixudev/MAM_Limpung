@@ -15,7 +15,7 @@
         
         <!-- Digital QR Verification QR-Code (Fully functional scanned authenticity) -->
         <div class="barcode-container" style="margin: 4px auto; width: 65px; height: 65px; border: none; padding: 2px; box-sizing: border-box; background-color: #fff; display: flex; align-items: center; justify-content: center;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode(url('/ppdb/verify/' . $student->nomor_registrasi)) }}" alt="QR Verifikasi" style="width: 100%; height: 100%; object-fit: contain;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode(route('frontend.ppdb.verify', ['nomor_registrasi' => $student->nomor_registrasi])) }}" alt="QR Verifikasi" style="width: 100%; height: 100%; object-fit: contain;">
         </div>
         
         <div class="signature-name" style="text-decoration: none; font-size: 7.5pt; font-family: monospace; color: #444; margin-top: 1px;">

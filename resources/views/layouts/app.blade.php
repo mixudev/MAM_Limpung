@@ -7,7 +7,7 @@
     <title>MAM Limpung</title>
 
     <!-- custom css -->
-    <link rel="stylesheet" href="{{ asset('assets/css/brush.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/layouts-front.css') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

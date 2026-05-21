@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('shared.ppdb.print.background-print')
     <!-- Inject Google Fonts & Custom Style -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
@@ -133,12 +134,13 @@
 
                     <!-- Action Buttons -->
                     <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
-                        <a href="{{ $print_url }}" 
-                           target="_blank" 
-                           class="flex-1 bg-blue-900 text-white py-3.5 px-6 font-bold hover:bg-black transition-all duration-300 uppercase tracking-widest text-xs inline-flex items-center justify-center gap-2.5 shadow-xl shadow-blue-900/10 rounded-none">
+                        <button type="button"
+                            id="btn-print-kartu-ppdb"
+                            data-print-url="{{ $printDocumentUrl }}"
+                            class="flex-1 bg-blue-900 text-white py-3.5 px-6 font-bold hover:bg-black transition-all duration-300 uppercase tracking-widest text-xs inline-flex items-center justify-center gap-2.5 shadow-xl shadow-blue-900/10 rounded-none disabled:opacity-60 disabled:cursor-wait">
                             <i class="fa-solid fa-print text-sm"></i>
-                            Cetak Kartu PPDB
-                        </a>
+                            <span>Cetak Kartu PPDB</span>
+                        </button>
                         <a href="{{ route('frontend.ppdb.status') }}" 
                            class="border-2 border-slate-200 text-slate-800 py-3 px-6 font-bold hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-300 uppercase tracking-widest text-xs text-center rounded-none">
                             Kembali Cari
@@ -232,4 +234,27 @@
 
         </div>
     </div>
+
+@if(isset($printDocumentUrl))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const btn = document.getElementById('btn-print-kartu-ppdb');
+        if (!btn || !window.PpdbBackgroundPrint) {
+            return;
+        }
+
+        btn.addEventListener('click', async function () {
+            btn.disabled = true;
+            try {
+                await PpdbBackgroundPrint.printFromUrl(btn.dataset.printUrl, {
+                    loadingLabel: 'Menyiapkan kartu PPDB...',
+                    errorLabel: 'Gagal mencetak. Coba lagi.',
+                });
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    });
+</script>
+@endif
 @endsection

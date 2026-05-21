@@ -132,7 +132,7 @@
                     <!-- Core Video Box -->
                     <div class="relative h-[400px] md:h-[550px] w-full bg-gray-900 overflow-hidden shadow-2xl transition-all duration-700 group-hover:scale-[1.01] border-4 border-white">
                         <!-- Thumbnail -->
-                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity duration-700 group-hover:scale-105" alt="Video Profile">
+                        <img src="{{ asset ("assets/img/school-2.png") }}" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity duration-700 group-hover:scale-105" alt="Video Profile">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                         
                         <!-- Play Button (Center) -->
@@ -160,15 +160,15 @@
                 </div>
 
                 <!-- Floating Stats relative to video box -->
-                <div class="absolute -left-8 md:-left-16 top-1/4 bg-white p-6 shadow-2xl border-l-4 border-amber-400 z-10 hidden sm:block transform -rotate-3 hover:rotate-0 transition-transform duration-300">
-                    <h4 class="text-3xl font-black text-gray-900 mb-1">15+</h4>
+                {{-- <div class="absolute -left-8 md:-left-16 top-1/4 bg-white p-6 shadow-2xl border-l-4 border-amber-400 z-10 hidden sm:block transform -rotate-3 hover:rotate-0 transition-transform duration-300">
+                     <h4 class="text-3xl font-black text-gray-900 mb-1">15+</h4> 
                     <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Fasilitas <br/>Ekstrakurikuler</p>
-                </div>
+                </div> --}}
                 
-                <div class="absolute -right-8 md:-right-16 bottom-1/4 bg-white p-6 shadow-2xl border-l-4 border-blue-600 z-10 hidden sm:block transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                    <h4 class="text-3xl font-black text-gray-900 mb-1">A</h4>
+                {{-- <div class="absolute -right-8 md:-right-16 bottom-1/4 bg-white p-6 shadow-2xl border-l-4 border-blue-600 z-10 hidden sm:block transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                    <h4 class="text-3xl font-black text-gray-900 mb-1">B</h4>
                     <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Akreditasi <br/>Institusi</p>
-                </div>
+                </div> --}}
 
                 <!-- Modal Video (Alpine.js) -->
                 <template x-teleport="body">

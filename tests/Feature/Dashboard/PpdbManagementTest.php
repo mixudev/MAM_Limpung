@@ -225,5 +225,6 @@ test('authorized admin can view/print export data as PDF', function () {
         ->assertSee('Indah Cahyani')
         ->assertSee('9999888877')
         ->assertSee('MTs Negeri 1 Batang')
-        ->assertSee('window.print()');
+        ->assertSee('Buku Ledger Pendaftaran')
+        ->assertSee('Madrasah Aliyah Muhammadiyah Limpung', false);
 });

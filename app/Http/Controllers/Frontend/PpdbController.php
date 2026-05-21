@@ -7,6 +7,7 @@ use App\Http\Requests\Frontend\PpdbStoreRequest;
 use App\Jobs\SyncPpdbToGoogleSheetsJob;
 use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
+use App\Support\PpdbTempUploadManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -49,8 +50,9 @@ class PpdbController extends Controller
 
         $formFields = PpdbSetting::getValue('form_fields', []);
         $requirements = PpdbSetting::getValue('requirements', []);
+        $ppdbTempUploads = PpdbTempUploadManager::forView();
 
-        return view('front.ppdb.form', compact('general', 'formFields', 'requirements'));
+        return view('front.ppdb.form', compact('general', 'formFields', 'requirements', 'ppdbTempUploads'));
     }
 
     public function store(PpdbStoreRequest $request): RedirectResponse
@@ -74,11 +76,13 @@ class PpdbController extends Controller
 
         $validated = $request->validated();
 
-        // 1. Process main student photo upload
+        // 1. Process main student photo upload (file baru atau dari sesi sementara)
         if ($request->hasFile('foto_siswa')) {
             $file = $request->file('foto_siswa');
             $filename = 'ppdb_'.uniqid().'.'.$file->getClientOriginalExtension();
             $validated['foto_siswa'] = $file->storeAs('ppdb/photos', $filename, 'public');
+        } elseif ($tempFoto = PpdbTempUploadManager::take('foto_siswa', 'ppdb/photos', 'ppdb')) {
+            $validated['foto_siswa'] = $tempFoto;
         }
 
         // 2. Package dynamic requirements uploads & custom form fields into additional_fields JSON
@@ -96,6 +100,9 @@ class PpdbController extends Controller
                 $path = $file->storeAs('ppdb/requirements', $filename, 'public');
                 $additional[$req['id']] = $path;
                 unset($validated[$req['id']]);
+            } elseif ($tempPath = PpdbTempUploadManager::take($req['id'], 'ppdb/requirements', 'req_'.$req['id'])) {
+                $additional[$req['id']] = $tempPath;
+                unset($validated[$req['id']]);
             }
         }
 
@@ -112,6 +119,8 @@ class PpdbController extends Controller
 
         $ppdbSiswa = PpdbSiswa::create($validated);
 
+        PpdbTempUploadManager::clear();
+
         // Sinkronisasi otomatis ke Google Sheets via background job
         SyncPpdbToGoogleSheetsJob::dispatch($ppdbSiswa);
 
@@ -122,8 +131,29 @@ class PpdbController extends Controller
 
     public function success(PpdbSiswa $ppdbSiswa): View
     {
+        $general = PpdbSetting::getValue('general', [
+            'tahun_ajaran' => (int) date('Y'),
+        ]);
+        $customFields = PpdbSetting::getValue('form_fields', []);
+
+        $printDocumentUrl = URL::signedRoute('frontend.ppdb.success', [
+            'ppdbSiswa' => $ppdbSiswa->nomor_registrasi,
+            'print' => 1,
+            'embed' => 1,
+        ]);
+
+        if (request()->boolean('print') && request()->boolean('embed')) {
+            return view('front.ppdb.print-bukti', [
+                'student' => $ppdbSiswa,
+                'general' => $general,
+                'customFields' => $customFields,
+            ]);
+        }
+
         return view('front.ppdb.success', [
             'ppdb_siswa' => $ppdbSiswa,
+            'general' => $general,
+            'printDocumentUrl' => $printDocumentUrl,
         ]);
     }
 
@@ -167,11 +197,15 @@ class PpdbController extends Controller
         }
 
         // Hasilkan signed URL untuk cetak kartu pendaftaran dinamis
-        $printUrl = URL::signedRoute('frontend.ppdb.success', ['ppdbSiswa' => $ppdbSiswa->nomor_registrasi, 'print' => 1]);
+        $printDocumentUrl = URL::signedRoute('frontend.ppdb.success', [
+            'ppdbSiswa' => $ppdbSiswa->nomor_registrasi,
+            'print' => 1,
+            'embed' => 1,
+        ]);
 
         return view('front.ppdb.status', [
             'ppdb_siswa' => $ppdbSiswa,
-            'print_url' => $printUrl,
+            'printDocumentUrl' => $printDocumentUrl,
         ]);
     }
 }

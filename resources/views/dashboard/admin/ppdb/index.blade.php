@@ -1,6 +1,8 @@
 @extends('dashboard.layouts.main')
 
 @section('content')
+@include('shared.ppdb.print.background-print')
+
 <!-- Custom Breadcrumb Override -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -251,84 +253,15 @@
         if (modal) modal.classList.add('hidden');
     }
 
-    // ════════════ 4. Direct Background Print Injection ════════════
     function printStudent(studentId) {
-        let toast = document.getElementById('print_toast');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'print_toast';
-            toast.className = 'fixed bottom-6 right-6 bg-slate-900 text-white font-mono text-[10px] uppercase tracking-widest px-4 py-2 border border-slate-800 z-[9999] transition-all duration-300 transform translate-y-10 opacity-0';
-            document.body.appendChild(toast);
+        if (!window.PpdbBackgroundPrint) {
+            return;
         }
-        
-        toast.innerText = 'Menyiapkan Lembar Cetak...';
-        toast.classList.remove('translate-y-10', 'opacity-0');
-        toast.classList.add('translate-y-0', 'opacity-100');
 
-        fetch(`/admin/ppdb/${studentId}/print`)
-            .then(res => res.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                const styleEl = doc.querySelector('style');
-                const printStyle = styleEl ? styleEl.innerHTML : '';
-                
-                const contentEl = doc.querySelector('.print-wrapper');
-                const printContent = contentEl ? contentEl.innerHTML : '';
-                
-                let container = document.getElementById('print-injection-container');
-                if (!container) {
-                    container = document.createElement('div');
-                    container.id = 'print-injection-container';
-                    document.body.appendChild(container);
-                }
-                
-                container.innerHTML = `<style>${printStyle}</style><div class="print-wrapper">${printContent}</div>`;
-                
-                setTimeout(() => {
-                    toast.classList.remove('translate-y-0', 'opacity-100');
-                    toast.classList.add('translate-y-10', 'opacity-0');
-                    window.print();
-                }, 500);
-            })
-            .catch(err => {
-                console.error("Gagal melakukan pencetakan latar belakang:", err);
-                toast.innerText = 'Gagal memuat dokumen!';
-                setTimeout(() => {
-                    toast.classList.remove('translate-y-0', 'opacity-100');
-                    toast.classList.add('translate-y-10', 'opacity-0');
-                }, 2000);
-            });
+        PpdbBackgroundPrint.printFromUrl(`/admin/ppdb/${studentId}/print?embed=1`, {
+            loadingLabel: 'Menyiapkan lembar cetak...',
+            errorLabel: 'Gagal memuat dokumen cetak.',
+        });
     }
-
-    window.addEventListener('afterprint', () => {
-        const container = document.getElementById('print-injection-container');
-        if (container) {
-            container.innerHTML = '';
-        }
-    });
 </script>
-
-<style>
-    /* Direct print injection stylesheet configurations */
-    #print-injection-container {
-        display: none;
-    }
-    @media print {
-        /* Force browser to hide entire admin dashboard layout */
-        body > *:not(#print-injection-container) {
-            display: none !important;
-        }
-        #print-injection-container {
-            display: block !important;
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: auto;
-            background: #fff;
-        }
-    }
-</style>
 @endsection

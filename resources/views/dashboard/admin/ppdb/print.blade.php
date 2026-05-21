@@ -1,36 +1,27 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIODATA_PPDB_{{ strtoupper(str_replace(' ', '_', $student->nama_lengkap)) }}</title>
-    <style>
-        @include('dashboard.admin.ppdb.partials.print.styles');
-    </style>
-</head>
-<body>
+<x-print.layout :title="'BIODATA_PPDB_' . strtoupper(str_replace(' ', '_', $student->nama_lengkap))">
 
-    <!-- Print control bar for screen viewing -->
-    <div class="print-btn-bar no-print">
-        <button class="print-btn" onclick="window.print()">Cetak Dokumen</button>
-        <button class="print-btn" style="background-color: #555; margin-left: 10px;" onclick="window.close()">Tutup Halaman</button>
-    </div>
+    <x-slot:styles>
+        <style>
+            @include('dashboard.admin.ppdb.partials.print.styles')
+        </style>
+    </x-slot:styles>
 
-    <!-- Main Container -->
-    <div class="print-wrapper">
-        @include('dashboard.admin.ppdb.partials.print.header')
+    {{-- Tombol Cetak / Tutup --}}
+    <x-print.action-bar mode="print" />
+
+    {{-- Isi Dokumen --}}
+    <div class="print-page print-wrapper">
+        @php
+            $tahunAjaran = $student->submitted_at?->year ?? (int) date('Y');
+        @endphp
+        @include('shared.ppdb.print.kop', [
+            'tahunAjaran' => $tahunAjaran,
+            'docTitle' => 'Formulir Pendaftaran Calon Siswa Baru',
+            'docSubtitle' => 'Penerimaan Peserta Didik Baru (PPDB) Tahun Pelajaran ' . $tahunAjaran . '/' . ($tahunAjaran + 1),
+        ])
         @include('dashboard.admin.ppdb.partials.print.biodata')
         @include('dashboard.admin.ppdb.partials.print.details')
         @include('dashboard.admin.ppdb.partials.print.signatures')
     </div>
 
-    <!-- Auto-Print Script -->
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                window.print();
-            }, 500);
-        });
-    </script>
-</body>
-</html>
+</x-print.layout>

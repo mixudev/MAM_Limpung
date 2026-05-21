@@ -64,10 +64,10 @@
                 <div class="flex items-center space-x-3">
                     <img src="{{ !empty($siteSettings->logo_path) ? asset('storage/' . $siteSettings->logo_path) : asset('assets/img/logo.png') }}" class="w-12 h-12 object-contain" alt="Logo {{ $siteSettings->school_name ?? 'MAM Limpung' }}">
                     <div class="flex flex-col">
-                        <h1 class="text-xl font-bold leading-tight tracking-tight">
+                        <h1 class="text-xl font-bold leading-tight tracking-tight times-new-roman">
                             <span class="text-blue-900">{{ $siteSettings->school_name ?? 'MAM Limpung' }}</span>
                         </h1>
-                        <p class="text-[10px] text-gray-600 font-light uppercase tracking-widest -mt-0.5">
+                        <p class="text-[10px] text-gray-600 font-light uppercase tracking-widest -mt-0.5 times-new-roman">
                             {{ !empty($siteSettings->meta_title) ? $siteSettings->meta_title : 'Unggul dan Berprestasi' }}
                         </p>
                     </div>

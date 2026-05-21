@@ -3,7 +3,10 @@
 namespace App\Http\Requests\Frontend;
 
 use App\Models\PpdbSetting;
+use App\Support\PpdbTempUploadManager;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\ValidationException;
 
 class PpdbStoreRequest extends FormRequest
 {
@@ -26,7 +29,7 @@ class PpdbStoreRequest extends FormRequest
             'nisn' => ['required', 'string', 'max:20', 'unique:ppdb_siswas,nisn'],
             'nomor_hp' => ['required', 'string', 'max:15'],
             'email' => ['required', 'email', 'max:255', 'unique:ppdb_siswas,email'],
-            'foto_siswa' => ['required', 'image', 'mimes:jpeg,jpg,png', 'max:2048'],
+            'foto_siswa' => PpdbTempUploadManager::fileRules('foto_siswa'),
             'jenis_kelamin' => ['required', 'in:L,P'],
             'tanggal_lahir' => ['required', 'date', 'before:today'],
             'tempat_lahir' => ['required', 'string', 'max:255'],
@@ -37,22 +40,18 @@ class PpdbStoreRequest extends FormRequest
             'ukuran_baju' => ['required', 'in:S,M,L,XL,XXL,XXXL'],
         ];
 
-        // 1. Dynamic Requirements Validation Rules (File Uploads)
         $requirements = PpdbSetting::getValue('requirements', []);
         foreach ($requirements as $req) {
             if ($req['id'] === 'foto') {
-                continue; // Foto is already validated as foto_siswa
+                continue;
             }
-            $reqRules = [];
-            $reqRules[] = $req['required'] ? 'required' : 'nullable';
-            $reqRules[] = 'file';
-            $reqRules[] = 'mimes:pdf,jpeg,jpg,png';
-            $reqRules[] = 'max:2048'; // 2MB max
 
-            $rules[$req['id']] = $reqRules;
+            $rules[$req['id']] = PpdbTempUploadManager::fileRules(
+                $req['id'],
+                (bool) ($req['required'] ?? false)
+            );
         }
 
-        // 2. Dynamic Form Fields Validation Rules
         $formFields = PpdbSetting::getValue('form_fields', []);
         foreach ($formFields as $field) {
             $fieldRules = [];
@@ -74,6 +73,15 @@ class PpdbStoreRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        PpdbTempUploadManager::persistFromRequest($this);
+
+        throw (new ValidationException($validator))
+            ->errorBag($this->errorBag)
+            ->redirectTo($this->getRedirectUrl());
     }
 
     /**

@@ -1,6 +1,8 @@
 @extends('dashboard.layouts.main')
 
 @section('content')
+@include('shared.ppdb.print.background-print')
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const breadcrumb = document.getElementById('breadcrumb');
@@ -169,7 +171,7 @@
                 pdfWrapper.classList.remove('hidden');
             }
             if (form) {
-                form.setAttribute('target', '_blank');
+                form.removeAttribute('target');
             }
         } else {
             if (pdfWrapper) {
@@ -199,21 +201,58 @@
         });
 
         if (form) {
-            form.addEventListener('submit', function() {
+            form.addEventListener('submit', async function (event) {
                 const checkedRadio = document.querySelector('input[name="format"]:checked');
                 const formatVal = checkedRadio ? checkedRadio.value : 'excel';
-                
-                if (formatVal === 'pdf') {
-                    form.setAttribute('target', '_blank');
-                    
+
+                if (formatVal !== 'pdf') {
+                    form.setAttribute('target', 'export-target-iframe');
+                    return;
+                }
+
+                event.preventDefault();
+
+                if (!window.PpdbBackgroundPrint) {
+                    return;
+                }
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                }
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        credentials: 'same-origin',
+                        headers: {
+                            Accept: 'text/html',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Export PDF gagal');
+                    }
+
+                    const html = await response.text();
+                    await PpdbBackgroundPrint.printHtml(html, {
+                        loadingLabel: 'Menyiapkan laporan PDF...',
+                        errorLabel: 'Gagal mencetak laporan.',
+                    });
+                } catch (error) {
+                    console.error(error);
                     if (toast) {
                         toast.classList.remove('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
-                        setTimeout(function() {
+                        setTimeout(function () {
                             toast.classList.add('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
                         }, 3000);
                     }
-                } else {
-                    form.setAttribute('target', 'export-target-iframe');
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                    }
                 }
             });
         }

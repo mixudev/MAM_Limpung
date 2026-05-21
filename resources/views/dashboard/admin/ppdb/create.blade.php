@@ -12,6 +12,22 @@
 </script>
 
 <div class="space-y-6 max-w-6xl mx-auto">
+    @if ($errors->any())
+    <div id="admin-ppdb-errors" class="bg-red-50 dark:bg-red-950/30 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-4 rounded-none shadow-sm relative" role="alert">
+        <button type="button" onclick="this.closest('#admin-ppdb-errors').remove()" class="absolute top-3 right-3 text-red-500 hover:text-red-800 dark:hover:text-red-200 p-1" aria-label="Tutup notifikasi">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+        <p class="font-bold mb-2 pr-8">Terjadi kesalahan. Periksa kolom yang ditandai:</p>
+        <ul class="list-disc list-inside space-y-1 text-sm pr-8">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
     <!-- Header -->
     <div class="flex items-center justify-between bg-white dark:bg-zinc-900 p-6 border border-slate-300 dark:border-zinc-800 border-l-4 border-l-[#4f45b2] rounded-none shadow-[1px_1px_3px_rgba(0,0,0,0.05)]">
         <div>
@@ -75,4 +91,53 @@
         </div>
     </form>
 </div>
+
+@if ($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const firstErrorKey = @json($errors->keys()->first());
+        const el = document.querySelector('[name="' + firstErrorKey + '"]');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (typeof el.focus === 'function') {
+                el.focus({ preventScroll: true });
+            }
+        }
+    });
+</script>
+@endif
+
+<script>
+    function renderAdminFilePreview(file, previewEl) {
+        previewEl.classList.remove('hidden');
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewEl.innerHTML = `
+                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-2">Pratinjau</p>
+                    <img src="${e.target.result}" alt="Pratinjau" class="max-h-36 w-auto border border-slate-200 dark:border-zinc-700 object-contain">
+                    <p class="text-xs text-slate-600 dark:text-zinc-400 mt-2 truncate">${file.name}</p>
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewEl.innerHTML = `
+                <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Berkas terpilih</p>
+                <p class="text-xs font-mono truncate">${file.name}</p>
+            `;
+        }
+    }
+
+    document.querySelectorAll('.admin-ppdb-file-input').forEach((input) => {
+        const preview = document.getElementById(input.id + '_preview');
+        if (!preview) {
+            return;
+        }
+        input.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                renderAdminFilePreview(e.target.files[0], preview);
+            }
+        });
+    });
+</script>
 @endsection

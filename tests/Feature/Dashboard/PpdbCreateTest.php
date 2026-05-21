@@ -118,4 +118,10 @@ test('registration validation fails for duplicate NISN or duplicate email', func
     $response = $this->actingAs($admin)->post(route('admin.ppdb.store'), $data);
 
     $response->assertSessionHasErrors(['nisn', 'email']);
+
+    $response = $this->actingAs($admin)->get(route('admin.ppdb.create'));
+
+    $response->assertSee('value="Budi Baru"', false)
+        ->assertSee('value="9998887776"', false)
+        ->assertSee('value="duplicate@example.com"', false);
 });
