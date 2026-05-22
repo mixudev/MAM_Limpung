@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
+use App\Models\SecuritySetting;
 use Exception;
 use Google\Client as GoogleClient;
 use Google\Service\Sheets as GoogleSheets;
@@ -23,12 +24,15 @@ class GoogleSheetsService
      */
     protected function getSheetsService(array $config): GoogleSheets
     {
-        if (empty($config['spreadsheet_id']) || empty($config['service_account_json'])) {
-            throw new Exception('Google Sheets belum dikonfigurasi secara lengkap.');
+        $securityCredentials = SecuritySetting::getValue('security_credentials', []);
+        $serviceAccountJson = $securityCredentials['google_service_account_json'] ?? '';
+
+        if (empty($config['spreadsheet_id']) || empty($serviceAccountJson)) {
+            throw new Exception('Google Sheets belum dikonfigurasi secara lengkap. Atur Google Service Account di halaman Keamanan.');
         }
 
         try {
-            $decryptedJson = Crypt::decryptString($config['service_account_json']);
+            $decryptedJson = Crypt::decryptString($serviceAccountJson);
             $credentials = json_decode($decryptedJson, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -58,11 +62,13 @@ class GoogleSheetsService
     public function testConnection(): array
     {
         $config = PpdbSetting::getValue('google_sheets', []);
+        $securityCredentials = SecuritySetting::getValue('security_credentials', []);
+        $serviceAccountJson = $securityCredentials['google_service_account_json'] ?? '';
 
-        if (empty($config) || empty($config['spreadsheet_id']) || empty($config['service_account_json'])) {
+        if (empty($config) || empty($config['spreadsheet_id']) || empty($serviceAccountJson)) {
             return [
                 'success' => false,
-                'message' => 'Konfigurasi Google Sheets kosong, Spreadsheet ID, atau Kredensial JSON belum diisi.',
+                'message' => 'Konfigurasi Google Sheets belum lengkap. Spreadsheet ID di halaman PPDB atau Kredensial JSON di halaman Keamanan belum diisi.',
             ];
         }
 
@@ -94,7 +100,7 @@ class GoogleSheetsService
             }
 
             // Get service account email to display dynamically in the tutorial
-            $decryptedJson = Crypt::decryptString($config['service_account_json']);
+            $decryptedJson = Crypt::decryptString($serviceAccountJson);
             $credentials = json_decode($decryptedJson, true);
             $clientEmail = $credentials['client_email'] ?? 'unknown';
 

@@ -9,22 +9,35 @@
         @enderror
     </div>
 
-    <!-- Service Account Credentials (JSON) -->
-    <div>
-        <label for="service_account_json" class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-2">Kredensial Service Account (format JSON)</label>
-        <textarea name="service_account_json" id="service_account_json" rows="8" class="w-full py-2.5 px-3 text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2] font-mono" placeholder="Tempel/paste isi file JSON Service Account Anda di sini secara utuh...">{{ old('service_account_json', $maskedJson) }}</textarea>
-        <div class="mt-2 flex items-center justify-between">
-            <p class="text-[11px] text-slate-400 dark:text-zinc-500">
-                @if($hasCredentials)
-                <span class="text-emerald-600 dark:text-emerald-500 font-semibold">Kredensial sudah tersimpan dengan sangat aman (Terenkripsi).</span> Kosongkan atau biarkan teks bertanda aman jika tidak ingin mengubahnya.
-                @else
-                <span class="text-amber-600 dark:text-amber-500 font-semibold">Kredensial belum dikonfigurasi.</span> Tempelkan file JSON Anda untuk memulai.
-                @endif
-            </p>
-            <button type="button" onclick="clearJsonTextarea()" class="text-[9px] font-mono font-bold uppercase tracking-wide text-red-500 hover:underline">Hapus Input</button>
+    <!-- Centralized Google Service Account Credentials Status -->
+    <div class="p-4 bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700">
+        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-2">Kredensial Service Account (Terpusat)</span>
+        
+        <div class="flex items-center gap-3">
+            @if($hasCredentials)
+                <div class="px-2 py-1 text-[10px] font-bold font-mono tracking-wide uppercase bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40">
+                    Terbaca (Terenkripsi)
+                </div>
+                <div class="text-xs text-slate-600 dark:text-zinc-450 font-medium">
+                    Email: <span class="font-mono bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded">{{ $clientEmail }}</span>
+                </div>
+            @else
+                <div class="px-2 py-1 text-[10px] font-bold font-mono tracking-wide uppercase bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-900/40">
+                    Belum Diatur
+                </div>
+                <div class="text-xs text-slate-500 dark:text-zinc-400">
+                    Silakan atur kredensial JSON terlebih dahulu.
+                </div>
+            @endif
         </div>
-        @error('service_account_json')
-        <p class="text-red-500 text-xs mt-1 font-semibold">{{ $message }}</p>
-        @enderror
+        
+        <div class="mt-3.5 pt-3 border-t border-slate-200/60 dark:border-zinc-700/60 flex items-center justify-between">
+            <span class="text-[11px] text-slate-400 dark:text-zinc-500">
+                Pengaturan Google Service Account kini dikelola secara terpusat di halaman Keamanan.
+            </span>
+            <a href="{{ route('admin.security.index') }}" class="text-[10px] font-mono font-bold uppercase tracking-wide text-[#4f45b2] dark:text-[#8c84c8] hover:underline flex items-center gap-1">
+                Atur di Halaman Keamanan &rarr;
+            </a>
+        </div>
     </div>
 </div>

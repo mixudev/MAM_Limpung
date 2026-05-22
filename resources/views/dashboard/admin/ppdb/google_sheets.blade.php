@@ -159,14 +159,6 @@
 <x-allert />
 
 <script>
-    function clearJsonTextarea() {
-        const textarea = document.getElementById('service_account_json');
-        if (textarea) {
-            textarea.value = '';
-            textarea.focus();
-        }
-    }
-
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
             if (window.AppPopup) {

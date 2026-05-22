@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard\Ppdb;
 
 use App\Http\Controllers\Controller;
 use App\Models\PpdbSetting;
+use App\Models\SecuritySetting;
 use App\Services\GoogleSheetsService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,6 @@ class AdminPpdbGoogleSheetsController extends Controller
         $defaults = [
             'spreadsheet_id' => '',
             'is_enabled' => false,
-            'service_account_json' => '',
             'split_by_status' => false,
             'header_style' => 'purple',
             'sync_fields' => [
@@ -57,17 +57,16 @@ class AdminPpdbGoogleSheetsController extends Controller
 
         $settings = array_merge($defaults, $saved);
 
-        // Mask the service account credentials if it exists to display securely
-        $hasCredentials = ! empty($settings['service_account_json']);
-        $maskedJson = $hasCredentials
-            ? '[Kredensial Service Account Tersimpan Secara Aman]'
-            : '';
+        // Retrieve service account credentials from SecuritySetting instead of PpdbSetting
+        $securityCredentials = SecuritySetting::getValue('security_credentials', []);
+        $serviceAccountJson = $securityCredentials['google_service_account_json'] ?? '';
+        $hasCredentials = ! empty($serviceAccountJson);
 
         // Retrieve saved client email dynamically if credentials exist
         $clientEmail = '-';
         if ($hasCredentials) {
             try {
-                $decryptedJson = Crypt::decryptString($settings['service_account_json']);
+                $decryptedJson = Crypt::decryptString($serviceAccountJson);
                 $credentials = json_decode($decryptedJson, true);
                 $clientEmail = $credentials['client_email'] ?? '-';
             } catch (Exception $e) {
@@ -78,19 +77,14 @@ class AdminPpdbGoogleSheetsController extends Controller
         return view('dashboard.admin.ppdb.google_sheets', [
             'settings' => $settings,
             'hasCredentials' => $hasCredentials,
-            'maskedJson' => $maskedJson,
             'clientEmail' => $clientEmail,
         ]);
     }
 
-    /**
-     * Update Google Sheets settings.
-     */
     public function update(Request $request): RedirectResponse
     {
         $request->validate([
             'spreadsheet_id' => ['required', 'string'],
-            'service_account_json' => ['nullable', 'string'],
             'header_style' => ['required', 'string', 'in:plain,purple,emerald,dark'],
             'sync_fields' => ['required', 'array', 'min:1'],
             'active_sheets' => ['nullable', 'array'],
@@ -100,30 +94,9 @@ class AdminPpdbGoogleSheetsController extends Controller
             'sync_fields.required' => 'Pilih minimal satu kolom data untuk disinkronkan.',
         ]);
 
-        $currentSettings = PpdbSetting::getValue('google_sheets', []);
-        $newJsonInput = $request->input('service_account_json');
-
-        $encryptedJson = $currentSettings['service_account_json'] ?? '';
-
-        if (! empty($newJsonInput) && strpos($newJsonInput, 'Kredensial Service Account') === false) {
-            // Validate JSON format
-            $decoded = json_decode($newJsonInput, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return back()->withErrors(['service_account_json' => 'Format kredensial Service Account JSON tidak valid atau rusak.'])->withInput();
-            }
-
-            // Encrypt and store the JSON securely
-            try {
-                $encryptedJson = Crypt::encryptString($newJsonInput);
-            } catch (Exception $e) {
-                return back()->withErrors(['service_account_json' => 'Gagal mengamankan kredensial JSON.'])->withInput();
-            }
-        }
-
         $config = [
             'spreadsheet_id' => $request->input('spreadsheet_id'),
             'is_enabled' => $request->has('is_enabled'),
-            'service_account_json' => $encryptedJson,
             'split_by_status' => $request->has('split_by_status'),
             'header_style' => $request->input('header_style', 'purple'),
             'sync_fields' => $request->input('sync_fields', []),
@@ -137,7 +110,7 @@ class AdminPpdbGoogleSheetsController extends Controller
         PpdbSetting::setValue('google_sheets', $config);
 
         return redirect()->route('admin.ppdb.google-sheets.edit')
-            ->with('success', 'Pengaturan Google Sheets berhasil disimpan dengan sangat aman!');
+            ->with('success', 'Pengaturan Google Sheets berhasil disimpan!');
     }
 
     /**

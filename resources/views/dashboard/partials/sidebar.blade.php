@@ -230,8 +230,9 @@
                     </a>
                 </li>
                 @endcan
+                @if(Auth::user()->hasAnyPermission(['access-admin-dashboard', 'access-super-admin-dashboard']))
                 <li>
-                    <a href="#" data-page="security" class="sidebar-link disabled" aria-label="Security">
+                    <a href="{{ route('admin.security.index') }}" data-page="security" class="sidebar-link {{ Route::is('admin.security.*') ? 'active' : '' }}" aria-label="Security">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
                                 class="w-4 h-4">
@@ -239,10 +240,12 @@
                                     d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
                             </svg>
                         </span>
-                        <span class="sidebar-label">Security</span>
-                        <span class="sidebar-tooltip">Security</span>
+                        <span class="sidebar-label">Keamanan (Security)</span>
+                        <span class="sidebar-tooltip">Keamanan (Security)</span>
                     </a>
                 </li>
+                @endif
+
                 <li>
                     <a href="#" data-page="apikeys" class="sidebar-link disabled" aria-label="API Keys">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">

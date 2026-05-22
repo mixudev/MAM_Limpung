@@ -1,14 +1,16 @@
 <?php
 
 use App\Models\PpdbSetting;
+use App\Models\SecuritySetting;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
-    // Clear Google Sheets settings before each test
+    // Clear Google Sheets and Security settings before each test
     PpdbSetting::where('key', 'google_sheets')->delete();
+    SecuritySetting::query()->delete();
 
     // Create admin user and permissions if they don't exist
     $this->permission = Permission::firstOrCreate(['name' => 'access-admin-dashboard', 'guard_name' => 'web']);
@@ -32,7 +34,7 @@ test('authorized admin can access google sheets settings page', function () {
     $response->assertSee('Integrasi Google Sheets');
 });
 
-test('admin can save google sheets settings with encrypted credentials', function () {
+test('admin can save google sheets settings', function () {
     $jsonCredentials = json_encode([
         'type' => 'service_account',
         'project_id' => 'test-project',
@@ -40,10 +42,14 @@ test('admin can save google sheets settings with encrypted credentials', functio
         'client_email' => 'test-service-account@test-project.iam.gserviceaccount.com',
     ]);
 
+    // Save service account centrally in security settings
+    SecuritySetting::setValue('security_credentials', [
+        'google_service_account_json' => Crypt::encryptString($jsonCredentials),
+    ]);
+
     $response = $this->actingAs($this->admin)->post(route('admin.ppdb.google-sheets.update'), [
         'spreadsheet_id' => 'test_spreadsheet_123',
         'is_enabled' => '1',
-        'service_account_json' => $jsonCredentials,
         'header_style' => 'purple',
         'sync_fields' => ['no_registrasi', 'nama_lengkap', 'nisn'],
     ]);
@@ -56,12 +62,9 @@ test('admin can save google sheets settings with encrypted credentials', functio
     expect($settings['spreadsheet_id'])->toBe('test_spreadsheet_123');
     expect($settings['is_enabled'])->toBeTrue();
 
-    // Credentials must be stored ENCRYPTED in database
-    expect($settings['service_account_json'])->not->toBe($jsonCredentials);
-
-    // Decrypting must return the exact original JSON
-    $decrypted = Crypt::decryptString($settings['service_account_json']);
-    expect($decrypted)->toBe($jsonCredentials);
+    // Verify page shows configured credentials email
+    $editResponse = $this->actingAs($this->admin)->get(route('admin.ppdb.google-sheets.edit'));
+    $editResponse->assertSee('test-service-account@test-project.iam.gserviceaccount.com');
 });
 
 test('test connection returns connection failed status when settings are unconfigured', function () {
@@ -70,5 +73,6 @@ test('test connection returns connection failed status when settings are unconfi
     $response->assertStatus(200);
     $data = $response->json();
     expect($data['success'])->toBeFalse();
-    expect($data['message'])->toContain('Konfigurasi Google Sheets kosong');
+    expect($data['message'])->toContain('Google Sheets');
 });
+
