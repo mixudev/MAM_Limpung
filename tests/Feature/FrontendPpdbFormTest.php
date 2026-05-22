@@ -17,7 +17,7 @@ test('frontend ppdb form preserves old input after validation failure', function
         'email' => 'existing@example.com',
     ]);
 
-    $photo = UploadedFile::fake()->image('foto.jpg', 100, 100);
+    $photo = UploadedFile::fake()->create('foto.jpg', 100, 'image/jpeg');
 
     $payload = [
         'nama_lengkap' => 'Ahmad Santoso',

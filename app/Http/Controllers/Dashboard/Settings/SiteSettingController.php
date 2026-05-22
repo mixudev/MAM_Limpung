@@ -45,6 +45,16 @@ class SiteSettingController extends Controller
         }
         unset($data['logo']);
 
+        if (isset($data['headmaster_signature']) && $data['headmaster_signature'] instanceof UploadedFile) {
+            if ($siteSetting->headmaster_signature) {
+                Storage::disk('public')->delete($siteSetting->headmaster_signature);
+            }
+            $file = $data['headmaster_signature'];
+            $filename = 'headmaster_signature_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $data['headmaster_signature'] = $file->storeAs('settings', $filename, 'public');
+        }
+        unset($data['headmaster_signature']);
+
         $siteSetting->update($data);
 
         return redirect()->route('admin.settings.edit')

@@ -35,22 +35,23 @@
     </div>
 
     <!-- Newspaper Hero Split (Shows only when not searching and "Semua" is selected) -->
+    @if($headline)
     <div x-show="activeCategory === 'Semua' && searchQuery === ''" class="container mx-auto px-4 sm:px-6 max-w-7xl mb-12 md:mb-16" x-transition>
         <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
             
             <!-- Left: Massive Featured Post -->
-            <div class="lg:w-2/3 flex flex-col cursor-pointer group" @click="window.location.href='{{ route('frontend.article.show', ['article' => 'dummy']) }}'">
+            <div class="lg:w-2/3 flex flex-col cursor-pointer group" @click="window.location.href='{{ route('frontend.article.show', $headline->slug) }}'">
                 <div class="w-full aspect-video overflow-hidden mb-5 sm:mb-6 bg-slate-200 relative">
-                    <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]" alt="Featured">
+                    <img src="{{ $headline->thumbnailUrl() }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]" alt="{{ $headline->judul }}">
                     <div class="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors duration-500"></div>
                 </div>
                 <div>
                     <div class="flex items-center gap-3 mb-3">
                         <span class="text-[10px] font-bold uppercase tracking-widest text-white bg-blue-700 px-2 py-1">Headline</span>
-                        <span class="text-xs text-slate-500 font-medium">15 Mei 2026</span>
+                        <span class="text-xs text-slate-500 font-medium">{{ $headline->published_at ? $headline->published_at->translatedFormat('d M Y') : $headline->created_at->translatedFormat('d M Y') }}</span>
                     </div>
-                    <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight md:leading-none mb-3 sm:mb-4 group-hover:text-blue-700 text-slate-900 transition-colors">Tim Robotik MAM Limpung Raih Juara 1 Tingkat Nasional</h2>
-                    <p class="text-slate-600 text-base sm:text-lg md:text-xl leading-relaxed max-w-3xl line-clamp-3 md:line-clamp-none">Siswa-siswi berbakat kita berhasil menyingkirkan ratusan tim dari seluruh Indonesia dalam ajang merakit robot pintar di Jakarta Expo Center.</p>
+                    <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight md:leading-none mb-3 sm:mb-4 group-hover:text-blue-700 text-slate-900 transition-colors">{{ $headline->judul }}</h2>
+                    <p class="text-slate-600 text-base sm:text-lg md:text-xl leading-relaxed max-w-3xl line-clamp-3 md:line-clamp-none">{{ $headline->ringkasan ?: str($headline->konten)->stripTags()->limit(150) }}</p>
                 </div>
             </div>
 
@@ -59,35 +60,21 @@
                 <h3 class="text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-4 sm:mb-6 text-slate-500">Terkini</h3>
                 
                 <div class="flex flex-col">
-                    <!-- Item 1 -->
-                    <a href="{{ route('frontend.article.show', ['article' => 'dummy']) }}" class="group py-4 sm:py-5 border-b border-slate-200">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1 sm:mb-2 block">Ekstrakurikuler</span>
-                        <h4 class="font-serif text-lg sm:text-xl font-bold leading-snug group-hover:text-blue-700 text-slate-900 transition-colors mb-2">Serunya Kegiatan Perkemahan Pramuka di Kaki Gunung Prau</h4>
-                        <span class="text-[10px] sm:text-xs text-slate-500">12 Mei 2026</span>
-                    </a>
-                    <!-- Item 2 -->
-                    <a href="{{ route('frontend.article.show', ['article' => 'dummy']) }}" class="group py-4 sm:py-5 border-b border-slate-200">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1 sm:mb-2 block">Info PPDB</span>
-                        <h4 class="font-serif text-lg sm:text-xl font-bold leading-snug group-hover:text-blue-700 text-slate-900 transition-colors mb-2">Penerimaan Peserta Didik Baru Resmi Dibuka</h4>
-                        <span class="text-[10px] sm:text-xs text-slate-500">10 Mei 2026</span>
-                    </a>
-                    <!-- Item 3 -->
-                    <a href="{{ route('frontend.article.show', ['article' => 'dummy']) }}" class="group py-4 sm:py-5 border-b border-slate-200">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1 sm:mb-2 block">Tips Belajar</span>
-                        <h4 class="font-serif text-lg sm:text-xl font-bold leading-snug group-hover:text-blue-700 text-slate-900 transition-colors mb-2">Seni Fokus: Hadapi Ujian Tanpa Distraksi Gadget</h4>
-                        <span class="text-[10px] sm:text-xs text-slate-500">05 Mei 2026</span>
-                    </a>
-                    <!-- Item 4 -->
-                    <a href="{{ route('frontend.article.show', ['article' => 'dummy']) }}" class="group py-4 sm:py-5 border-b border-slate-200">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-purple-600 mb-1 sm:mb-2 block">Prestasi</span>
-                        <h4 class="font-serif text-lg sm:text-xl font-bold leading-snug group-hover:text-blue-700 text-slate-900 transition-colors mb-2">Juara Umum Lomba Pidato Bahasa Arab se-Kabupaten Batang</h4>
-                        <span class="text-[10px] sm:text-xs text-slate-500">01 Mei 2026</span>
-                    </a>
+                    @forelse($latestArticles as $item)
+                        <a href="{{ route('frontend.article.show', $item->slug) }}" class="group py-4 sm:py-5 border-b border-slate-200">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1 sm:mb-2 block">{{ $item->category ? $item->category->name : 'Umum' }}</span>
+                            <h4 class="font-serif text-lg sm:text-xl font-bold leading-snug group-hover:text-blue-700 text-slate-900 transition-colors mb-2">{{ $item->judul }}</h4>
+                            <span class="text-[10px] sm:text-xs text-slate-500">{{ $item->published_at ? $item->published_at->translatedFormat('d M Y') : $item->created_at->translatedFormat('d M Y') }}</span>
+                        </a>
+                    @empty
+                        <p class="text-xs text-slate-400 font-mono py-4">Belum ada berita terkini lainnya.</p>
+                    @endforelse
                 </div>
             </div>
 
         </div>
     </div>
+    @endif
 
     <!-- Main Article Grid -->
     <div class="container mx-auto px-4 sm:px-6 max-w-7xl border-t-2 md:border-t-4 border-slate-900 pt-6">
@@ -97,7 +84,7 @@
             <span class="text-slate-500 text-[10px] sm:text-sm font-medium" x-text="filteredArticles.length + ' Hasil'"></span>
         </div>
 
-        <!-- Empty State -->
+        <!-- Empty State (handled by Alpine, fallback not needed for empty state since static loop has articles or handles empty) -->
         <div x-show="filteredArticles.length === 0" class="text-center py-24 sm:py-32 border border-slate-200 bg-white" style="display: none;">
             <i class="fa-regular fa-newspaper text-3xl sm:text-4xl text-slate-300 mb-4 block"></i>
             <h3 class="font-serif text-xl sm:text-2xl font-bold text-slate-900 mb-2">Tidak ada hasil</h3>
@@ -107,10 +94,36 @@
             </button>
         </div>
 
-        <!-- Strict Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 sm:gap-x-8 sm:gap-y-12">
+        <!-- Static Fallback Grid for SEO Crawlers (Hidden by Alpine immediately once it loads) -->
+        <div x-show="false" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 sm:gap-x-8 sm:gap-y-12">
+            @forelse($articles as $article)
+                <a href="{{ route('frontend.article.show', $article->slug) }}" class="group flex flex-col">
+                    <div class="w-full aspect-[4/3] overflow-hidden bg-slate-200 mb-4 relative">
+                        <img src="{{ $article->thumbnailUrl() }}" alt="{{ $article->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]">
+                        <div class="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors duration-500"></div>
+                    </div>
+                    <div class="flex flex-col flex-1">
+                        <div class="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-blue-700">{{ $article->category ? $article->category->name : 'Umum' }}</span>
+                            <span class="text-[10px] text-slate-400 font-medium">{{ $article->published_at ? $article->published_at->translatedFormat('d M Y') : $article->created_at->translatedFormat('d M Y') }}</span>
+                        </div>
+                        <h3 class="font-serif text-xl sm:text-2xl font-bold leading-tight mb-2 sm:mb-3 group-hover:text-blue-700 text-slate-900 transition-colors">{{ $article->judul }}</h3>
+                        <p class="text-slate-600 leading-relaxed text-xs sm:text-sm line-clamp-3 mb-4 flex-1">{{ $article->ringkasan ?: str($article->konten)->stripTags()->limit(150) }}</p>
+                    </div>
+                </a>
+            @empty
+                <div class="col-span-full text-center py-24 border border-slate-200 bg-white">
+                    <i class="fa-regular fa-newspaper text-3xl sm:text-4xl text-slate-300 mb-4 block"></i>
+                    <h3 class="font-serif text-xl sm:text-2xl font-bold text-slate-900 mb-2">Belum Ada Artikel</h3>
+                    <p class="text-sm text-slate-500">Silakan kembali lagi nanti untuk membaca pembaruan literasi sekolah kami.</p>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Dynamic Grid with Alpine Filtering for JS-Enabled Users -->
+        <div x-show="true" style="display: none;" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 sm:gap-x-8 sm:gap-y-12">
             <template x-for="article in filteredArticles" :key="article.id">
-                <a href="{{ route('frontend.article.show', ['article' => 'dummy']) }}" class="group flex flex-col">
+                <a :href="article.url" class="group flex flex-col">
                     <div class="w-full aspect-[4/3] overflow-hidden bg-slate-200 mb-4 relative">
                         <img :src="article.image" :alt="article.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]">
                         <div class="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors duration-500"></div>
@@ -135,59 +148,9 @@
         Alpine.data('articleList', () => ({
             searchQuery: '',
             activeCategory: 'Semua',
-            categories: ['Semua', 'Prestasi', 'Ekstrakurikuler', 'Info PPDB', 'Tips Belajar'],
+            categories: {!! $categoriesJson !!},
+            articles: {!! $articlesJson !!},
             
-            articles: [
-                {
-                    id: 1,
-                    title: "Perkemahan Pramuka di Kaki Gunung Prau Membentuk Karakter",
-                    excerpt: "Ratusan siswa MAM Limpung mengikuti persami yang dirancang khusus untuk melatih kemandirian, kedisiplinan, dan kekompakan tim dalam suasana alam terbuka.",
-                    category: "Ekstrakurikuler",
-                    date: "12 Mei 2026",
-                    image: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?q=80&w=2070&auto=format&fit=crop"
-                },
-                {
-                    id: 2,
-                    title: "Penerimaan Peserta Didik Baru Tahun Ajaran 2026 Resmi Dibuka",
-                    excerpt: "Madrasah Aliyah Muhammadiyah Limpung mengundang putra-putri terbaik daerah untuk bergabung. Tersedia beasiswa prestasi bagi pendaftar dengan nilai akademik unggul.",
-                    category: "Info PPDB",
-                    date: "10 Mei 2026",
-                    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop"
-                },
-                {
-                    id: 3,
-                    title: "Seni Fokus: Strategi Menghadapi Ujian Akhir Tanpa Distraksi",
-                    excerpt: "Di era digital yang penuh godaan layar kaca, psikolog sekolah membagikan pendekatan kontemplatif agar siswa tetap tajam dan tenang menghadapi masa ujian.",
-                    category: "Tips Belajar",
-                    date: "05 Mei 2026",
-                    image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop"
-                },
-                {
-                    id: 4,
-                    title: "Juara Umum Pidato Bahasa Arab, Sebuah Pencapaian Historis",
-                    excerpt: "Kafilah MAM Limpung sukses membawa pulang piala bergilir bupati, menancapkan dominasi literasi bahasa asing di kancah pendidikan Kabupaten Batang.",
-                    category: "Prestasi",
-                    date: "01 Mei 2026",
-                    image: "https://images.unsplash.com/photo-1523580846011-d3a5ce25c281?q=80&w=2070&auto=format&fit=crop"
-                },
-                {
-                    id: 5,
-                    title: "Keseruan Ekstrakurikuler Jurnalistik Meliput Pawai Budaya",
-                    excerpt: "Tim Jurnalis Sekolah diterjunkan langsung meliput acara karnaval budaya tahunan kecamatan Limpung dengan peralatan profesional.",
-                    category: "Ekstrakurikuler",
-                    date: "28 April 2026",
-                    image: "https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?q=80&w=2071&auto=format&fit=crop"
-                },
-                {
-                    id: 6,
-                    title: "Kenapa Harus Pilih MAM Limpung? Ini Kata Alumni",
-                    excerpt: "Testimoni para alumni yang sukses masuk Perguruan Tinggi Negeri ternama berkat bimbingan intensif dari guru.",
-                    category: "Info PPDB",
-                    date: "25 April 2026",
-                    image: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1949&auto=format&fit=crop"
-                }
-            ],
-
             get filteredArticles() {
                 let result = this.articles;
 

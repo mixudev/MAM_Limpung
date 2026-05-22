@@ -10,9 +10,6 @@ class RejectStudentAction
     /**
      * Reject registration with an obligatory reason.
      *
-     * @param PpdbSiswa $siswa
-     * @param string    $reason
-     * @return bool
      * @throws InvalidArgumentException
      */
     public function execute(PpdbSiswa $siswa, string $reason): bool
@@ -22,7 +19,7 @@ class RejectStudentAction
         }
 
         return $siswa->update([
-            'status'        => 'ditolak',
+            'status' => 'ditolak',
             'catatan_admin' => trim($reason),
         ]);
     }

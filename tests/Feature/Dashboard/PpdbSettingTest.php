@@ -47,10 +47,6 @@ test('authorized admin can update general ppdb configs', function () {
     $response = $this->actingAs($admin)->post(route('admin.ppdb.settings.general'), [
         'is_open' => '0', // Closed
         'tahun_ajaran' => '2028',
-        'target_quota' => '150',
-        'registration_fee' => '200000',
-        'start_date' => '2028-06-01',
-        'end_date' => '2028-09-15',
     ]);
 
     $response->assertRedirect(route('admin.ppdb.settings.edit'))
@@ -59,8 +55,30 @@ test('authorized admin can update general ppdb configs', function () {
     $config = PpdbSetting::getValue('general');
     $this->assertFalse($config['is_open']);
     $this->assertEquals(2028, $config['tahun_ajaran']);
-    $this->assertEquals(150, $config['target_quota']);
-    $this->assertEquals(200000, $config['registration_fee']);
+});
+
+test('authorized admin can update waves ppdb configs', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $response = $this->actingAs($admin)->post(route('admin.ppdb.settings.waves'), [
+        'waves' => [
+            [
+                'id' => 'gel_1',
+                'name' => 'Gelombang 1',
+                'start_date' => '2028-01-01',
+                'end_date' => '2028-02-01',
+            ],
+        ],
+    ]);
+
+    $response->assertRedirect(route('admin.ppdb.settings.edit'))
+        ->assertSessionHas('success');
+
+    $waves = PpdbSetting::getValue('waves');
+    $this->assertCount(1, $waves);
+    $this->assertEquals('gel_1', $waves[0]['id']);
+    $this->assertEquals('Gelombang 1', $waves[0]['name']);
 });
 
 test('authorized admin can save dynamic document requirements checklist', function () {
@@ -73,11 +91,13 @@ test('authorized admin can save dynamic document requirements checklist', functi
                 'id' => 'scan_skhun',
                 'label' => 'Scan SKHUN Asli',
                 'required' => '1',
+                'is_active' => '1',
             ],
             [
                 'id' => 'kartu_kip',
                 'label' => 'Kartu KIP (Jika Ada)',
                 'required' => '0',
+                'is_active' => '0',
             ],
         ],
     ]);
@@ -89,7 +109,9 @@ test('authorized admin can save dynamic document requirements checklist', functi
     $this->assertCount(2, $reqs);
     $this->assertEquals('scan_skhun', $reqs[0]['id']);
     $this->assertTrue($reqs[0]['required']);
+    $this->assertTrue($reqs[0]['is_active']);
     $this->assertFalse($reqs[1]['required']);
+    $this->assertFalse($reqs[1]['is_active']);
 });
 
 test('authorized admin can update custom dynamic form fields in batch', function () {
@@ -103,6 +125,7 @@ test('authorized admin can update custom dynamic form fields in batch', function
                 'label' => 'Nama Wali Murid',
                 'type' => 'text',
                 'required' => '1',
+                'is_active' => '1',
             ],
             [
                 'id' => 'jalur_prestasi',
@@ -110,6 +133,7 @@ test('authorized admin can update custom dynamic form fields in batch', function
                 'type' => 'select',
                 'options' => 'Olahraga, Seni, Tahfidz',
                 'required' => '0',
+                'is_active' => '0',
             ],
         ],
     ]);
@@ -123,4 +147,5 @@ test('authorized admin can update custom dynamic form fields in batch', function
     $this->assertEquals('jalur_prestasi', $fields[1]['id']);
     $this->assertEquals(['Olahraga', 'Seni', 'Tahfidz'], $fields[1]['options']);
     $this->assertFalse($fields[1]['required']);
+    $this->assertFalse($fields[1]['is_active']);
 });

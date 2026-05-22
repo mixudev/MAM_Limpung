@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Http\Requests\Dashboard;
+
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateArticleRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        $article = $this->route('article');
+
+        // Authorize using the ArticlePolicy 'update' method
+        return $this->user()->can('update', $article);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        $article = $this->route('article');
+        $articleId = is_object($article) ? $article->id : $article;
+
+        return [
+            'judul' => ['required', 'string', 'max:255', 'unique:articles,judul,'.$articleId],
+            'category_id' => ['required', 'exists:article_categories,id'],
+            'ringkasan' => ['nullable', 'string', 'max:500'],
+            'konten' => ['required', 'string'],
+            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'], // Strict upload check
+            'temp_thumbnail' => ['nullable', 'string'],
+            'status' => ['required', 'in:draft,published,archived'],
+            'published_at' => ['nullable', 'required_if:status,published', 'date'],
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     */
+    public function attributes(): array
+    {
+        return [
+            'judul' => 'Judul Artikel',
+            'category_id' => 'Kategori Artikel',
+            'ringkasan' => 'Ringkasan Artikel',
+            'konten' => 'Konten Artikel',
+            'thumbnail' => 'Gambar Mini (Thumbnail)',
+            'temp_thumbnail' => 'Berkas Gambar Sementara',
+            'status' => 'Status Publikasi',
+            'published_at' => 'Waktu Publikasi',
+        ];
+    }
+}

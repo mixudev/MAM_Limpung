@@ -21,6 +21,7 @@ Route::middleware(['auth', 'active'])->group(function () {
             // Settings Panel
             Route::get('/settings', [AdminPpdbSettingController::class, 'edit'])->name('settings.edit');
             Route::post('/settings/general', [AdminPpdbSettingController::class, 'updateGeneral'])->name('settings.general');
+            Route::post('/settings/waves', [AdminPpdbSettingController::class, 'updateWaves'])->name('settings.waves');
             Route::post('/settings/requirements', [AdminPpdbSettingController::class, 'updateRequirements'])->name('settings.requirements');
             Route::post('/settings/fields', [AdminPpdbSettingController::class, 'updateFields'])->name('settings.fields.update');
 

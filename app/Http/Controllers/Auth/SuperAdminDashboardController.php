@@ -17,8 +17,8 @@ class SuperAdminDashboardController extends Controller
         $user = $request->user()->load('roles', 'permissions');
 
         return view('dashboard.super-admin', [
-            'user'        => $user,
-            'roles'       => $user->getRoleNames(),
+            'user' => $user,
+            'roles' => $user->getRoleNames(),
             'permissions' => $user->getAllPermissions()->pluck('name'),
         ]);
     }

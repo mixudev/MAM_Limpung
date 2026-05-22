@@ -34,7 +34,7 @@ class Prestasi extends Model
     {
         return [
             'tanggal_prestasi' => 'date',
-            'is_featured'      => 'boolean',
+            'is_featured' => 'boolean',
         ];
     }
 
@@ -73,7 +73,7 @@ class Prestasi extends Model
     public function fotoUrl(): string
     {
         return $this->foto
-            ? asset('storage/' . $this->foto)
+            ? asset('storage/'.$this->foto)
             : asset('images/default-prestasi.jpg');
     }
 
@@ -84,10 +84,10 @@ class Prestasi extends Model
     {
         return match ($this->tingkat) {
             'internasional' => 'Internasional',
-            'nasional'      => 'Nasional',
-            'provinsi'      => 'Provinsi',
-            'kabupaten'     => 'Kabupaten/Kota',
-            default         => 'Sekolah',
+            'nasional' => 'Nasional',
+            'provinsi' => 'Provinsi',
+            'kabupaten' => 'Kabupaten/Kota',
+            default => 'Sekolah',
         };
     }
 }

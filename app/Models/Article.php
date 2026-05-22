@@ -15,12 +15,12 @@ class Article extends Model
 
     protected $fillable = [
         'user_id',
+        'category_id',
         'judul',
         'slug',
         'ringkasan',
         'konten',
         'thumbnail',
-        'kategori',
         'status',
         'published_at',
     ];
@@ -33,6 +33,46 @@ class Article extends Model
         return [
             'published_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (self $article) {
+            if (empty($article->slug)) {
+                $article->slug = static::generateUniqueSlug($article->judul);
+            }
+        });
+
+        static::updating(function (self $article) {
+            if ($article->isDirty('judul')) {
+                $article->slug = static::generateUniqueSlug($article->judul, $article->id);
+            }
+        });
+    }
+
+    /**
+     * Generate unique slug for article
+     */
+    public static function generateUniqueSlug(string $title, ?int $excludeId = null): string
+    {
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $count = 1;
+
+        while (static::where('slug', $slug)
+            ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
+            ->exists()
+        ) {
+            $slug = $originalSlug.'-'.$count;
+            $count++;
+        }
+
+        return $slug;
     }
 
     // -----------------------------------------------------------------------
@@ -53,6 +93,11 @@ class Article extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ArticleCategory::class, 'category_id');
+    }
+
     // -----------------------------------------------------------------------
     //  Scopes
     // -----------------------------------------------------------------------
@@ -71,7 +116,7 @@ class Article extends Model
     public function thumbnailUrl(): string
     {
         return $this->thumbnail
-            ? asset('storage/' . $this->thumbnail)
+            ? asset('storage/'.$this->thumbnail)
             : asset('images/default-thumbnail.jpg');
     }
 }

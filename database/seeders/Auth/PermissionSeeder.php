@@ -63,6 +63,18 @@ class PermissionSeeder extends Seeder
         ['edit-announcements',    'announcements', 'Edit Announcements',    'Edit announcements'],
         ['delete-announcements',  'announcements', 'Delete Announcements',  'Delete announcements'],
 
+        // --- Article Categories ---
+        ['view-article-categories',    'article-categories', 'View Article Categories',    'View article categories'],
+        ['create-article-categories',  'article-categories', 'Create Article Categories',  'Create article categories'],
+        ['edit-article-categories',    'article-categories', 'Edit Article Categories',    'Edit article categories'],
+        ['delete-article-categories',  'article-categories', 'Delete Article Categories',  'Delete article categories'],
+
+        // --- Articles ---
+        ['view-articles',    'articles', 'View Articles',    'View articles'],
+        ['create-articles',  'articles', 'Create Articles',  'Create articles'],
+        ['edit-articles',    'articles', 'Edit Articles',    'Edit articles'],
+        ['delete-articles',  'articles', 'Delete Articles',  'Delete articles'],
+
         // --- Reports ---
         ['view-reports',   'reports', 'View Reports',   'View generated reports'],
         ['export-reports', 'reports', 'Export Reports', 'Export reports to file'],
@@ -77,13 +89,13 @@ class PermissionSeeder extends Seeder
             Permission::firstOrCreate(
                 ['name' => $name, 'guard_name' => 'web'],
                 [
-                    'group'        => $group,
+                    'group' => $group,
                     'display_name' => $displayName,
-                    'description'  => $description,
+                    'description' => $description,
                 ]
             );
         }
 
-        $this->command->info('✅ ' . count($this->permissions) . ' permissions seeded.');
+        $this->command->info('✅ '.count($this->permissions).' permissions seeded.');
     }
 }

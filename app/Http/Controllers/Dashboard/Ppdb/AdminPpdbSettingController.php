@@ -19,16 +19,13 @@ class AdminPpdbSettingController extends Controller
         $general = PpdbSetting::getValue('general', [
             'is_open' => true,
             'tahun_ajaran' => (int) date('Y'),
-            'target_quota' => 120,
-            'registration_fee' => 150000,
-            'start_date' => date('Y').'-05-01',
-            'end_date' => date('Y').'-08-31',
         ]);
 
+        $waves = PpdbSetting::getValue('waves', []);
         $requirements = PpdbSetting::getValue('requirements', []);
         $formFields = PpdbSetting::getValue('form_fields', []);
 
-        return view('dashboard.admin.ppdb.settings', compact('general', 'requirements', 'formFields'));
+        return view('dashboard.admin.ppdb.settings', compact('general', 'waves', 'requirements', 'formFields'));
     }
 
     /**
@@ -39,23 +36,46 @@ class AdminPpdbSettingController extends Controller
         $validated = $request->validate([
             'is_open' => 'required|boolean',
             'tahun_ajaran' => 'required|integer|min:2020|max:2100',
-            'target_quota' => 'required|integer|min:1|max:5000',
-            'registration_fee' => 'required|integer|min:0',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
         PpdbSetting::setValue('general', [
             'is_open' => (bool) $validated['is_open'],
             'tahun_ajaran' => (int) $validated['tahun_ajaran'],
-            'target_quota' => (int) $validated['target_quota'],
-            'registration_fee' => (int) $validated['registration_fee'],
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
         ]);
 
         return redirect()->route('admin.ppdb.settings.edit')
             ->with('success', 'Konfigurasi PPDB|Pengaturan umum berhasil diperbarui.');
+    }
+
+    /**
+     * Update waves list.
+     */
+    public function updateWaves(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'waves' => 'nullable|array',
+            'waves.*.id' => 'required|string|alpha_dash',
+            'waves.*.name' => 'required|string|max:100',
+            'waves.*.start_date' => 'required|date',
+            'waves.*.end_date' => 'required|date|after_or_equal:waves.*.start_date',
+        ]);
+
+        $wavesList = [];
+        if (! empty($validated['waves'])) {
+            foreach ($validated['waves'] as $wave) {
+                $wavesList[] = [
+                    'id' => Str::slug($wave['id'], '_'),
+                    'name' => strip_tags($wave['name']),
+                    'start_date' => $wave['start_date'],
+                    'end_date' => $wave['end_date'],
+                ];
+            }
+        }
+
+        PpdbSetting::setValue('waves', $wavesList);
+
+        return redirect()->route('admin.ppdb.settings.edit')
+            ->with('success', 'Gelombang PPDB|Jadwal gelombang berhasil diperbarui.');
     }
 
     /**
@@ -68,6 +88,7 @@ class AdminPpdbSettingController extends Controller
             'requirements.*.id' => 'required|string|alpha_dash',
             'requirements.*.label' => 'required|string|max:100',
             'requirements.*.required' => 'required|boolean',
+            'requirements.*.is_active' => 'required|boolean',
         ]);
 
         $reqList = [];
@@ -77,6 +98,7 @@ class AdminPpdbSettingController extends Controller
                     'id' => Str::slug($req['id'], '_'),
                     'label' => strip_tags($req['label']),
                     'required' => (bool) $req['required'],
+                    'is_active' => (bool) $req['is_active'],
                 ];
             }
         }
@@ -99,6 +121,7 @@ class AdminPpdbSettingController extends Controller
             'fields.*.type' => 'required|string|in:text,number,select,date,textarea',
             'fields.*.options' => 'nullable|string',
             'fields.*.required' => 'required|boolean',
+            'fields.*.is_active' => 'required|boolean',
         ]);
 
         $fieldsList = [];
@@ -139,6 +162,7 @@ class AdminPpdbSettingController extends Controller
                     'type' => $f['type'],
                     'options' => $optionsArr,
                     'required' => (bool) $f['required'],
+                    'is_active' => (bool) $f['is_active'],
                 ];
             }
         }

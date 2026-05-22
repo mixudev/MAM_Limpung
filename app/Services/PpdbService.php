@@ -14,11 +14,6 @@ use Illuminate\Support\Facades\DB;
 class PpdbService
 {
     /**
-     * Target quota of admissions.
-     */
-    public const TARGET_QUOTA = 120;
-
-    /**
      * Get distinct years of registration to populate the filter dropdown.
      * Defaults to the current year if database is empty.
      *
@@ -46,16 +41,11 @@ class PpdbService
     /**
      * Compile key metrics counts for a specific registration year.
      *
-     * @return array{total: int, pending: int, verified: int, rejected: int, quota_target: int, quota_percent: float}
+     * @return array{total: int, pending: int, verified: int, rejected: int, acceptance_rate: float}
      */
     public function getStats(int $year): array
     {
-        $general = PpdbSetting::getValue('general', [
-            'target_quota' => self::TARGET_QUOTA,
-        ]);
-        $quotaTarget = (int) ($general['target_quota'] ?? self::TARGET_QUOTA);
-
-        return Cache::remember("ppdb_stats_{$year}", 300, function () use ($year, $quotaTarget) {
+        return Cache::remember("ppdb_stats_{$year}", 300, function () use ($year) {
             $start = "{$year}-01-01 00:00:00";
             $end = "{$year}-12-31 23:59:59";
 
@@ -71,17 +61,16 @@ class PpdbService
             $rejected = $counts['ditolak'] ?? 0;
             $total = $pending + $verified + $rejected;
 
-            $quotaPercent = $quotaTarget > 0
-                ? round(($verified / $quotaTarget) * 100, 1)
-                : 0;
+            $acceptanceRate = $total > 0
+                ? round(($verified / $total) * 100, 1)
+                : 0.0;
 
             return [
                 'total' => $total,
                 'pending' => $pending,
                 'verified' => $verified,
                 'rejected' => $rejected,
-                'quota_target' => $quotaTarget,
-                'quota_percent' => min($quotaPercent, 100.0),
+                'acceptance_rate' => min($acceptanceRate, 100.0),
             ];
         });
     }

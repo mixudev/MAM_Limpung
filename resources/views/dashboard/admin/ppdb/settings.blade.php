@@ -175,6 +175,13 @@
                     <option value="0">OPSIONAL (Optional)</option>
                 </select>
             </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+                <select name="requirements[${reqIndexCount}][is_active]" 
+                    class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2">
+                    <option value="1">TAMPILKAN (Ya)</option>
+                    <option value="0">SEMBUNYIKAN (Tidak)</option>
+                </select>
+            </td>
             <td class="px-4 py-3 text-right whitespace-nowrap">
                 <button type="button" onclick="removeRequirementRow('${reqIndexCount}')" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 rounded-none transition-all">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -212,6 +219,77 @@
             const slugged = label.toLowerCase()
                                  .replace(/[^a-z0-9_]+/g, '_')
                                  .replace(/^_+|_+$/g, '');
+            idInput.value = slugged;
+        }
+    }
+
+    // ════════════ 3.5. Interactive Waves Table Manager ════════════
+    let waveIndexCount = {{ isset($waves) ? count($waves) : 0 }};
+
+    function addNewWaveRow() {
+        const tableBody = document.getElementById('wavesTableBody');
+        const placeholder = document.getElementById('no-waves-placeholder');
+        if (placeholder) {
+            placeholder.remove();
+        }
+
+        const newRow = document.createElement('tr');
+        newRow.id = `wave-row-${waveIndexCount}`;
+        newRow.className = 'hover:bg-slate-50/20 transition-all';
+        newRow.innerHTML = `
+            <td class="px-4 py-3 whitespace-nowrap">
+                <input type="text" name="waves[${waveIndexCount}][id]" id="wave-id-input-${waveIndexCount}" required placeholder="e.g. gelombang_1"
+                    class="w-full bg-slate-100 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded-none text-xs font-mono text-slate-500 dark:text-zinc-400 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]"
+                    oninput="syncWaveSlug(${waveIndexCount})">
+            </td>
+            <td class="px-4 py-3">
+                <input type="text" name="waves[${waveIndexCount}][name]" id="wave-name-input-${waveIndexCount}" required placeholder="e.g. Gelombang 1"
+                    class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]"
+                    oninput="syncWaveSlug(${waveIndexCount})">
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+                <input type="date" name="waves[${waveIndexCount}][start_date]" required
+                    class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+                <input type="date" name="waves[${waveIndexCount}][end_date]" required
+                    class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+            </td>
+            <td class="px-4 py-3 text-right whitespace-nowrap">
+                <button type="button" onclick="removeWaveRow('${waveIndexCount}')" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 rounded-none transition-all">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(newRow);
+        waveIndexCount++;
+    }
+
+    function removeWaveRow(rowId) {
+        const row = document.getElementById(`wave-row-${rowId}`);
+        if (row) {
+            row.remove();
+        }
+
+        const tableBody = document.getElementById('wavesTableBody');
+        if (tableBody.children.length === 0) {
+            tableBody.innerHTML = `
+                <tr id="no-waves-placeholder">
+                    <td colspan="5" class="text-center py-8 text-slate-400 dark:text-zinc-500 text-xs">Belum ada gelombang pendaftaran yang diatur.</td>
+                </tr>
+            `;
+        }
+    }
+
+    function syncWaveSlug(rowId) {
+        const name = document.getElementById(`wave-name-input-${rowId}`).value;
+        const idInput = document.getElementById(`wave-id-input-${rowId}`);
+        if (idInput && name) {
+            const slugged = name.toLowerCase()
+                                .replace(/[^a-z0-9_]+/g, '_')
+                                .replace(/^_+|_+$/g, '');
             idInput.value = slugged;
         }
     }
@@ -275,6 +353,14 @@
                     class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2">
                     <option value="0">OPSIONAL</option>
                     <option value="1">WAJIB</option>
+                </select>
+            </td>
+            <!-- Is Active -->
+            <td class="px-4 py-3 whitespace-nowrap">
+                <select name="fields[${fieldIndexCount}][is_active]" 
+                    class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2">
+                    <option value="1">TAMPILKAN (Ya)</option>
+                    <option value="0">SEMBUNYIKAN (Tidak)</option>
                 </select>
             </td>
             <!-- Delete Action -->
@@ -383,6 +469,11 @@
             const requiredSelect = row.querySelector('select[name$="[required]"]');
             if (requiredSelect) {
                 requiredSelect.name = `fields[${idx}][required]`;
+            }
+
+            const activeSelect = row.querySelector('select[name$="[is_active]"]');
+            if (activeSelect) {
+                activeSelect.name = `fields[${idx}][is_active]`;
             }
             
             const optionsInput = row.querySelector('input[name$="[options]"]');

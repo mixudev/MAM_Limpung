@@ -43,10 +43,10 @@
                     <thead>
                         <tr class="bg-slate-50 dark:bg-zinc-800/40 border-b border-slate-100 dark:border-zinc-800/80">
                             <th class="px-2 py-3.5 w-10 text-center text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500"></th>
-                            <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">ID Slug</th>
                             <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Label Pertanyaan / Input</th>
                             <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Tipe Input</th>
                             <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Sifat</th>
+                            <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Status Tampil</th>
                             <th class="px-4 py-3.5 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -59,11 +59,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                                     </svg>
                                 </td>
-                                <!-- ID Slug (Read-only for existing ones) -->
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <input type="text" name="fields[{{ $index }}][id]" value="{{ $field['id'] }}" required readonly
-                                        class="w-full bg-slate-100 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded-none text-xs font-mono text-slate-500 dark:text-zinc-400 py-1.5 px-2.5">
-                                </td>
+                                <!-- ID Slug Hidden -->
+                                <input type="hidden" name="fields[{{ $index }}][id]" value="{{ $field['id'] }}">
                                 <!-- Label & Options -->
                                 <td class="px-4 py-3">
                                     <div class="space-y-2">
@@ -99,6 +96,14 @@
                                         <option value="1" {{ $field['required'] ? 'selected' : '' }}>WAJIB</option>
                                     </select>
                                 </td>
+                                <!-- Is Active Toggle -->
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <select name="fields[{{ $index }}][is_active]" 
+                                        class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2">
+                                        <option value="1" {{ ($field['is_active'] ?? true) ? 'selected' : '' }}>TAMPILKAN (Ya)</option>
+                                        <option value="0" {{ !($field['is_active'] ?? true) ? 'selected' : '' }}>SEMBUNYIKAN (Tidak)</option>
+                                    </select>
+                                </td>
                                 <!-- Delete Row -->
                                 <td class="px-4 py-3 text-right whitespace-nowrap">
                                     <button type="button" onclick="removeFormFieldRow('{{ $index }}', '{{ $field['label'] }}')" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 rounded-none transition-all">
@@ -110,7 +115,7 @@
                             </tr>
                         @empty
                             <tr id="no-fields-placeholder">
-                                <td colspan="6" class="text-center py-10 text-slate-400 dark:text-zinc-500 text-xs">Belum ada kolom kustom tambahan. Formulir pendaftaran hanya memuat kolom inti.</td>
+                                <td colspan="7" class="text-center py-10 text-slate-400 dark:text-zinc-500 text-xs">Belum ada kolom kustom tambahan. Formulir pendaftaran hanya memuat kolom inti.</td>
                             </tr>
                         @endforelse
                     </tbody>

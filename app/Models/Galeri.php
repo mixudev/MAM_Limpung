@@ -67,7 +67,7 @@ class Galeri extends Model
 
     public function fileUrl(): string
     {
-        return asset('storage/' . $this->file_path);
+        return asset('storage/'.$this->file_path);
     }
 
     public function isFoto(): bool

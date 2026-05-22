@@ -22,6 +22,7 @@
                             <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">ID Kode Berkas (Slug)</th>
                             <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Nama Dokumen Persyaratan</th>
                             <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Sifat Dokumen</th>
+                            <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Status Tampil</th>
                             <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -46,6 +47,14 @@
                                         <option value="0" {{ !$req['required'] ? 'selected' : '' }}>OPSIONAL (Optional)</option>
                                     </select>
                                 </td>
+                                <!-- Is Active Toggle -->
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <select name="requirements[{{ $index }}][is_active]" 
+                                        class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2">
+                                        <option value="1" {{ ($req['is_active'] ?? true) ? 'selected' : '' }}>TAMPILKAN (Ya)</option>
+                                        <option value="0" {{ !($req['is_active'] ?? true) ? 'selected' : '' }}>SEMBUNYIKAN (Tidak)</option>
+                                    </select>
+                                </td>
                                 <!-- Delete Row -->
                                 <td class="px-4 py-3 text-right whitespace-nowrap">
                                     <button type="button" onclick="removeRequirementRow('{{ $index }}')" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 rounded-none transition-all">
@@ -57,7 +66,7 @@
                             </tr>
                         @empty
                             <tr id="no-requirements-placeholder">
-                                <td colspan="4" class="text-center py-8 text-slate-400 dark:text-zinc-500 text-xs">Belum ada persyaratan berkas yang didaftarkan.</td>
+                                <td colspan="5" class="text-center py-8 text-slate-400 dark:text-zinc-500 text-xs">Belum ada persyaratan berkas yang didaftarkan.</td>
                             </tr>
                         @endforelse
                     </tbody>

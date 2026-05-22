@@ -23,28 +23,28 @@ class UserSeeder extends Seeder
 {
     private array $users = [
         [
-            'name'     => 'Super Administrator',
-            'email'    => 'super-admin@example.com',
+            'name' => 'Super Administrator',
+            'email' => 'super-admin@example.com',
             'password' => 'SuperAdmin123!',
-            'role'     => 'super-admin',
+            'role' => 'super-admin',
         ],
         [
-            'name'     => 'Administrator',
-            'email'    => 'admin@example.com',
+            'name' => 'Administrator',
+            'email' => 'admin@example.com',
             'password' => 'Admin123!',
-            'role'     => 'admin',
+            'role' => 'admin',
         ],
         [
-            'name'     => 'Budi Santoso (Guru)',
-            'email'    => 'guru@example.com',
+            'name' => 'Budi Santoso (Guru)',
+            'email' => 'guru@example.com',
             'password' => 'Guru123!',
-            'role'     => 'guru',
+            'role' => 'guru',
         ],
         [
-            'name'     => 'Andi Wijaya (Siswa)',
-            'email'    => 'siswa@example.com',
+            'name' => 'Andi Wijaya (Siswa)',
+            'email' => 'siswa@example.com',
             'password' => 'Siswa123!',
-            'role'     => 'siswa',
+            'role' => 'siswa',
         ],
     ];
 
@@ -53,6 +53,7 @@ class UserSeeder extends Seeder
         // Safety guard: refuse to run in production
         if (app()->isProduction()) {
             $this->command->error('❌ UserSeeder tidak dapat dijalankan di environment production!');
+
             return;
         }
 
@@ -62,10 +63,10 @@ class UserSeeder extends Seeder
             $user = User::updateOrCreate(
                 ['email' => $data['email']],
                 [
-                    'name'              => $data['name'],
-                    'password'          => Hash::make($data['password']),
+                    'name' => $data['name'],
+                    'password' => Hash::make($data['password']),
                     'email_verified_at' => now(),
-                    'is_active'         => true,
+                    'is_active' => true,
                 ]
             );
 
@@ -75,7 +76,7 @@ class UserSeeder extends Seeder
             $this->command->line("  → {$user->email} [{$data['role']}] created/updated.");
         }
 
-        $this->command->info('✅ ' . count($this->users) . ' users seeded.');
+        $this->command->info('✅ '.count($this->users).' users seeded.');
         $this->command->newLine();
         $this->command->table(
             ['Email', 'Password', 'Role'],

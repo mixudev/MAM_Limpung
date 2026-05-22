@@ -298,106 +298,40 @@
                     <!-- Steps -->
                     <div class="space-y-12 relative z-10">
                         
-                        <!-- Step 1: Gelombang 1 -->
-                        <div class="flex flex-col md:flex-row items-center justify-start md:justify-between relative min-h-[140px]">
-                            <!-- Left: Card -->
-                            <div class="w-full md:w-[42%] pl-12 md:pl-0 fade-right-init">
-                                <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80">
-                                    <span class="text-blue-600 font-bold text-xs tracking-wider block mb-1 uppercase">1 - 31 Januari {{ $general['tahun_ajaran'] }}</span>
-                                    <h3 class="text-base font-bold text-gray-900 flex items-center gap-1.5">
-                                        Gelombang 1 <span class="bg-blue-100 text-blue-800 text-[9px] px-1.5 py-0.5 rounded-sm font-medium">Early Bird</span>
-                                    </h3>
-                                    <p class="text-gray-500 mt-2 text-xs leading-relaxed">Pendaftaran tahap awal dengan keuntungan khusus prioritas kuota kelas peminatan utama dan diskon formulir.</p>
-                                    <div class="mt-4 flex items-center gap-2">
-                                        <span class="inline-flex items-center text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-sm"><i class="fa-solid fa-percent mr-1"></i> Diskon Formulir</span>
-                                        <span class="inline-flex items-center text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm"><i class="fa-solid fa-circle-check mr-1"></i> Prioritas Kelas</span>
+                        @forelse($waves as $index => $wave)
+                            @php
+                                $isEven = $index % 2 == 0;
+                                $colors = ['blue', 'emerald', 'amber', 'violet', 'rose', 'cyan'];
+                                $color = $colors[$index % count($colors)];
+                                $number = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+                                $startDate = \Carbon\Carbon::parse($wave['start_date'])->translatedFormat('d M Y');
+                                $endDate = \Carbon\Carbon::parse($wave['end_date'])->translatedFormat('d M Y');
+                            @endphp
+                            <!-- Dynamic Wave Step -->
+                            <div class="flex flex-col md:flex-row{{ !$isEven ? '-reverse' : '' }} items-center justify-start md:justify-between relative min-h-[140px]">
+                                <!-- Card -->
+                                <div class="w-full md:w-[42%] pl-12 md:pl-0 fade-{{ $isEven ? 'right' : 'left' }}-init">
+                                    <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80">
+                                        <span class="text-{{ $color }}-600 font-bold text-xs tracking-wider block mb-1 uppercase">{{ $startDate }} - {{ $endDate }}</span>
+                                        <h3 class="text-base font-bold text-gray-900 flex items-center gap-1.5">
+                                            {{ $wave['name'] }}
+                                        </h3>
+                                        <p class="text-gray-500 mt-2 text-xs leading-relaxed">Periode pendaftaran dibuka untuk tahun ajaran {{ $general['tahun_ajaran'] }}. Segera lengkapi persyaratan Anda.</p>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Center Checkpoint Node 1 -->
-                            <div id="node-1" class="absolute left-6 md:left-[48%] -translate-x-1/2 w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-sm flex items-center justify-center animate-pulse z-20">
-                                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-                            </div>
-                            <!-- Right: Spacer (For Desktop) -->
-                            <div class="hidden md:block w-[42%] text-left pl-10">
-                                <div class="text-3xl font-bold text-blue-100/80">01</div>
-                                <div class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">Langkah Awal Emas</div>
-                            </div>
-                        </div>
-
-                        <!-- Step 2: Gelombang 2 -->
-                        <div class="flex flex-col md:flex-row-reverse items-center justify-start md:justify-between relative min-h-[140px]">
-                            <!-- Left: Card (Desktop sits right) -->
-                            <div class="w-full md:w-[42%] pl-12 md:pl-0 fade-left-init">
-                                <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80">
-                                    <span class="text-emerald-600 font-bold text-xs tracking-wider block mb-1 uppercase">1 - 28 Februari {{ $general['tahun_ajaran'] }}</span>
-                                    <h3 class="text-base font-bold text-gray-900">Gelombang 2</h3>
-                                    <p class="text-gray-500 mt-2 text-xs leading-relaxed">Pendaftaran gelombang reguler dibuka untuk melengkapi kuota rombongan belajar utama yang masih tersedia.</p>
-                                    <div class="mt-4 flex items-center gap-2">
-                                        <span class="inline-flex items-center text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm"><i class="fa-solid fa-graduation-cap mr-1"></i> Reguler</span>
-                                    </div>
+                                <!-- Center Checkpoint Node -->
+                                <div id="node-{{ $index + 1 }}" class="absolute left-6 md:left-[{{ $isEven ? '48' : '52' }}%] -translate-x-1/2 w-5 h-5 rounded-full bg-{{ $color }}-500 border-2 border-white shadow-sm flex items-center justify-center {{ $index === 0 ? 'animate-pulse' : '' }} z-20">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                                </div>
+                                <!-- Spacer (Desktop) -->
+                                <div class="hidden md:block w-[42%] text-{{ $isEven ? 'left' : 'right' }} {{ $isEven ? 'pl-10' : 'pr-10' }}">
+                                    <div class="text-3xl font-bold text-{{ $color }}-100/80">{{ $number }}</div>
+                                    <div class="text-[10px] font-bold text-{{ $color }}-600 uppercase tracking-widest mt-0.5">Tahap {{ $number }}</div>
                                 </div>
                             </div>
-                            <!-- Center Checkpoint Node 2 -->
-                            <div id="node-2" class="absolute left-6 md:left-[52%] -translate-x-1/2 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white shadow-sm flex items-center justify-center z-20">
-                                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-                            </div>
-                            <!-- Right: Spacer (For Desktop) -->
-                            <div class="hidden md:block w-[42%] text-right pr-10">
-                                <div class="text-3xl font-bold text-emerald-100/80">02</div>
-                                <div class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-0.5">Kesempatan Utama</div>
-                            </div>
-                        </div>
-
-                        <!-- Step 3: Tes & Seleksi -->
-                        <div class="flex flex-col md:flex-row items-center justify-start md:justify-between relative min-h-[140px]">
-                            <!-- Left: Card -->
-                            <div class="w-full md:w-[42%] pl-12 md:pl-0 fade-right-init">
-                                <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80">
-                                    <span class="text-amber-600 font-bold text-xs tracking-wider block mb-1 uppercase">5 - 10 Maret {{ $general['tahun_ajaran'] }}</span>
-                                    <h3 class="text-base font-bold text-gray-900">Tes & Wawancara</h3>
-                                    <p class="text-gray-500 mt-2 text-xs leading-relaxed">Evaluasi pemetaan kemampuan membaca Al-Qur'an dan wawancara minat bakat serta silaturahmi wali murid.</p>
-                                    <div class="mt-4 flex items-center gap-2">
-                                        <span class="inline-flex items-center text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-sm"><i class="fa-solid fa-book-quran mr-1"></i> Baca Al-Quran</span>
-                                        <span class="inline-flex items-center text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-sm"><i class="fa-solid fa-users mr-1"></i> Wawancara</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Center Checkpoint Node 3 -->
-                            <div id="node-3" class="absolute left-6 md:left-[48%] -translate-x-1/2 w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-sm flex items-center justify-center z-20">
-                                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-                            </div>
-                            <!-- Right: Spacer (For Desktop) -->
-                            <div class="hidden md:block w-[42%] text-left pl-10">
-                                <div class="text-3xl font-bold text-amber-100/80">03</div>
-                                <div class="text-[10px] font-bold text-amber-600 uppercase tracking-widest mt-0.5">Pemetaan Minat</div>
-                            </div>
-                        </div>
-
-                        <!-- Step 4: Daftar Ulang -->
-                        <div class="flex flex-col md:flex-row-reverse items-center justify-start md:justify-between relative min-h-[140px]">
-                            <!-- Left: Card -->
-                            <div class="w-full md:w-[42%] pl-12 md:pl-0 fade-left-init">
-                                <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80">
-                                    <span class="text-violet-600 font-bold text-xs tracking-wider block mb-1 uppercase">17 - 25 Maret {{ $general['tahun_ajaran'] }}</span>
-                                    <h3 class="text-base font-bold text-gray-900">Daftar Ulang Resmi</h3>
-                                    <p class="text-gray-500 mt-2 text-xs leading-relaxed">Bagi calon peserta didik yang dinyatakan diterima, melakukan registrasi ulang berkas fisik dan pengukuran seragam madrasah.</p>
-                                    <div class="mt-4 flex items-center gap-2">
-                                        <span class="inline-flex items-center text-[10px] font-semibold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-sm"><i class="fa-solid fa-shirt mr-1"></i> Ukur Seragam</span>
-                                        <span class="inline-flex items-center text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm"><i class="fa-solid fa-stamp mr-1"></i> Sah Terdaftar</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Center Checkpoint Node 4 -->
-                            <div id="node-4" class="absolute left-6 md:left-[52%] -translate-x-1/2 w-5 h-5 rounded-full bg-violet-500 border-2 border-white shadow-sm flex items-center justify-center z-20">
-                                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-                            </div>
-                            <!-- Right: Spacer (For Desktop) -->
-                            <div class="hidden md:block w-[42%] text-right pr-10">
-                                <div class="text-3xl font-bold text-violet-100/80">04</div>
-                                <div class="text-[10px] font-bold text-violet-600 uppercase tracking-widest mt-0.5">Siap Belajar</div>
-                            </div>
-                        </div>
+                        @empty
+                            <div class="text-center py-8 text-gray-500 text-sm">Jadwal gelombang pendaftaran belum ditentukan oleh Admin.</div>
+                        @endforelse
 
                     </div>
                 </div>
@@ -415,96 +349,69 @@
                     <p class="text-gray-500 mt-2 text-xs md:text-sm">Lengkapi berkas-berkas berikut untuk mempermudah panitia memverifikasi data pendaftaran Anda.</p>
                 </div>
 
-                <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
-                    
-                    <!-- Dokumen Wajib -->
-                    <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80 fade-right-init">
-                        <div class="flex items-center gap-3.5 mb-5">
-                            <div class="w-10 h-10 rounded bg-blue-50 text-blue-600 flex items-center justify-center">
-                                <i class="fa-solid fa-folder-closed text-base"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-base font-bold text-gray-900">Dokumen Utama (Wajib)</h3>
-                                <p class="text-[10px] text-gray-400">Harus disiapkan oleh semua calon siswa baru</p>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4">
+                <!-- Simple Table -->
+                <div class="overflow-x-auto bg-white rounded-md shadow-sm border border-gray-200">
+                    <table class="w-full text-left border-collapse min-w-[500px]">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                <th class="py-3 px-4 md:px-6 font-bold text-gray-900 text-xs md:text-sm">Nama Dokumen</th>
+                                <th class="py-3 px-4 md:px-6 font-bold text-gray-900 text-xs md:text-sm">Keterangan</th>
+                                <th class="py-3 px-4 md:px-6 font-bold text-gray-900 text-xs md:text-sm w-20">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
                             @forelse($requirements as $req)
-                                <div class="flex gap-3">
-                                    <div class="mt-0.5 w-5 h-5 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 transition-all duration-200">
-                                        <i class="fa-solid fa-{{ $req['required'] ? 'check' : 'plus' }} text-[10px] {{ !$req['required'] ? 'text-amber-600 animate-pulse' : '' }}"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-800 text-xs md:text-sm">{{ $req['label'] }}</h4>
-                                        <p class="text-[11px] text-gray-400 mt-0.5 leading-normal">
-                                            {{ $req['required'] ? 'Berkas wajib disiapkan/diunggah.' : 'Berkas tambahan opsional.' }}
-                                        </p>
-                                    </div>
-                                </div>
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="py-3 px-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">{{ $req['label'] }}</td>
+                                    <td class="py-3 px-4 md:px-6 text-xs text-gray-600">{{ $req['required'] ? 'Wajib disiapkan oleh semua siswa' : 'Opsional / sesuai program pilihan' }}</td>
+                                    <td class="py-3 px-4 md:px-6 text-xs font-semibold">
+                                        <span class="inline-block px-2 py-1 rounded text-white {{ $req['required'] ? 'bg-emerald-600' : 'bg-amber-500' }}">
+                                            {{ $req['required'] ? 'Wajib' : 'Opsional' }}
+                                        </span>
+                                    </td>
+                                </tr>
                             @empty
-                                <div class="text-center py-6 text-xs text-gray-400">
-                                    Tidak ada persyaratan berkas yang dikonfigurasi.
-                                </div>
+                                <tr>
+                                    <td colspan="3" class="py-8 px-6 text-center text-xs text-gray-400">
+                                        Tidak ada persyaratan berkas yang dikonfigurasi.
+                                    </td>
+                                </tr>
                             @endforelse
-                        </div>
-                    </div>
 
-                    <!-- Dokumen Tambahan -->
-                    <div class="bg-white p-6 rounded-md shadow-sm border border-gray-200/80 flex flex-col justify-between fade-left-init">
-                        <div>
-                            <div class="flex items-center gap-3.5 mb-5">
-                                <div class="w-10 h-10 rounded bg-amber-50 text-amber-600 flex items-center justify-center">
-                                    <i class="fa-solid fa-circle-nodes text-base"></i>
-                                </div>
-                                <div>
-                                    <h3 class="text-base font-bold text-gray-900">Jalur Khusus / Tambahan</h3>
-                                    <p class="text-[10px] text-gray-400">Diperlukan untuk program khusus / klaim beasiswa</p>
-                                </div>
-                            </div>
+                            <!-- Berkas Tambahan Section Header -->
+                            <tr class="bg-blue-50 border-b border-blue-200">
+                                <td colspan="3" class="py-3 px-4 md:px-6 text-xs font-bold text-blue-900 uppercase tracking-wide">Berkas Tambahan (Untuk Program Khusus / Beasiswa)</td>
+                            </tr>
 
-                            <div class="space-y-4">
-                                <!-- Item 1 -->
-                                <div class="flex gap-3">
-                                    <div class="mt-0.5 w-5 h-5 rounded bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 transition-all duration-200">
-                                        <i class="fa-solid fa-plus text-[10px]"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-800 text-xs md:text-sm">Piagam / Sertifikat Prestasi</h4>
-                                        <p class="text-[11px] text-gray-400 mt-0.5 leading-normal">Untuk klaim **Beasiswa Prestasi** (Juara akademik kelas/olahraga/kesenian minimal tingkat Kabupaten).</p>
-                                    </div>
-                                </div>
+                            <!-- Item 1 -->
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-3 px-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">Piagam / Sertifikat Prestasi</td>
+                                <td class="py-3 px-4 md:px-6 text-xs text-gray-600">Untuk klaim Beasiswa Prestasi (Juara akademik/olahraga/kesenian min. Kabupaten)</td>
+                                <td class="py-3 px-4 md:px-6 text-xs font-semibold"><span class="inline-block px-2 py-1 rounded text-white bg-blue-500">Opsional</span></td>
+                            </tr>
 
-                                <!-- Item 2 -->
-                                <div class="flex gap-3">
-                                    <div class="mt-0.5 w-5 h-5 rounded bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 transition-all duration-200">
-                                        <i class="fa-solid fa-plus text-[10px]"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-800 text-xs md:text-sm">Kartu KIP, PKH, KPS, atau KKS</h4>
-                                        <p class="text-[11px] text-gray-400 mt-0.5 leading-normal">Untuk verifikasi **Beasiswa Afirmasi** (Keluarga kurang mampu).</p>
-                                    </div>
-                                </div>
+                            <!-- Item 2 -->
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-3 px-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">Kartu KIP, PKH, KPS, atau KKS</td>
+                                <td class="py-3 px-4 md:px-6 text-xs text-gray-600">Untuk verifikasi Beasiswa Afirmasi (Keluarga kurang mampu)</td>
+                                <td class="py-3 px-4 md:px-6 text-xs font-semibold"><span class="inline-block px-2 py-1 rounded text-white bg-blue-500">Opsional</span></td>
+                            </tr>
 
-                                <!-- Item 3 -->
-                                <div class="flex gap-3">
-                                    <div class="mt-0.5 w-5 h-5 rounded bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 transition-all duration-200">
-                                        <i class="fa-solid fa-plus text-[10px]"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-800 text-xs md:text-sm">Surat Rekomendasi Ranting Muhammadiyah</h4>
-                                        <p class="text-[11px] text-gray-400 mt-0.5 leading-normal">Diperuntukkan bagi kader Muhammadiyah untuk mendapatkan potongan biaya khusus.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            <!-- Item 3 -->
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-3 px-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">Surat Rekomendasi Ranting Muhammadiyah</td>
+                                <td class="py-3 px-4 md:px-6 text-xs text-gray-600">Untuk kader Muhammadiyah mendapat potongan biaya khusus</td>
+                                <td class="py-3 px-4 md:px-6 text-xs font-semibold"><span class="inline-block px-2 py-1 rounded text-white bg-blue-500">Opsional</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                        <div class="mt-6 pt-5 border-t border-gray-100 flex items-center gap-3 bg-blue-50/50 p-3 rounded">
-                            <i class="fa-solid fa-circle-info text-blue-600 text-sm flex-shrink-0 mt-0.5"></i>
-                            <span class="text-[10px] text-gray-500 leading-tight">Semua berkas diserahkan dalam map kertas: **Kuning** (Putra) & **Merah** (Putri).</span>
-                        </div>
-                    </div>
-
+                <!-- Info Note -->
+                <div class="mt-6 bg-blue-50 border border-blue-200 p-4 rounded-md flex items-start gap-3">
+                    <span class="text-blue-900 font-bold text-xs md:text-sm leading-relaxed">
+                        Catatan: Semua berkas diserahkan dalam map kertas warna Kuning (Putra) atau Merah (Putri).
+                    </span>
                 </div>
             </div>
         </section>
@@ -520,105 +427,180 @@
                     <p class="text-gray-500 mt-2 text-xs md:text-sm">Kami mendukung semangat belajar siswa berprestasi, penghafal Quran, maupun keluarga kurang mampu untuk tetap bisa meraih cita-cita.</p>
                 </div>
 
-                <!-- Clean, Simple 3-Column Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    
-                    <!-- Card 1: Beasiswa Prestasi -->
-                    <div class="bg-white p-6 rounded-md border border-gray-200/80 border-t-4 border-t-amber-500 shadow-sm flex flex-col justify-between fade-up-init" style="transition-delay: 100ms;">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-sm uppercase">Akademik & Bakat</span>
-                                <i class="fa-solid fa-trophy text-amber-500 text-sm"></i>
-                            </div>
-                            <h3 class="text-base font-semibold text-gray-900">Beasiswa Prestasi</h3>
-                            <p class="text-gray-500 text-xs mt-2 leading-relaxed">Diberikan khusus untuk siswa berprestasi peringkat kelas di SMP/MTs asal atau peraih juara perlombaan resmi.</p>
+                <!-- Desktop Table View -->
+                <div class="hidden md:block mt-8 overflow-x-auto bg-white rounded-md shadow-sm border border-gray-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                <th class="py-4 px-6 font-bold text-gray-900 text-sm">Jalur Beasiswa</th>
+                                <th class="py-4 px-6 font-bold text-gray-900 text-sm">Kriteria & Persyaratan</th>
+                                <th class="py-4 px-6 font-bold text-gray-900 text-sm">Benefit</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-xs text-gray-600">
+                            <!-- Beasiswa Prestasi -->
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-4 px-6 align-top">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <i class="fa-solid fa-trophy text-amber-500"></i>
+                                        <span class="font-bold text-gray-900 text-sm">Prestasi</span>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-sm uppercase inline-block">Akademik & Bakat</span>
+                                </td>
+                                <td class="py-4 px-6 align-top">
+                                    <ul class="space-y-1">
+                                        <li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-amber-500 mt-0.5"></i> Juara 1 Paralel SMP/MTs asal</li>
+                                        <li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-amber-500 mt-0.5"></i> Juara 2 & 3 Paralel SMP/MTs asal</li>
+                                        <li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-amber-500 mt-0.5"></i> Juara Lomba tingkat Kabupaten / Provinsi</li>
+                                    </ul>
+                                </td>
+                                <td class="py-4 px-6 align-top font-semibold text-amber-600">
+                                    <ul class="space-y-1 text-gray-900">
+                                        <li><span class="text-amber-600">Bebas SPP 1 Tahun</span> (Juara 1)</li>
+                                        <li><span class="text-amber-600">Bebas SPP 6 Bulan</span> (Juara 2 & 3)</li>
+                                        <li><span class="text-amber-600">Reward Khusus</span> (Juara Lomba)</li>
+                                    </ul>
+                                </td>
+                            </tr>
                             
-                            <div class="mt-4 py-3 bg-gray-50/50 border border-gray-100 rounded px-3">
-                                <span class="text-[9px] font-bold text-gray-400 uppercase block">Benefit</span>
-                                <span class="text-sm font-semibold text-amber-600 block">Bebas SPP s.d. 12 Bulan</span>
-                            </div>
+                            <!-- Beasiswa Tahfidz -->
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-4 px-6 align-top">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <i class="fa-solid fa-book-quran text-emerald-500"></i>
+                                        <span class="font-bold text-gray-900 text-sm">Tahfidz</span>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm uppercase inline-block">Keagamaan</span>
+                                </td>
+                                <td class="py-4 px-6 align-top">
+                                    <ul class="space-y-1">
+                                        <li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i> Hafal minimal 3 Juz</li>
+                                        <li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i> Hafal minimal 5 Juz</li>
+                                        <li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i> Hafal 10 Juz atau lebih</li>
+                                    </ul>
+                                </td>
+                                <td class="py-4 px-6 align-top font-semibold">
+                                    <ul class="space-y-1 text-gray-900">
+                                        <li><span class="text-emerald-600">Bebas SPP 3 Bulan</span> (3 Juz)</li>
+                                        <li><span class="text-emerald-600">Bebas SPP 6 Bulan</span> (5 Juz)</li>
+                                        <li><span class="text-emerald-600">Bebas SPP 1 Tahun</span> (10+ Juz)</li>
+                                    </ul>
+                                </td>
+                            </tr>
 
-                            <ul class="mt-4 space-y-2 text-xs text-gray-600">
-                                <li class="flex items-start gap-2">
-                                    <i class="fa-solid fa-check text-amber-500 text-[10px] mt-0.5"></i>
-                                    <span>Juara 1 Paralel: Bebas SPP 1 Tahun</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <i class="fa-solid fa-check text-amber-500 text-[10px] mt-0.5"></i>
-                                    <span>Juara 2 & 3 Paralel: Bebas SPP 6 Bulan</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <i class="fa-solid fa-check text-amber-500 text-[10px] mt-0.5"></i>
-                                    <span>Juara Lomba Minimal Kab: Reward Khusus</span>
-                                </li>
-                            </ul>
+                            <!-- Beasiswa Afirmasi -->
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-4 px-6 align-top">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <i class="fa-solid fa-handshake-angle text-indigo-500"></i>
+                                        <span class="font-bold text-gray-900 text-sm">Afirmasi</span>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-sm uppercase inline-block">Kader & Sosial</span>
+                                </td>
+                                <td class="py-4 px-6 align-top">
+                                    <ul class="space-y-1">
+                                        <li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-indigo-500 mt-0.5"></i> Siswa Yatim / Piatu</li>
+                                        <li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-indigo-500 mt-0.5"></i> Memiliki KIP / PIP / PKH</li>
+                                        <li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-indigo-500 mt-0.5"></i> Rekomendasi Kader / Ranting Muhammadiyah</li>
+                                    </ul>
+                                </td>
+                                <td class="py-4 px-6 align-top font-semibold">
+                                    <ul class="space-y-1 text-gray-900">
+                                        <li><span class="text-indigo-600">Diskon SPP 50%</span> (Yatim/KIP)</li>
+                                        <li><span class="text-indigo-600">Diskon SPP 50%</span> (Kader)</li>
+                                        <li class="text-gray-500 font-normal italic mt-1">Berlaku selama masa pendidikan</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="md:hidden mt-8 space-y-4">
+                    <!-- Beasiswa Prestasi Card -->
+                    <div class="bg-white rounded-md shadow-sm border border-gray-200 p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-trophy text-amber-500 text-lg"></i>
+                            <span class="font-bold text-gray-900 text-sm">Prestasi</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-sm uppercase inline-block mb-4">Akademik & Bakat</span>
+                        
+                        <div class="space-y-3 border-t border-gray-200 pt-4">
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-700 mb-2">Kriteria:</h4>
+                                <ul class="space-y-1 text-xs text-gray-600">
+                                    <li>• Juara 1 Paralel SMP/MTs asal</li>
+                                    <li>• Juara 2 & 3 Paralel SMP/MTs asal</li>
+                                    <li>• Juara Lomba tingkat Kabupaten / Provinsi</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-amber-600 mb-2">Benefit:</h4>
+                                <ul class="space-y-1 text-xs text-gray-900 font-semibold">
+                                    <li>• Bebas SPP 1 Tahun (Juara 1)</li>
+                                    <li>• Bebas SPP 6 Bulan (Juara 2 & 3)</li>
+                                    <li>• Reward Khusus (Juara Lomba)</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Card 2: Beasiswa Tahfidz -->
-                    <div class="bg-white p-6 rounded-md border border-gray-200/80 border-t-4 border-t-emerald-500 shadow-sm flex flex-col justify-between fade-up-init" style="transition-delay: 200ms;">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm uppercase">Keagamaan</span>
-                                <i class="fa-solid fa-book-quran text-emerald-500 text-sm"></i>
+                    <!-- Beasiswa Tahfidz Card -->
+                    <div class="bg-white rounded-md shadow-sm border border-gray-200 p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-book-quran text-emerald-500 text-lg"></i>
+                            <span class="font-bold text-gray-900 text-sm">Tahfidz</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm uppercase inline-block mb-4">Keagamaan</span>
+                        
+                        <div class="space-y-3 border-t border-gray-200 pt-4">
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-700 mb-2">Kriteria:</h4>
+                                <ul class="space-y-1 text-xs text-gray-600">
+                                    <li>• Hafal minimal 3 Juz</li>
+                                    <li>• Hafal minimal 5 Juz</li>
+                                    <li>• Hafal 10 Juz atau lebih</li>
+                                </ul>
                             </div>
-                            <h3 class="text-base font-semibold text-gray-900">Beasiswa Tahfidz</h3>
-                            <p class="text-gray-500 text-xs mt-2 leading-relaxed">Apresiasi khusus dan bantuan biaya SPP untuk siswa baru penghafal Al-Qur'an secara terukur.</p>
-                            
-                            <div class="mt-4 py-3 bg-gray-50/50 border border-gray-100 rounded px-3">
-                                <span class="text-[9px] font-bold text-gray-400 uppercase block">Benefit</span>
-                                <span class="text-sm font-semibold text-emerald-600 block">Bebas SPP s.d. 12 Bulan</span>
+                            <div>
+                                <h4 class="text-xs font-bold text-emerald-600 mb-2">Benefit:</h4>
+                                <ul class="space-y-1 text-xs text-gray-900 font-semibold">
+                                    <li>• Bebas SPP 3 Bulan (3 Juz)</li>
+                                    <li>• Bebas SPP 6 Bulan (5 Juz)</li>
+                                    <li>• Bebas SPP 1 Tahun (10+ Juz)</li>
+                                </ul>
                             </div>
-
-                            <ul class="mt-4 space-y-2 text-xs text-gray-600">
-                                <li class="flex items-start gap-2">
-                                    <i class="fa-solid fa-check text-emerald-500 text-[10px] mt-0.5"></i>
-                                    <span>Hafal 3 Juz: Bebas SPP 3 Bulan</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <i class="fa-solid fa-check text-emerald-500 text-[10px] mt-0.5"></i>
-                                    <span>Hafal 5 Juz: Bebas SPP 6 Bulan</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <i class="fa-solid fa-check text-emerald-500 text-[10px] mt-0.5"></i>
-                                    <span>Hafal 10+ Juz: Bebas SPP 1 Tahun</span>
-                                </li>
-                            </ul>
                         </div>
                     </div>
 
-                    <!-- Card 3: Beasiswa Afirmasi -->
-                    <div class="bg-white p-6 rounded-md border border-gray-200/80 border-t-4 border-t-indigo-500 shadow-sm flex flex-col justify-between fade-up-init" style="transition-delay: 300ms;">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-sm uppercase">Kader & Sosial</span>
-                                <i class="fa-solid fa-handshake-angle text-indigo-500 text-sm"></i>
+                    <!-- Beasiswa Afirmasi Card -->
+                    <div class="bg-white rounded-md shadow-sm border border-gray-200 p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-handshake-angle text-indigo-500 text-lg"></i>
+                            <span class="font-bold text-gray-900 text-sm">Afirmasi</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-sm uppercase inline-block mb-4">Kader & Sosial</span>
+                        
+                        <div class="space-y-3 border-t border-gray-200 pt-4">
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-700 mb-2">Kriteria:</h4>
+                                <ul class="space-y-1 text-xs text-gray-600">
+                                    <li>• Siswa Yatim / Piatu</li>
+                                    <li>• Memiliki KIP / PIP / PKH</li>
+                                    <li>• Rekomendasi Kader / Ranting Muhammadiyah</li>
+                                </ul>
                             </div>
-                            <h3 class="text-base font-semibold text-gray-900">Beasiswa Afirmasi</h3>
-                            <p class="text-gray-500 text-xs mt-2 leading-relaxed">Bantuan SPP bagi siswa yatim/piatu, keluarga kurang mampu (KIP/PIP), atau kader persyarikatan Muhammadiyah.</p>
-                            
-                            <div class="mt-4 py-3 bg-gray-50/50 border border-gray-100 rounded px-3">
-                                <span class="text-[9px] font-bold text-gray-400 uppercase block">Benefit</span>
-                                <span class="text-sm font-semibold text-indigo-600 block">Potongan SPP Bulanan 50%</span>
+                            <div>
+                                <h4 class="text-xs font-bold text-indigo-600 mb-2">Benefit:</h4>
+                                <ul class="space-y-1 text-xs text-gray-900 font-semibold">
+                                    <li>• Diskon SPP 50% (Yatim/KIP)</li>
+                                    <li>• Diskon SPP 50% (Kader)</li>
+                                    <li class="text-gray-500 font-normal italic">Berlaku selama masa pendidikan</li>
+                                </ul>
                             </div>
-
-                            <ul class="mt-4 space-y-2 text-xs text-gray-600">
-                                <li class="flex items-start gap-2">
-                                    <i class="fa-solid fa-check text-indigo-500 text-[10px] mt-0.5"></i>
-                                    <span>Yatim/Piatu & KIP/PIP: Diskon SPP 50%</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <i class="fa-solid fa-check text-indigo-500 text-[10px] mt-0.5"></i>
-                                    <span>Rekomendasi Kader/Ranting: Diskon 50%</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <i class="fa-solid fa-check text-indigo-500 text-[10px] mt-0.5"></i>
-                                    <span>Berlaku Selama Masa Pendidikan</span>
-                                </li>
-                            </ul>
                         </div>
                     </div>
-
                 </div>
 
             </div>

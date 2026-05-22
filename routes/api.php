@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Auth\ApiAuthController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,10 +65,10 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // --- Super Admin & Admin only ---
     Route::prefix('admin')->name('api.admin.')->middleware('role:super-admin|admin')->group(function () {
         Route::get('/stats', fn () => response()->json([
-            'users'       => \App\Models\User::count(),
-            'active'      => \App\Models\User::active()->count(),
-            'roles'       => \Spatie\Permission\Models\Role::count(),
-            'permissions' => \Spatie\Permission\Models\Permission::count(),
+            'users' => User::count(),
+            'active' => User::active()->count(),
+            'roles' => Role::count(),
+            'permissions' => Permission::count(),
         ]))->name('stats');
     });
 });

@@ -12,7 +12,7 @@ test('web responses contain essential security headers', function () {
 
 test('hsts header is present in production', function () {
     config(['app.env' => 'production']);
-    
+
     $response = $this->get('/login');
 
     $response->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
@@ -20,7 +20,7 @@ test('hsts header is present in production', function () {
 
 test('hsts header is absent in local environment', function () {
     config(['app.env' => 'local']);
-    
+
     $response = $this->get('/login');
 
     $this->assertFalse($response->headers->has('Strict-Transport-Security'));

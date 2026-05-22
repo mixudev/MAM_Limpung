@@ -17,28 +17,35 @@
         <!-- Article Header -->
         <header class="mb-8 md:mb-10 text-center sm:text-left">
             <div class="flex items-center justify-center sm:justify-start gap-3 mb-4 md:mb-6">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-blue-700 border border-blue-700 px-3 py-1">Prestasi</span>
-                <span class="text-slate-500 text-xs sm:text-sm">15 Mei 2026</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-blue-700 border border-blue-700 px-3 py-1">
+                    {{ $article->category ? $article->category->name : 'Umum' }}
+                </span>
+                <span class="text-slate-500 text-xs sm:text-sm">
+                    {{ $article->published_at ? $article->published_at->translatedFormat('d M Y') : $article->created_at->translatedFormat('d M Y') }}
+                </span>
             </div>
             
             <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight md:leading-[1.1] mb-6 md:mb-8">
-                Tim Robotik MAM Limpung Raih Juara 1 Tingkat Nasional 2025
+                {{ $article->judul }}
             </h1>
             
             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 text-slate-600 text-xs sm:text-sm">
-                <span class="font-bold uppercase tracking-widest text-[10px] sm:text-xs text-slate-900">Oleh Ustadz Budi Santoso</span>
+                <span class="font-bold uppercase tracking-widest text-[10px] sm:text-xs text-slate-900">
+                    Oleh {{ $article->penulis ? $article->penulis->name : 'Penulis Sekolah' }}
+                </span>
                 <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
-                <span class="uppercase tracking-widest text-[10px] sm:text-xs">5 Menit Membaca</span>
+                <span class="uppercase tracking-widest text-[10px] sm:text-xs">
+                    {{ $readTime }} Menit Membaca
+                </span>
             </div>
         </header>
 
         <!-- Sharp Featured Image -->
+        @if($article->thumbnail)
         <div class="w-full aspect-video sm:aspect-[21/9] bg-slate-200 mb-8 md:mb-12 relative">
-            <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=2070&auto=format&fit=crop" alt="Robotik" class="w-full h-full object-cover">
-            <div class="absolute bottom-0 right-0 bg-slate-900 text-white text-[8px] sm:text-[10px] uppercase tracking-widest px-2 sm:px-3 py-1">
-                Foto: Dokumentasi Sekolah
-            </div>
+            <img src="{{ $article->thumbnailUrl() }}" alt="{{ $article->judul }}" class="w-full h-full object-cover">
         </div>
+        @endif
 
         <!-- Article Body (Optimized for Readability) -->
         <div class="prose prose-slate prose-base sm:prose-lg md:prose-xl mx-auto 
@@ -46,43 +53,39 @@
                     prose-headings:font-serif prose-headings:font-bold prose-headings:text-slate-900 prose-headings:leading-tight
                     prose-a:text-blue-700 prose-a:underline prose-a:decoration-blue-300 hover:prose-a:decoration-blue-700
                     prose-blockquote:border-l-4 prose-blockquote:border-amber-500 prose-blockquote:bg-white prose-blockquote:py-3 sm:prose-blockquote:py-4 prose-blockquote:px-5 sm:prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:font-serif prose-blockquote:text-slate-900 prose-blockquote:shadow-sm">
-            
-            <p class="text-lg sm:text-xl md:text-2xl font-serif leading-relaxed mb-8 sm:mb-10 text-slate-900">
-                <span class="float-left text-6xl sm:text-7xl font-serif font-bold text-slate-900 leading-none pr-3 sm:pr-4 pt-1 sm:pt-2">K</span>
-                abar menggembirakan datang dari tim Ekstrakurikuler Robotik Madrasah Aliyah Muhammadiyah (MAM) Limpung. Pada ajang kompetisi merakit robot pintar tingkat nasional, tim kebanggaan sekolah sukses menyabet gelar Juara 1 mengalahkan ratusan peserta lain.
-            </p>
-
-            <p>
-                Ajang yang diselenggarakan di Jakarta Expo Center pada akhir pekan lalu tersebut mempertandingkan kreativitas, logika pemrograman, dan kecepatan robot dalam menyelesaikan rintangan. Tim MAM Limpung yang beranggotakan tiga siswa kelas XI ini berhasil mencatatkan waktu tercepat berkat algoritma pencarian rute yang sangat efisien.
-            </p>
-
-            <h3>Proses Persiapan yang Panjang</h3>
-            <p>
-                Kemenangan ini tentu tidak didapatkan secara instan. Menurut Ustadz Budi selaku pembina ekstrakurikuler, tim telah mempersiapkan desain prototipe dan latihan koding sejak 6 bulan yang lalu. Mereka secara rutin menggunakan fasilitas Laboratorium Komputer sekolah setiap sore hari.
-            </p>
-
-            <blockquote>
-                <p class="mb-2 text-xl sm:text-2xl leading-snug">"Anak-anak menunjukkan dedikasi yang luar biasa. Mereka rela mengorbankan waktu libur untuk melakukan uji coba dan memperbaiki bug. Ini bukti madrasah kita mampu mencetak talenta unggul di bidang teknologi."</p>
-                <footer class="text-xs sm:text-sm font-sans font-bold uppercase tracking-widest text-slate-500">— Ustadz Budi Santoso</footer>
-            </blockquote>
-
-            <h3>Membangun Karakter Melalui Teknologi</h3>
-            <p>
-                Selain keahlian teknis, kompetisi ini juga sangat melatih karakter siswa dalam hal kerja sama tim, memecahkan masalah, dan kemampuan menahan tekanan saat bertanding. Ke depannya, sekolah berencana untuk menambah alat peraga robotik agar semakin banyak siswa yang bisa berpartisipasi.
-            </p>
-
+            {!! $article->konten !!}
         </div>
 
-        <!-- Minimalist Tags & Author Footer -->
+        <!-- Related Articles Recommendations -->
+        @if($relatedArticles->isNotEmpty())
+        <div class="mt-16 pt-10 border-t border-slate-200">
+            <h3 class="font-serif text-2xl font-bold text-slate-900 mb-6">Artikel Terkait</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                @foreach($relatedArticles as $related)
+                    <a href="{{ route('frontend.article.show', $related->slug) }}" class="group flex flex-col">
+                        <div class="w-full aspect-video overflow-hidden bg-slate-200 mb-3 relative">
+                            <img src="{{ $related->thumbnailUrl() }}" alt="{{ $related->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        </div>
+                        <span class="text-[9px] font-bold uppercase tracking-widest text-blue-700 mb-1">
+                            {{ $related->category ? $related->category->name : 'Umum' }}
+                        </span>
+                        <h4 class="font-serif text-sm font-bold text-slate-900 leading-snug group-hover:text-blue-700 transition-colors line-clamp-2">
+                            {{ $related->judul }}
+                        </h4>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Footer Call to Action -->
         <div class="mt-12 md:mt-16 pt-6 md:pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex flex-wrap justify-center gap-2">
-                <a href="#" class="px-3 py-1 border border-slate-200 text-slate-600 hover:border-blue-700 hover:text-blue-700 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors">Robotik</a>
-                <a href="#" class="px-3 py-1 border border-slate-200 text-slate-600 hover:border-blue-700 hover:text-blue-700 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors">Prestasi</a>
+            <div class="text-xs text-slate-500 font-mono">
+                Bagikan artikel ini kepada rekan atau siswa Anda.
             </div>
             
-            <!-- Soft CTA -->
-            <a href="#" class="group flex items-center justify-center w-full md:w-auto gap-4 bg-slate-900 text-white px-6 py-3 hover:bg-blue-700 transition-colors">
-                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest">Daftar PPDB 2026</span>
+            <a href="/ppdb" class="group flex items-center justify-center w-full md:w-auto gap-4 bg-slate-900 text-white px-6 py-3 hover:bg-blue-700 transition-colors">
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest">Daftar PPDB Online</span>
                 <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </a>
         </div>

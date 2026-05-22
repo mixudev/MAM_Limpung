@@ -27,6 +27,19 @@ class SiteSetting extends Model
         'twitter_url',
         'meta_title',
         'meta_description',
+        // Kepala Sekolah
+        'headmaster_name',
+        'headmaster_nip',
+        'headmaster_phone',
+        'headmaster_signature',
+        // Data Sekolah
+        'school_motto',
+        'school_code',
+        'school_founding_year',
+        'school_status',
+        'school_accreditation',
+        'school_website',
+        'school_email_official',
     ];
 
     protected static function booted()

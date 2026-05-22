@@ -34,6 +34,19 @@ class UpdateSiteSettingRequest extends FormRequest
             'twitter_url' => ['nullable', 'url', 'max:255'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:1000'],
+            // Kepala Sekolah
+            'headmaster_name' => ['nullable', 'string', 'max:255'],
+            'headmaster_nip' => ['nullable', 'string', 'max:50'],
+            'headmaster_phone' => ['nullable', 'string', 'max:50'],
+            'headmaster_signature' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:1024'],
+            // Data Sekolah
+            'school_motto' => ['nullable', 'string', 'max:500'],
+            'school_code' => ['nullable', 'string', 'max:50'],
+            'school_founding_year' => ['nullable', 'integer', 'min:1900', 'max:'.date('Y')],
+            'school_status' => ['nullable', 'in:Negeri,Swasta'],
+            'school_accreditation' => ['nullable', 'string', 'max:10'],
+            'school_website' => ['nullable', 'url', 'max:255'],
+            'school_email_official' => ['nullable', 'email', 'max:255'],
         ];
     }
 }

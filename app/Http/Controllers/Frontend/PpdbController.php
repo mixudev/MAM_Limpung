@@ -20,14 +20,19 @@ class PpdbController extends Controller
         $general = PpdbSetting::getValue('general', [
             'is_open' => true,
             'tahun_ajaran' => (int) date('Y'),
-            'target_quota' => 120,
-            'registration_fee' => 150000,
-            'start_date' => date('Y').'-05-01',
-            'end_date' => date('Y').'-08-31',
         ]);
-        $requirements = PpdbSetting::getValue('requirements', []);
+        $waves = collect(PpdbSetting::getValue('waves', []))
+            ->filter(function ($wave) {
+                return $wave['is_active'] ?? true;
+            })
+            ->values()
+            ->all();
 
-        return view('front.ppdb.index', compact('general', 'requirements'));
+        $requirements = collect(PpdbSetting::getValue('requirements', []))->filter(function ($req) {
+            return $req['is_active'] ?? true;
+        })->values()->all();
+
+        return view('front.ppdb.index', compact('general', 'waves', 'requirements'));
     }
 
     public function form(): View|RedirectResponse
@@ -35,24 +40,37 @@ class PpdbController extends Controller
         $general = PpdbSetting::getValue('general', [
             'is_open' => true,
             'tahun_ajaran' => (int) date('Y'),
-            'target_quota' => 120,
-            'registration_fee' => 150000,
-            'start_date' => date('Y').'-05-01',
-            'end_date' => date('Y').'-08-31',
         ]);
+        $waves = PpdbSetting::getValue('waves', []);
 
         $today = date('Y-m-d');
-        $isOpen = $general['is_open'] && ($today >= $general['start_date'] && $today <= $general['end_date']);
+        $isWaveActive = false;
 
-        if (! $isOpen) {
-            return view('front.ppdb.closed', compact('general'));
+        foreach ($waves as $wave) {
+            if ($today >= $wave['start_date'] && $today <= $wave['end_date']) {
+                $isWaveActive = true;
+                break;
+            }
         }
 
-        $formFields = PpdbSetting::getValue('form_fields', []);
-        $requirements = PpdbSetting::getValue('requirements', []);
+        // If waves are empty, we just fallback to general is_open
+        $isOpen = $general['is_open'] && (empty($waves) || $isWaveActive);
+
+        if (! $isOpen) {
+            return view('front.ppdb.closed', compact('general', 'waves'));
+        }
+
+        $formFields = collect(PpdbSetting::getValue('form_fields', []))->filter(function ($field) {
+            return $field['is_active'] ?? true;
+        })->values()->all();
+
+        $requirements = collect(PpdbSetting::getValue('requirements', []))->filter(function ($req) {
+            return $req['is_active'] ?? true;
+        })->values()->all();
+
         $ppdbTempUploads = PpdbTempUploadManager::forView();
 
-        return view('front.ppdb.form', compact('general', 'formFields', 'requirements', 'ppdbTempUploads'));
+        return view('front.ppdb.form', compact('general', 'waves', 'formFields', 'requirements', 'ppdbTempUploads'));
     }
 
     public function store(PpdbStoreRequest $request): RedirectResponse
@@ -60,14 +78,20 @@ class PpdbController extends Controller
         $general = PpdbSetting::getValue('general', [
             'is_open' => true,
             'tahun_ajaran' => (int) date('Y'),
-            'target_quota' => 120,
-            'registration_fee' => 150000,
-            'start_date' => date('Y').'-05-01',
-            'end_date' => date('Y').'-08-31',
         ]);
+        $waves = PpdbSetting::getValue('waves', []);
 
         $today = date('Y-m-d');
-        $isOpen = $general['is_open'] && ($today >= $general['start_date'] && $today <= $general['end_date']);
+        $isWaveActive = false;
+
+        foreach ($waves as $wave) {
+            if ($today >= $wave['start_date'] && $today <= $wave['end_date']) {
+                $isWaveActive = true;
+                break;
+            }
+        }
+
+        $isOpen = $general['is_open'] && (empty($waves) || $isWaveActive);
 
         if (! $isOpen) {
             return redirect()->route('frontend.ppdb.index')
@@ -91,7 +115,7 @@ class PpdbController extends Controller
         // Handle dynamic requirement document uploads (except main photo which is 'foto')
         $requirements = PpdbSetting::getValue('requirements', []);
         foreach ($requirements as $req) {
-            if ($req['id'] === 'foto') {
+            if ($req['id'] === 'foto' || ! ($req['is_active'] ?? true)) {
                 continue;
             }
             if ($request->hasFile($req['id'])) {
@@ -109,6 +133,9 @@ class PpdbController extends Controller
         // Handle custom input fields
         $formFields = PpdbSetting::getValue('form_fields', []);
         foreach ($formFields as $field) {
+            if (! ($field['is_active'] ?? true)) {
+                continue;
+            }
             if (isset($validated[$field['id']])) {
                 $additional[$field['id']] = $validated[$field['id']];
                 unset($validated[$field['id']]);

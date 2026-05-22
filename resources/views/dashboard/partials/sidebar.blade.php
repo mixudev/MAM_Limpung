@@ -54,6 +54,7 @@
                         <span class="sidebar-tooltip">Akademik</span>
                     </a>
                 </li>
+                @if(Auth::user()->hasAnyPermission(['access-admin-dashboard', 'access-super-admin-dashboard']))
                 <li>
                     <a href="#" class="sidebar-link dropdown-trigger {{ Route::is('admin.ppdb.*') ? 'active dropdown-open' : '' }}" aria-label="PPDB">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
@@ -99,6 +100,7 @@
                         </div>
                     </ul>
                 </li>
+                @endif
             </ul>
         </div>
 
@@ -107,8 +109,9 @@
                 class="sidebar-section-title px-3 mb-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-white/50 dark:text-zinc-500">
                 Information</p>
             <ul class="space-y-0.5">
+                @can('view-articles')
                 <li>
-                    <a href="#" data-page="article" class="sidebar-link disabled" aria-label="Artikel">
+                    <a href="{{ route('admin.articles.index') }}" class="sidebar-link {{ Route::is('admin.articles.*') ? 'active' : '' }}" aria-label="Artikel">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-newspaper" viewBox="0 0 16 16">
                                 <path d="M0 2.5A1.5 1.5 0 0 1 1.5 1h11A1.5 1.5 0 0 1 14 2.5v10.528c0 .3-.05.654-.238.972h.738a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 1 1 0v9a1.5 1.5 0 0 1-1.5 1.5H1.497A1.497 1.497 0 0 1 0 13.5zM12 14c.37 0 .654-.211.853-.441.092-.106.147-.279.147-.531V2.5a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0-.5.5v11c0 .278.223.5.497.5z"/>
@@ -119,6 +122,8 @@
                         <span class="sidebar-tooltip">Artikel</span>
                     </a>
                 </li>
+                @endcan
+                @if(Auth::user()->hasAnyPermission(['access-admin-dashboard', 'access-super-admin-dashboard']))
                 <li>
                     <a href="{{ route('admin.announcements.index') }}" data-page="pengumuman" class="sidebar-link {{ Route::is('admin.announcements.*') ? 'active' : '' }}" aria-label="Pengumuman">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
@@ -131,7 +136,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="sidebar-link dropdown-trigger" aria-label="kategori">
+                    <a href="#" class="sidebar-link dropdown-trigger {{ Route::is('admin.article-categories.*') ? 'active dropdown-open' : '' }}" aria-label="kategori">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid" viewBox="0 0 16 16">
                                 <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/>
@@ -147,13 +152,13 @@
                     <ul class="sidebar-submenu">
                         <div class="sidebar-submenu-inner">
                             <li>
-                                <a href="#" data-page="kategori-artikel" class="sidebar-link disabled text-xs py-1.5"
+                                <a href="{{ route('admin.article-categories.index') }}" class="sidebar-link text-xs py-1.5 "
                                     aria-label="kategori-artikel">
-                                    <span class="sidebar-label">kategori-artikel</span>
+                                    <span class="sidebar-label">Kategori Artikel</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" data-page="other_logs" class="sidebar-link disabled text-xs py-1.5"
+                                <a href="#" class="sidebar-link disabled text-xs py-1.5"
                                     aria-label="Lain-lain">
                                     <span class="sidebar-label">Lain-lain</span>
                                 </a>
@@ -173,6 +178,7 @@
                         <span class="sidebar-tooltip">Pengaturan Web</span>
                     </a>
                 </li>
+                @endif
             </ul>
         </div>
 

@@ -76,7 +76,7 @@ class UserPolicy
         }
 
         // Prevent privilege escalation: cannot modify higher-level users
-        $authLevel   = $authUser->roles->max('level') ?? 0;
+        $authLevel = $authUser->roles->max('level') ?? 0;
         $targetLevel = $targetUser->roles->max('level') ?? 0;
 
         return $authLevel > $targetLevel || $authUser->id === $targetUser->id;
@@ -97,7 +97,7 @@ class UserPolicy
         }
 
         // Prevent privilege escalation
-        $authLevel   = $authUser->roles->max('level') ?? 0;
+        $authLevel = $authUser->roles->max('level') ?? 0;
         $targetLevel = $targetUser->roles->max('level') ?? 0;
 
         if ($authLevel <= $targetLevel) {
