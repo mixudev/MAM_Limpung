@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dashboard\Security\RolePermissionController;
+use App\Http\Controllers\Dashboard\Security\SecuritySettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('super-admin')
@@ -17,14 +18,15 @@ Route::prefix('admin')
     ->name('admin.')
     ->middleware(['auth', 'active', 'permission:access-admin-dashboard'])
     ->group(function () {
-        Route::get('/security', [App\Http\Controllers\Dashboard\Security\SecuritySettingsController::class, 'index'])->name('security.index');
-        Route::post('/security/credentials', [App\Http\Controllers\Dashboard\Security\SecuritySettingsController::class, 'updateCredentials'])->name('security.credentials.update');
-        Route::post('/security/backup/settings', [App\Http\Controllers\Dashboard\Security\SecuritySettingsController::class, 'updateBackupSettings'])->name('security.backup.settings');
-        Route::post('/security/backup/generate-key', [App\Http\Controllers\Dashboard\Security\SecuritySettingsController::class, 'generateKey'])->name('security.backup.generate-key');
-        Route::get('/security/backup/download-key', [App\Http\Controllers\Dashboard\Security\SecuritySettingsController::class, 'downloadKey'])->name('security.backup.download-key');
-        Route::post('/security/backup/run', [App\Http\Controllers\Dashboard\Security\SecuritySettingsController::class, 'runBackup'])->name('security.backup.run');
-        Route::get('/security/backup/download/{filename}', [App\Http\Controllers\Dashboard\Security\SecuritySettingsController::class, 'downloadBackup'])->name('security.backup.download');
-        Route::delete('/security/backup/delete/{filename}', [App\Http\Controllers\Dashboard\Security\SecuritySettingsController::class, 'deleteBackup'])->name('security.backup.delete');
-        Route::post('/security/backup/verify', [App\Http\Controllers\Dashboard\Security\SecuritySettingsController::class, 'verifyBackup'])->name('security.backup.verify');
+        Route::get('/security', [SecuritySettingsController::class, 'index'])->name('security.index');
+        Route::post('/security/credentials', [SecuritySettingsController::class, 'updateCredentials'])->name('security.credentials.update');
+        Route::post('/security/backup/settings', [SecuritySettingsController::class, 'updateBackupSettings'])->name('security.backup.settings');
+        Route::post('/security/backup/generate-key', [SecuritySettingsController::class, 'generateKey'])->name('security.backup.generate-key');
+        Route::post('/security/backup/download-key', [SecuritySettingsController::class, 'downloadKey'])->name('security.backup.download-key');
+        Route::post('/security/backup/run', [SecuritySettingsController::class, 'runBackup'])->name('security.backup.run');
+        Route::get('/security/backup/download/{filename}', [SecuritySettingsController::class, 'downloadBackup'])->name('security.backup.download');
+        Route::delete('/security/backup/delete/{filename}', [SecuritySettingsController::class, 'deleteBackup'])->name('security.backup.delete');
+        Route::post('/security/backup/verify', [SecuritySettingsController::class, 'verifyBackup'])->name('security.backup.verify');
+        Route::get('/security/backup/storage-directories', [SecuritySettingsController::class, 'getStorageDirectories'])->name('security.backup.storage-directories');
+        Route::get('/security/backup/log/{id}', [SecuritySettingsController::class, 'getBackupLogDetails'])->name('security.backup.log-details');
     });
-

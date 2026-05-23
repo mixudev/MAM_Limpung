@@ -18,7 +18,7 @@
     'bordered' => true,
     'logoSize' => '110px',
     'line1'    => 'MAJELIS PENDIDIKAN DASAR DAN MENENGAH MUHAMMADIYAH',
-    'line2'    => 'Madrasah Aliyah Muhammadiyah Limpung',
+    'line2'    => 'Madrasah Aliyah Muhammadiyah Limpung', 
     'line3'    => 'Terakreditasi B | NPSN: 20363023 | NSM: 131233250001',
     'line4'    => 'Jalan Cokronegoro No.34 Limpung Kabupaten Batang | Telp: (0285) 4468835 | 51271',
     'logoSrc'  => null,

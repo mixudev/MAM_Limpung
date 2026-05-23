@@ -45,7 +45,7 @@
         .kop-logo {
             position: absolute;
             left: 0;
-            top: 50%;
+            top: 40%;
             transform: translateY(-50%);
             object-fit: contain;
             flex-shrink: 0;

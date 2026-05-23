@@ -7,6 +7,9 @@
         if (breadcrumb) {
             breadcrumb.textContent = 'Keamanan & Backup';
         }
+        if (typeof toggleStorageFolders === 'function') {
+            toggleStorageFolders();
+        }
     });
 </script>
 
@@ -189,12 +192,39 @@
                                         </div>
                                     </label>
                                     <label class="flex items-start gap-3 p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-850 cursor-pointer select-none" style="display:flex !important; margin-bottom:0 !important;">
-                                        <input type="checkbox" name="backup_storage" value="1" class="mt-0.5 text-indigo-600 focus:ring-indigo-500 border-slate-350 dark:border-zinc-800" {{ $backupSettings['backup_storage'] ? 'checked' : '' }}>
+                                        <input type="checkbox" name="backup_storage" id="backup-storage-checkbox" value="1" onchange="toggleStorageFolders()" class="mt-0.5 text-indigo-600 focus:ring-indigo-500 border-slate-350 dark:border-zinc-800" {{ $backupSettings['backup_storage'] ? 'checked' : '' }}>
                                         <div class="space-y-0.5">
                                             <span class="text-xs font-bold text-slate-855 dark:text-zinc-200 block">File Storage Uploads</span>
                                             <p class="text-[10px] text-slate-555 dark:text-zinc-400">File berkas unggahan pendaftar.</p>
                                         </div>
                                     </label>
+                                </div>
+
+                                <!-- Sub-panel Selective Storage Folders -->
+                                <div id="storage-folders-wrapper" class="p-4 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-850 space-y-3 transition-all duration-300 {{ $backupSettings['backup_storage'] ? '' : 'hidden' }}">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold text-slate-700 dark:text-zinc-350">Pilih Folder untuk Dibackup (Opsional)</span>
+                                        <button type="button" onclick="scanStorageDirectories()" class="inline-flex items-center gap-1.5 py-1 px-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-[10px] font-mono font-bold text-slate-600 dark:text-zinc-400 transition-all shadow-sm">
+                                            <i class="fa-solid fa-arrows-rotate" id="scan-btn-icon"></i> Scan Folder Realtime
+                                        </button>
+                                    </div>
+                                    <p class="text-[10px] text-slate-505 dark:text-zinc-500">Centang folder tertentu saja yang ingin dicadangkan. Jika tidak ada yang dicentang, sistem otomatis membackup seluruh isi storage public.</p>
+                                    
+                                    <div id="storage-folders-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1.5">
+                                        @forelse($storageDirs as $dir)
+                                            <label class="flex items-center justify-between p-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-indigo-500 dark:hover:border-zinc-700 cursor-pointer transition-all duration-200 select-none">
+                                                <div class="flex items-center gap-2">
+                                                    <input type="checkbox" name="storage_folders[]" value="{{ $dir['name'] }}" class="text-indigo-600 focus:ring-indigo-500 border-slate-350 dark:border-zinc-800" {{ in_array($dir['name'], $selectedFolders) ? 'checked' : '' }}>
+                                                    <span class="text-xs font-mono text-slate-700 dark:text-zinc-300">{{ $dir['name'] }}</span>
+                                                </div>
+                                                <span class="text-[10px] font-mono font-bold text-slate-400 dark:text-zinc-500">{{ $dir['formatted_size'] }}</span>
+                                            </label>
+                                        @empty
+                                            <div class="col-span-2 py-4 text-center text-slate-450 dark:text-zinc-550 font-mono text-[10px]">
+                                                Tidak ada folder yang ditemukan di public storage.
+                                            </div>
+                                        @endforelse
+                                    </div>
                                 </div>
                             </div>
 
@@ -249,9 +279,9 @@
                                                 Kunci enkripsi acak 64-karakter hex yang sangat kuat telah dibuat secara otomatis oleh sistem. Seluruh cadangan data berikutnya akan diamankan dengan kunci ini.
                                             </p>
                                             <div class="flex flex-wrap gap-2 pt-1">
-                                                <a href="{{ route('admin.security.backup.download-key') }}" class="inline-flex items-center gap-2 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-[10px] uppercase tracking-wider rounded-none transition-all shadow-sm">
+                                                <button type="button" onclick="confirmKeyDownload()" class="inline-flex items-center gap-2 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-[10px] uppercase tracking-wider rounded-none transition-all shadow-sm">
                                                     <i class="fa-solid fa-download"></i> Download Kunci (.txt)
-                                                </a>
+                                                </button>
                                                 <button type="button" onclick="confirmKeyRotation()" class="inline-flex items-center gap-2 py-2 px-4 bg-amber-600 hover:bg-amber-700 text-white font-mono font-bold text-[10px] uppercase tracking-wider rounded-none transition-all shadow-sm">
                                                     <i class="fa-solid fa-rotate"></i> Rotasi Kunci Baru
                                                 </button>
@@ -392,16 +422,16 @@
                                     @forelse($backupHistory as $history)
                                     <tr class="hover:bg-slate-50/60 dark:hover:bg-zinc-900/40 transition-colors">
                                         <td class="py-3.5 px-4 font-mono text-[11px] text-slate-500 dark:text-zinc-400 whitespace-nowrap">
-                                            {{ \Carbon\Carbon::parse($history['created_at'])->format('d-m-Y H:i:s') }}
+                                            {{ $history->created_at ? $history->created_at->format('d-m-Y H:i:s') : '-' }}
                                         </td>
                                         <td class="py-3.5 px-4 font-medium text-slate-800 dark:text-zinc-200 font-mono text-[11px] break-all max-w-[200px]">
-                                            {{ $history['filename'] }}
+                                            {{ $history->filename }}
                                         </td>
                                         <td class="py-3.5 px-4 text-slate-600 dark:text-zinc-400 whitespace-nowrap">
-                                            {{ $history['status'] === 'success' ? round($history['size'] / 1024 / 1024, 2) . ' MB' : '-' }}
+                                            {{ $history->status === 'success' ? $history->formatted_size : '-' }}
                                         </td>
                                         <td class="py-3.5 px-4 whitespace-nowrap">
-                                            @if($history['encrypted'])
+                                            @if($history->encrypted)
                                                 <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 border border-indigo-500/15">
                                                     <i class="fa-solid fa-lock text-[9px]"></i> AES-256
                                                 </span>
@@ -412,12 +442,12 @@
                                             @endif
                                         </td>
                                         <td class="py-3.5 px-4 whitespace-nowrap">
-                                            @if($history['drive_uploaded'])
-                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 border border-emerald-500/15" title="Drive File ID: {{ $history['drive_file_id'] }}">
+                                            @if($history->drive_uploaded)
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 border border-emerald-500/15" title="Drive File ID: {{ $history->drive_file_id }}">
                                                     <i class="fa-brands fa-google-drive"></i> Berhasil
                                                 </span>
-                                            @elseif(!empty($history['drive_error']))
-                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-1.5 py-0.5 border border-rose-500/15 cursor-help" title="Error: {{ $history['drive_error'] }}">
+                                            @elseif(!empty($history->drive_error))
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-1.5 py-0.5 border border-rose-500/15 cursor-help" title="Error: {{ $history->drive_error }}">
                                                     <i class="fa-solid fa-triangle-exclamation"></i> Gagal
                                                 </span>
                                             @else
@@ -427,27 +457,33 @@
                                             @endif
                                         </td>
                                         <td class="py-3.5 px-4 whitespace-nowrap text-center">
-                                            @if($history['status'] === 'success')
+                                            @if($history->status === 'success')
                                                 <span class="inline-block text-[10px] font-bold px-2 py-0.5 bg-emerald-500 text-white dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/20">SUKSES</span>
                                             @else
-                                                <span class="inline-block text-[10px] font-bold px-2 py-0.5 bg-rose-500 text-white dark:bg-rose-950/40 dark:text-rose-400 border border-rose-500/20 cursor-help" title="Kesalahan: {{ $history['error_message'] ?? 'Eror tidak diketahui' }}">GAGAL</span>
+                                                <span class="inline-block text-[10px] font-bold px-2 py-0.5 bg-rose-500 text-white dark:bg-rose-950/40 dark:text-rose-400 border border-rose-500/20">GAGAL</span>
                                             @endif
                                         </td>
                                         <td class="py-3.5 px-4 whitespace-nowrap text-right space-x-1.5">
-                                            @if($history['status'] === 'success')
-                                                <a href="{{ route('admin.security.backup.download', ['filename' => $history['filename']]) }}"
+                                            <!-- Tombol Info (Selalu muncul untuk detail AJAX) -->
+                                            <button type="button" onclick="showBackupLogDetails({{ $history->id }})"
+                                                    class="inline-flex items-center justify-center w-7 h-7 bg-blue-50 dark:bg-zinc-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-zinc-700 hover:bg-blue-600 hover:text-white transition-colors" title="Detail Info Lengkap">
+                                                <i class="fa-solid fa-circle-info text-[11px]"></i>
+                                            </button>
+ 
+                                            @if($history->status === 'success')
+                                                <a href="{{ route('admin.security.backup.download', ['filename' => $history->filename]) }}"
                                                    class="inline-flex items-center justify-center w-7 h-7 bg-indigo-50 dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-zinc-700 hover:bg-indigo-600 hover:text-white transition-colors" title="Unduh Berkas ke Komputer">
                                                     <i class="fa-solid fa-download text-[11px]"></i>
                                                 </a>
-                                                <button type="button" onclick="prefillVerification('{{ $history['filename'] }}')"
+                                                <button type="button" onclick="prefillVerification('{{ $history->filename }}')"
                                                         class="inline-flex items-center justify-center w-7 h-7 bg-slate-100 dark:bg-zinc-800 text-slate-650 dark:text-zinc-350 border border-slate-250 dark:border-zinc-700 hover:bg-indigo-500 hover:text-white transition-colors" title="Uji Dekripsi Berkas Ini">
                                                     <i class="fa-solid fa-shield-halved text-[11px]"></i>
                                                 </button>
-                                                <button type="button" onclick="deleteBackup('{{ $history['filename'] }}')"
-                                                        class="inline-flex items-center justify-center w-7 h-7 bg-rose-50 dark:bg-zinc-800 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-zinc-700 hover:bg-rose-600 hover:text-white transition-colors" title="Hapus Berkas Backup">
-                                                    <i class="fa-solid fa-trash-can text-[11px]"></i>
-                                                </button>
                                             @endif
+                                            <button type="button" onclick="deleteBackup('{{ $history->filename }}')"
+                                                    class="inline-flex items-center justify-center w-7 h-7 bg-rose-50 dark:bg-zinc-800 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-zinc-700 hover:bg-rose-600 hover:text-white transition-colors" title="Hapus Berkas Backup / Log">
+                                                <i class="fa-solid fa-trash-can text-[11px]"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                     @empty
@@ -483,7 +519,7 @@
                         <div class="p-4 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-850 text-[11px] space-y-2">
                             <span class="text-slate-700 dark:text-zinc-350 font-bold uppercase tracking-wider block">Verifikasi via Command Line (CLI):</span>
                             <p class="text-slate-550 dark:text-zinc-400 leading-relaxed">Jika Anda mengunduh berkas backup berekstensi <code>.enc</code> ke PC lokal, Anda dapat mendekripsinya secara manual menggunakan OpenSSL CLI di terminal:</p>
-                            <pre class="bg-zinc-950 text-emerald-400 p-2.5 overflow-x-auto text-[10px] font-mono border border-zinc-850 leading-relaxed">openssl enc -d -aes-256-cbc -salt -in [NAMA_FILE].enc -out [NAMA_FILE].zip</pre>
+                            <pre class="bg-zinc-950 text-emerald-400 p-2.5 overflow-x-auto text-[10px] font-mono border border-zinc-850 leading-relaxed">openssl enc -d -aes-256-cbc -pbkdf2 -iter 10000 -in [NAMA_FILE].enc -out [NAMA_FILE].zip</pre>
                             <span class="text-[10px] text-slate-455 dark:text-zinc-555 block mt-1">Masukkan kata sandi enkripsi Anda saat dimintai password di terminal CLI.</span>
                         </div>
                     </div>
@@ -637,10 +673,12 @@
             }
         })
         .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => { throw new Error(err.message || 'Respons server gagal.') });
-            }
-            return response.json();
+            return response.json().then(data => {
+                if (!response.ok) {
+                    return Promise.reject({ message: data.message || 'Respons server gagal.', log: data.log });
+                }
+                return data;
+            });
         })
         .then(data => {
             logToTerminal('Inisialisasi berhasil!', 'success');
@@ -658,27 +696,100 @@
             }
 
             logToTerminal(`Penghapusan berkas temporer: BERSIH`, 'info');
-            logToTerminal(`Ukuran File Akhir: ${(data.log.size / 1024 / 1024).toFixed(2)} MB`, 'system');
+            logToTerminal(`Ukuran File Akhir: ${data.log.status === 'success' ? data.log.formatted_size : '-'}`, 'system');
             logToTerminal(`Total Durasi Proses: ${data.log.duration} detik`, 'system');
-            logToTerminal(`Backup selesai dengan sempurna! File disimpan: ${data.log.filename}`, 'success');
+            logToTerminal(`Backup selesai dengan sukses! File disimpan: ${data.log.filename}`, 'success');
             
             terminalIndicator.className = 'w-2 h-2 rounded-full bg-emerald-500';
             terminalStatusText.innerText = 'Status: Eksekusi Sukses!';
 
-            // Reload page or dynamically update table after a brief moment
-            setTimeout(() => {
-                window.location.reload();
-            }, 2500);
+            // Dynamic table update without reload
+            appendBackupLogToTable(data.log);
+
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            terminalSpinner.classList.add('hidden');
         })
         .catch(err => {
-            logToTerminal(`PROSES BACKUP GAGAL: ${err.message}`, 'error');
+            logToTerminal(`PROSES BACKUP GAGAL: ${err.message || err}`, 'error');
             terminalIndicator.className = 'w-2 h-2 rounded-full bg-rose-500';
             terminalStatusText.innerText = 'Status: Eksekusi Eror!';
             
+            if (err.log) {
+                appendBackupLogToTable(err.log);
+            }
+
             btn.disabled = false;
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
             terminalSpinner.classList.add('hidden');
         });
+    }
+
+    // Dynamic table update helper
+    function appendBackupLogToTable(log) {
+        const tbody = document.getElementById('backup-history-tbody');
+        
+        if (tbody.children.length === 1 && tbody.innerHTML.includes('Belum ada riwayat')) {
+            tbody.innerHTML = '';
+        }
+        
+        const downloadUrl = "{{ route('admin.security.backup.download', ['filename' => ':filename']) }}".replace(':filename', log.filename);
+        
+        const row = document.createElement('tr');
+        row.className = "hover:bg-slate-50/60 dark:hover:bg-zinc-900/40 transition-colors";
+        
+        row.innerHTML = `
+            <td class="py-3.5 px-4 font-mono text-[11px] text-slate-500 dark:text-zinc-400 whitespace-nowrap">
+                ${log.formatted_date}
+            </td>
+            <td class="py-3.5 px-4 font-medium text-slate-800 dark:text-zinc-200 font-mono text-[11px] break-all max-w-[200px]">
+                ${log.filename}
+            </td>
+            <td class="py-3.5 px-4 text-slate-600 dark:text-zinc-400 whitespace-nowrap">
+                ${log.status === 'success' ? log.formatted_size : '-'}
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+                ${log.encrypted 
+                    ? '<span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 border border-indigo-500/15"><i class="fa-solid fa-lock text-[9px]"></i> AES-256</span>'
+                    : '<span class="inline-flex items-center gap-1 text-[10px] font-medium text-slate-550 bg-slate-500/10 px-1.5 py-0.5 border border-slate-500/10"><i class="fa-solid fa-lock-open text-[9px]"></i> Tidak</span>'
+                }
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+                ${log.drive_uploaded
+                    ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 border border-emerald-500/15" title="Drive File ID: ${log.drive_file_id}"><i class="fa-brands fa-google-drive"></i> Berhasil</span>`
+                    : (log.drive_error
+                        ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-1.5 py-0.5 border border-rose-500/15 cursor-help" title="Error: ${log.drive_error}"><i class="fa-solid fa-triangle-exclamation"></i> Gagal</span>`
+                        : '<span class="inline-flex items-center gap-1 text-[10px] font-medium text-slate-400 bg-slate-400/5 px-1.5 py-0.5 border border-slate-450/10">-</span>')
+                }
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap text-center">
+                ${log.status === 'success'
+                    ? '<span class="inline-block text-[10px] font-bold px-2 py-0.5 bg-emerald-500 text-white dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/20">SUKSES</span>'
+                    : '<span class="inline-block text-[10px] font-bold px-2 py-0.5 bg-rose-500 text-white dark:bg-rose-950/40 dark:text-rose-400 border border-rose-500/20">GAGAL</span>'
+                }
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap text-right space-x-1.5">
+                ${log.status === 'success' 
+                    ? `
+                    <a href="${downloadUrl}"
+                       class="inline-flex items-center justify-center w-7 h-7 bg-indigo-50 dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-zinc-700 hover:bg-indigo-600 hover:text-white transition-colors" title="Unduh Berkas ke Komputer">
+                        <i class="fa-solid fa-download text-[11px]"></i>
+                    </a>
+                    <button type="button" onclick="prefillVerification('${log.filename}')"
+                            class="inline-flex items-center justify-center w-7 h-7 bg-slate-100 dark:bg-zinc-800 text-slate-650 dark:text-zinc-350 border border-slate-250 dark:border-zinc-700 hover:bg-indigo-500 hover:text-white transition-colors" title="Uji Dekripsi Berkas Ini">
+                        <i class="fa-solid fa-shield-halved text-[11px]"></i>
+                    </button>
+                    ` 
+                    : ''
+                }
+                <button type="button" onclick="deleteBackup('${log.filename}')"
+                        class="inline-flex items-center justify-center w-7 h-7 bg-rose-50 dark:bg-zinc-800 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-zinc-700 hover:bg-rose-600 hover:text-white transition-colors" title="Hapus Berkas Backup / Log">
+                    <i class="fa-solid fa-trash-can text-[11px]"></i>
+                </button>
+            </td>
+        `;
+        
+        tbody.insertBefore(row, tbody.firstChild);
     }
 
     // Prefill fields for validation tab
@@ -824,47 +935,387 @@
         });
     }
 
-    // Delete Backup
+    // Delete Backup using AppPopup.confirm
     function deleteBackup(filename) {
-        if (!confirm(`Apakah Anda yakin ingin menghapus berkas backup "${filename}" secara permanen? Tindakan ini tidak dapat dibatalkan.`)) {
-            return;
-        }
+        AppPopup.show({
+            type: 'confirm',
+            title: 'Hapus Berkas Backup?',
+            description: `Apakah Anda yakin ingin menghapus berkas backup <strong>${filename}</strong> secara permanen? Tindakan ini tidak dapat dibatalkan.`,
+            confirmText: 'Ya, Hapus',
+            cancelText: 'Batal',
+            icon: `<svg class="popup-anim-svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                    <path d="M10 11v6M14 11v6"/>
+                    <path d="M9 6V4h6v2"/>
+                  </svg>`,
+            onConfirm: () => {
+                const url = "{{ route('admin.security.backup.delete', ['filename' => ':filename']) }}".replace(':filename', filename);
 
-        const url = "{{ route('admin.security.backup.delete', ['filename' => ':filename']) }}".replace(':filename', filename);
-
-        fetch(url, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        AppPopup.success({
+                            title: 'Berhasil!',
+                            description: data.message,
+                            duration: 2000
+                        });
+                        setTimeout(() => window.location.reload(), 2000);
+                    } else {
+                        AppPopup.error({
+                            title: 'Gagal',
+                            description: `Gagal menghapus: ${data.message}`
+                        });
+                    }
+                })
+                .catch(err => {
+                    AppPopup.error({
+                        title: 'Eror',
+                        description: `Terjadi kesalahan sistem: ${err.message}`
+                    });
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                window.location.reload();
-            } else {
-                alert(`Gagal menghapus: ${data.message}`);
-            }
-        })
-        .catch(err => {
-            alert(`Terjadi kesalahan sistem: ${err.message}`);
         });
     }
 
-    function submitGenerateKey() {
-        document.getElementById('generate-key-form').submit();
+    function openPasswordConfirmModal(actionType) {
+        const form = document.getElementById('password-confirm-form');
+        const input = document.getElementById('confirm_password_input');
+        input.value = ''; // Reset input
+        
+        if (actionType === 'download') {
+            form.action = "{{ route('admin.security.backup.download-key') }}";
+        } else if (actionType === 'rotate') {
+            form.action = "{{ route('admin.security.backup.generate-key') }}";
+        }
+        
+        AppModal.open('passwordConfirmModal');
     }
 
     function confirmKeyRotation() {
-        if (confirm('PERINGATAN: Merotasi kunci akan menghasilkan kunci enkripsi baru. Berkas backup lama yang terenkripsi tidak akan bisa didekripsi dengan kunci baru ini (kecuali Anda masih memiliki salinan kunci lama yang telah diunduh). Apakah Anda yakin ingin melanjutkan?')) {
-            submitGenerateKey();
+        AppPopup.show({
+            type: 'warning',
+            title: 'Rotasi Kunci Enkripsi?',
+            description: 'PERINGATAN: Merotasi kunci akan menghasilkan kunci enkripsi baru. Berkas backup lama yang terenkripsi tidak akan bisa didekripsi dengan kunci baru ini. Apakah Anda yakin ingin melanjutkan?',
+            confirmText: 'Ya, Lanjutkan',
+            cancelText: 'Batal',
+            icon: `<svg class="popup-anim-svg text-amber-500" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                  </svg>`,
+            onConfirm: () => {
+                openPasswordConfirmModal('rotate');
+            }
+        });
+    }
+
+    function confirmKeyDownload() {
+        AppPopup.show({
+            type: 'custom',
+            title: 'Unduh Kunci Enkripsi?',
+            description: 'Apakah Anda yakin ingin mengunduh berkas kunci enkripsi? Kunci ini sangat rahasia dan wajib disimpan dengan aman untuk keperluan dekripsi cadangan data Anda.',
+            confirmText: 'Ya, Unduh',
+            cancelText: 'Batal',
+            icon: `<svg class="popup-anim-svg text-indigo-500" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>`,
+            onConfirm: () => {
+                openPasswordConfirmModal('download');
+            }
+        });
+    }
+
+    function toggleStorageFolders() {
+        const checkbox = document.getElementById('backup-storage-checkbox');
+        const wrapper = document.getElementById('storage-folders-wrapper');
+        if (checkbox && wrapper) {
+            if (checkbox.checked) {
+                wrapper.classList.remove('hidden');
+            } else {
+                wrapper.classList.add('hidden');
+            }
         }
+    }
+
+    function scanStorageDirectories() {
+        const icon = document.getElementById('scan-btn-icon');
+        const listContainer = document.getElementById('storage-folders-list');
+        if (!icon || !listContainer) return;
+        
+        icon.classList.add('fa-spin');
+        
+        fetch("{{ route('admin.security.backup.storage-directories') }}", {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Gagal melakukan scanning folder.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            icon.classList.remove('fa-spin');
+            if (data.success) {
+                let html = '';
+                const selected = data.selected_folders || [];
+                
+                if (data.directories.length === 0) {
+                    html = '<div class="col-span-2 py-4 text-center text-slate-450 dark:text-zinc-550 font-mono text-[10px]">Tidak ada folder yang ditemukan di public storage.</div>';
+                } else {
+                    data.directories.forEach(dir => {
+                        const isChecked = selected.includes(dir.name) ? 'checked' : '';
+                        html += `
+                            <label class="flex items-center justify-between p-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-indigo-500 dark:hover:border-zinc-700 cursor-pointer transition-all duration-200 select-none">
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" name="storage_folders[]" value="${dir.name}" ${isChecked} class="text-indigo-600 focus:ring-indigo-500 border-slate-350 dark:border-zinc-800">
+                                    <span class="text-xs font-mono text-slate-700 dark:text-zinc-300">${dir.name}</span>
+                                </div>
+                                <span class="text-[10px] font-mono font-bold text-slate-400 dark:text-zinc-500">${dir.formatted_size}</span>
+                            </label>
+                        `;
+                    });
+                }
+                listContainer.innerHTML = html;
+            } else {
+                alert(data.message || 'Gagal memuat daftar folder.');
+            }
+        })
+        .catch(err => {
+            icon.classList.remove('fa-spin');
+            alert('Gagal melakukan scan folder: ' + err.message);
+        });
+    }
+
+    // Show Backup Log Details Modal
+    function showBackupLogDetails(logId) {
+        const modal = document.getElementById('logDetailModal');
+        const modalContent = document.getElementById('logDetailModalContent');
+        
+        // Reset values
+        document.getElementById('detail-created_at').innerText = 'Memuat...';
+        document.getElementById('detail-status').innerText = '...';
+        document.getElementById('detail-status').className = 'inline-block font-bold px-1.5 py-0.5 border border-slate-350 text-slate-500';
+        document.getElementById('detail-filename').innerText = 'Memuat...';
+        document.getElementById('detail-type').innerText = 'Memuat...';
+        document.getElementById('detail-size').innerText = 'Memuat...';
+        document.getElementById('detail-encrypted').innerHTML = 'Memuat...';
+        document.getElementById('detail-duration').innerText = 'Memuat...';
+        document.getElementById('detail-drive_uploaded').innerHTML = 'Memuat...';
+        
+        document.getElementById('detail-drive_file_id_wrapper').classList.add('hidden');
+        document.getElementById('detail-drive_error_wrapper').classList.add('hidden');
+        document.getElementById('detail-system_error_wrapper').classList.add('hidden');
+
+        // Show modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 50);
+
+        const url = "{{ route('admin.security.backup.log-details', ['id' => ':id']) }}".replace(':id', logId);
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Gagal memuat detail log dari server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.message || 'Log tidak ditemukan.');
+            }
+
+            const log = data.log;
+
+            document.getElementById('detail-created_at').innerText = data.formatted_date;
+            document.getElementById('detail-filename').innerText = log.filename;
+            document.getElementById('detail-type').innerText = log.type || 'Full Backup';
+            document.getElementById('detail-size').innerText = log.status === 'success' ? data.formatted_size : '-';
+            document.getElementById('detail-duration').innerText = `${log.duration} detik`;
+
+            // Status Utama
+            const statusEl = document.getElementById('detail-status');
+            if (log.status === 'success') {
+                statusEl.innerText = 'SUKSES';
+                statusEl.className = 'inline-block font-bold px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25';
+            } else {
+                statusEl.innerText = 'GAGAL';
+                statusEl.className = 'inline-block font-bold px-1.5 py-0.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/25';
+            }
+
+            // Enkripsi
+            const encEl = document.getElementById('detail-encrypted');
+            if (log.encrypted) {
+                encEl.innerHTML = '<span class="text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 border border-indigo-500/15"><i class="fa-solid fa-lock text-[9px]"></i> AES-256</span>';
+            } else {
+                encEl.innerHTML = '<span class="text-slate-500 bg-slate-500/10 px-1.5 py-0.5 border border-slate-500/10"><i class="fa-solid fa-lock-open text-[9px]"></i> Tidak</span>';
+            }
+
+            // Google Drive Uploaded
+            const driveEl = document.getElementById('detail-drive_uploaded');
+            if (log.drive_uploaded) {
+                driveEl.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 border border-emerald-500/15"><i class="fa-brands fa-google-drive"></i> Berhasil</span>';
+                document.getElementById('detail-drive_file_id_wrapper').classList.remove('hidden');
+                document.getElementById('detail-drive_file_id').innerText = log.drive_file_id || '-';
+            } else if (log.drive_error) {
+                driveEl.innerHTML = '<span class="text-rose-600 dark:text-rose-400 bg-rose-500/10 px-1.5 py-0.5 border border-rose-500/15"><i class="fa-solid fa-triangle-exclamation"></i> Gagal</span>';
+                document.getElementById('detail-drive_error_wrapper').classList.remove('hidden');
+                document.getElementById('detail-drive_error').innerText = log.drive_error;
+            } else {
+                driveEl.innerHTML = '<span class="text-slate-400 bg-slate-400/5 px-1.5 py-0.5 border border-slate-450/10">Tidak Diaktifkan</span>';
+            }
+
+            // System Error (if failed)
+            if (log.status === 'failed' && log.error_message) {
+                document.getElementById('detail-system_error_wrapper').classList.remove('hidden');
+                document.getElementById('detail-system_error').innerText = log.error_message;
+            }
+        })
+        .catch(err => {
+            alert(err.message);
+            closeLogDetailModal();
+        });
+    }
+
+    function closeLogDetailModal() {
+        const modal = document.getElementById('logDetailModal');
+        const modalContent = document.getElementById('logDetailModalContent');
+        
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 150);
     }
 </script>
 
-<form id="generate-key-form" action="{{ route('admin.security.backup.generate-key') }}" method="POST" style="display: none;">
-    @csrf
-</form>
+<!-- Modal Detail Log Backup -->
+<div id="logDetailModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeLogDetailModal()"></div>
+    
+    <!-- Modal Content -->
+    <div class="relative bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 w-full max-w-2xl shadow-xl transform transition-all duration-300 scale-95 opacity-0" id="logDetailModalContent">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-indigo-500"></i>
+                <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 dark:text-zinc-200">Detail Log Backup</h3>
+            </div>
+            <button type="button" onclick="closeLogDetailModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+        
+        <!-- Body -->
+        <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto text-xs">
+            <!-- Grid Metadata -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <span class="text-slate-400 dark:text-zinc-500 block font-mono text-[10px] uppercase">WAKTU EKSEKUSI</span>
+                    <span id="detail-created_at" class="font-mono text-slate-800 dark:text-zinc-200">-</span>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-slate-400 dark:text-zinc-500 block font-mono text-[10px] uppercase">STATUS UTAMA</span>
+                    <span id="detail-status" class="inline-block font-bold px-1.5 py-0.5 border">-</span>
+                </div>
+                <div class="space-y-1 col-span-2">
+                    <span class="text-slate-400 dark:text-zinc-500 block font-mono text-[10px] uppercase">NAMA BERKAS</span>
+                    <span id="detail-filename" class="font-mono break-all font-bold text-slate-800 dark:text-zinc-200">-</span>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-slate-400 dark:text-zinc-500 block font-mono text-[10px] uppercase">TIPE BACKUP</span>
+                    <span id="detail-type" class="text-slate-800 dark:text-zinc-200">-</span>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-slate-400 dark:text-zinc-500 block font-mono text-[10px] uppercase">UKURAN BERKAS</span>
+                    <span id="detail-size" class="font-mono text-slate-800 dark:text-zinc-200">-</span>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-slate-400 dark:text-zinc-500 block font-mono text-[10px] uppercase">ENKRIPSI AES-256</span>
+                    <span id="detail-encrypted" class="inline-flex items-center gap-1 font-mono font-bold">-</span>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-slate-400 dark:text-zinc-500 block font-mono text-[10px] uppercase">DURASI PROSES</span>
+                    <span id="detail-duration" class="font-mono text-slate-800 dark:text-zinc-200">-</span>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="h-px bg-slate-200 dark:bg-zinc-800"></div>
+
+            <!-- Google Drive Status Section -->
+            <div class="space-y-2">
+                <span class="text-slate-400 dark:text-zinc-500 block font-mono text-[10px] uppercase">SINKRONISASI GOOGLE DRIVE</span>
+                <div class="p-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-550 dark:text-zinc-400">Status Unggahan:</span>
+                        <span id="detail-drive_uploaded" class="inline-flex items-center gap-1 font-mono font-bold">-</span>
+                    </div>
+                    <div id="detail-drive_file_id_wrapper" class="hidden flex items-center justify-between">
+                        <span class="text-slate-550 dark:text-zinc-400">ID Berkas Drive:</span>
+                        <span id="detail-drive_file_id" class="font-mono text-indigo-600 dark:text-indigo-400 select-all font-semibold break-all text-right max-w-[70%]">-</span>
+                    </div>
+                    <div id="detail-drive_error_wrapper" class="hidden space-y-1.5 pt-1.5 border-t border-slate-250 dark:border-zinc-850">
+                        <span class="text-rose-500 dark:text-rose-400 font-bold block">Pesan Kesalahan Google Drive:</span>
+                        <div class="p-2.5 bg-rose-500/5 text-rose-600 dark:text-rose-400/90 font-mono text-[11px] border border-rose-500/10 rounded-none whitespace-pre-wrap leading-relaxed" id="detail-drive_error"></div>
+                        <div class="text-[10px] text-amber-600 dark:text-amber-400/80 leading-relaxed font-sans pt-1">
+                            <span class="font-bold"><i class="fa-solid fa-lightbulb text-amber-500"></i> Solusi Kuota 0 Bytes:</span> Google Service Account secara default memiliki kuota 0 bytes. Harap gunakan **Shared Drive (Drive Bersama)** atau **Domain-Wide Delegation** di Google Workspace Anda, lalu bagikan akses folder/Shared Drive tersebut ke email Service Account di atas.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message Section (If failed) -->
+            <div id="detail-system_error_wrapper" class="hidden space-y-2">
+                <span class="text-slate-400 dark:text-zinc-500 block font-mono text-[10px] uppercase">DETIL EROR SISTEM / PHP EXCEPTION</span>
+                <div class="p-3 bg-rose-500/5 text-rose-600 dark:text-rose-400 border border-rose-500/10 rounded-none space-y-1.5">
+                    <span class="font-bold block">Exception Message:</span>
+                    <div class="p-2.5 bg-zinc-950 text-rose-400 font-mono text-[11px] border border-zinc-850 rounded-none whitespace-pre-wrap leading-relaxed" id="detail-system_error"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-end p-4 border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950">
+            <button type="button" onclick="closeLogDetailModal()" class="py-2 px-5 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 font-mono font-bold text-[10px] uppercase tracking-wider rounded-none transition-all">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Password Keamanan -->
+<x-app-modal id="passwordConfirmModal" maxWidth="md" title="Konfirmasi Kata Sandi" description="Masukkan kata sandi login Anda untuk memverifikasi tindakan ini demi keamanan tambahan." icon='<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>' iconColor="indigo">
+    <form id="password-confirm-form" method="POST" action="">
+        @csrf
+        <div class="space-y-4">
+            <div>
+                <label for="confirm_password_input" class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-500 mb-2">Kata Sandi Akun</label>
+                <input type="password" name="confirm_password" id="confirm_password_input" required class="w-full text-sm px-3 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100" placeholder="••••••••">
+            </div>
+        </div>
+        <x-slot name="footer">
+            <button type="button" onclick="AppModal.close('passwordConfirmModal')" class="modal-btn-cancel">Batal</button>
+            <button type="submit" class="modal-btn-primary">Konfirmasi & Lanjutkan</button>
+        </x-slot>
+    </form>
+</x-app-modal>
 @endsection

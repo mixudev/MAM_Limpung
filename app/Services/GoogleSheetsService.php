@@ -75,38 +75,23 @@ class GoogleSheetsService
         try {
             $service = $this->getSheetsService($config);
             $spreadsheetId = $config['spreadsheet_id'];
-            $sheetNames = $config['sheet_names'] ?? [
-                'semua' => 'Semua Pendaftar',
-            ];
-            $sheetName = $sheetNames['semua'] ?? 'Semua Pendaftar';
 
-            // Try to fetch spreadsheet metadata to test connection
-            $spreadsheet = $service->spreadsheets->get($spreadsheetId);
-
-            // Check if the specific sheet name exists
-            $sheetExists = false;
-            foreach ($spreadsheet->getSheets() as $sheet) {
-                if ($sheet->getProperties()->getTitle() === $sheetName) {
-                    $sheetExists = true;
-                    break;
-                }
-            }
-
-            if (! $sheetExists && empty($config['split_by_status'])) {
-                return [
-                    'success' => false,
-                    'message' => "Spreadsheet berhasil diakses, namun Sheet/Tab dengan nama '{$sheetName}' tidak ditemukan.",
-                ];
-            }
+            // Ensure all active sheets exist (creating them dynamically if missing)
+            $createdSheets = $this->ensureSheetsExist($service, $spreadsheetId, $config);
 
             // Get service account email to display dynamically in the tutorial
             $decryptedJson = Crypt::decryptString($serviceAccountJson);
             $credentials = json_decode($decryptedJson, true);
             $clientEmail = $credentials['client_email'] ?? 'unknown';
 
+            $message = 'Koneksi berhasil! Sistem berhasil terhubung ke Google Sheets API.';
+            if (! empty($createdSheets)) {
+                $message .= ' Secara otomatis membuat tab baru yang dibutuhkan: '.implode(', ', $createdSheets).'.';
+            }
+
             return [
                 'success' => true,
-                'message' => 'Koneksi berhasil! Sistem berhasil terhubung ke Google Sheets API.',
+                'message' => $message,
                 'client_email' => $clientEmail,
             ];
         } catch (Exception $e) {
@@ -146,6 +131,9 @@ class GoogleSheetsService
                 'semua' => 'Semua Pendaftar',
             ];
             $sheetName = $sheetNames['semua'] ?? 'Semua Pendaftar';
+
+            // Ensure all active sheets exist (creating them dynamically if missing)
+            $this->ensureSheetsExist($service, $spreadsheetId, $config);
 
             // Get selected fields and custom fields
             $syncFields = $config['sync_fields'] ?? [
@@ -340,6 +328,87 @@ class GoogleSheetsService
         $sheetMap[$title] = $sheetId;
 
         return $sheetId;
+    }
+
+    /**
+     * Ensure all active sheet tabs exist and are properly formatted.
+     */
+    public function ensureSheetsExist(GoogleSheets $service, string $spreadsheetId, array $config): array
+    {
+        $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+        $sheetMap = [];
+        foreach ($spreadsheet->getSheets() as $s) {
+            $sheetMap[$s->getProperties()->getTitle()] = $s->getProperties()->getSheetId();
+        }
+
+        $activeSheets = $config['active_sheets'] ?? ['semua', 'diterima', 'pending', 'ditolak', 'ringkasan'];
+        $sheetNames = $config['sheet_names'] ?? [
+            'semua' => 'Semua Pendaftar',
+            'diterima' => 'Siswa Diterima',
+            'pending' => 'Dalam Proses',
+            'ditolak' => 'Siswa Ditolak',
+            'ringkasan' => 'Ringkasan Data',
+        ];
+
+        $syncFields = $config['sync_fields'] ?? [
+            'no_registrasi', 'nama_lengkap', 'nisn', 'jenis_kelamin', 'sekolah_asal', 'no_hp', 'email', 'status', 'tanggal_daftar', 'custom_fields',
+        ];
+        $headerStyle = $config['header_style'] ?? 'purple';
+        $customFields = PpdbSetting::getValue('form_fields', []);
+        $headers = $this->buildHeaders($syncFields, $customFields);
+
+        $createdSheets = [];
+
+        // Determine which sheets need to be checked
+        $sheetsToVerify = [];
+        $splitByStatus = ! empty($config['split_by_status']);
+
+        if ($splitByStatus) {
+            if (in_array('semua', $activeSheets)) {
+                $sheetsToVerify['semua'] = $sheetNames['semua'] ?: 'Semua Pendaftar';
+            }
+            if (in_array('diterima', $activeSheets)) {
+                $sheetsToVerify['diterima'] = $sheetNames['diterima'] ?: 'Siswa Diterima';
+            }
+            if (in_array('pending', $activeSheets)) {
+                $sheetsToVerify['pending'] = $sheetNames['pending'] ?: 'Dalam Proses';
+            }
+            if (in_array('ditolak', $activeSheets)) {
+                $sheetsToVerify['ditolak'] = $sheetNames['ditolak'] ?: 'Siswa Ditolak';
+            }
+        } else {
+            if (in_array('semua', $activeSheets)) {
+                $sheetsToVerify['semua'] = $sheetNames['semua'] ?: 'Semua Pendaftar';
+            }
+        }
+
+        if (in_array('ringkasan', $activeSheets)) {
+            $sheetsToVerify['ringkasan'] = $sheetNames['ringkasan'] ?: 'Ringkasan Data';
+        }
+
+        foreach ($sheetsToVerify as $key => $title) {
+            if (! isset($sheetMap[$title])) {
+                // Create sheet tab
+                $sheetId = $this->getOrCreateSheetId($service, $spreadsheetId, $title, $sheetMap);
+
+                if ($key === 'ringkasan') {
+                    // Populate and format summary sheet
+                    $this->syncSummarySheet($service, $spreadsheetId, $sheetId, $title, $headerStyle);
+                } else {
+                    // Write headers for student data sheets
+                    if (! empty($headers)) {
+                        $body = new ValueRange(['values' => [$headers]]);
+                        $service->spreadsheets_values->update($spreadsheetId, "{$title}!A1", $body, [
+                            'valueInputOption' => 'USER_ENTERED',
+                        ]);
+                        $this->formatSheetHeaders($service, $spreadsheetId, $sheetId, count($headers), $headerStyle);
+                    }
+                }
+                $createdSheets[] = $title;
+            }
+        }
+
+        return $createdSheets;
     }
 
     /**

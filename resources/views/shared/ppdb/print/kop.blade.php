@@ -2,11 +2,11 @@
     $tahunAjaran = $tahunAjaran ?? (int) date('Y');
 @endphp
 <x-print.kop-surat
-    line1="Pimpinan Cabang Muhammadiyah Limpung"
+    line1="MAJELIS PENDIDIKAN DASAR DAN MENENGAH MUHAMMADIYAH"
     line2="Madrasah Aliyah Muhammadiyah Limpung"
     line3="Terakreditasi B | NPSN: 20363023 | NSM: 131233250001"
-    line4="Jl. Raya Limpung No. 12, Limpung, Batang, Jawa Tengah 51271 | Telp: (0285) 446889 | WA: +62 823-2495-2365 | Email: mamlimpung@gmail.com"
-    :logo-size="$logoSize ?? '72px'"
+    line4="Jalan Cokronegoro No.34 Limpung Kabupaten Batang | Telp: (0285) 4468835 | 51271"
+    :logo-size="$logoSize ?? '100px'"
 >
     @if(! empty($docTitle))
         <h1 class="doc-title">{{ $docTitle }}</h1>

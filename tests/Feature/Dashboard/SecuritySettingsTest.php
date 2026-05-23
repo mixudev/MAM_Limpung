@@ -1,12 +1,11 @@
 <?php
 
+use App\Models\BackupLog;
 use App\Models\PpdbSetting;
 use App\Models\SecuritySetting;
 use App\Models\User;
-use App\Services\BackupService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -16,6 +15,7 @@ beforeEach(function () {
     // Clear settings before each test
     PpdbSetting::whereIn('key', ['security_credentials', 'backup_settings', 'backup_history'])->delete();
     SecuritySetting::query()->delete();
+    BackupLog::query()->delete();
 
     // Create admin user and permissions
     $this->permission = Permission::firstOrCreate(['name' => 'access-admin-dashboard', 'guard_name' => 'web']);
@@ -36,7 +36,7 @@ test('unauthorized users cannot access security settings page', function () {
 test('authorized admin can access security settings page', function () {
     $response = $this->actingAs($this->admin)->get(route('admin.security.index'));
     $response->assertStatus(200);
-    $response->assertSee('Pusat Keamanan &amp; Sistem Backup');
+    $response->assertSee('Pusat Keamanan & Sistem Backup', false);
 });
 
 test('admin can save google service account credentials securely', function () {
@@ -98,7 +98,9 @@ test('admin cannot enable encryption without generating key first', function () 
 
 test('admin can generate and download encryption key', function () {
     // Generate key
-    $generateResponse = $this->actingAs($this->admin)->post(route('admin.security.backup.generate-key'));
+    $generateResponse = $this->actingAs($this->admin)->post(route('admin.security.backup.generate-key'), [
+        'confirm_password' => 'password',
+    ]);
     $generateResponse->assertRedirect();
     $generateResponse->assertSessionHas('success');
 
@@ -109,7 +111,9 @@ test('admin can generate and download encryption key', function () {
     expect(strlen($decryptedKey))->toBe(64); // 64-char hex key
 
     // Download key
-    $downloadResponse = $this->actingAs($this->admin)->get(route('admin.security.backup.download-key'));
+    $downloadResponse = $this->actingAs($this->admin)->post(route('admin.security.backup.download-key'), [
+        'confirm_password' => 'password',
+    ]);
     $downloadResponse->assertStatus(200);
     $downloadResponse->assertHeader('Content-Type', 'text/plain; charset=UTF-8');
     expect($downloadResponse->streamedContent())->toContain($decryptedKey);
@@ -119,7 +123,7 @@ test('admin can run backup manually and verify decryption successfully', functio
     // Setup encryption key
     $rawKey = bin2hex(random_bytes(32));
     $encryptedKey = Crypt::encryptString($rawKey);
-    
+
     SecuritySetting::setValue('backup_settings', [
         'enabled' => true,
         'schedule' => 'daily',
@@ -133,7 +137,7 @@ test('admin can run backup manually and verify decryption successfully', functio
 
     // Ensure backups folder exists
     $backupsPath = storage_path('app/backups');
-    if (!file_exists($backupsPath)) {
+    if (! file_exists($backupsPath)) {
         mkdir($backupsPath, 0755, true);
     }
 
@@ -147,7 +151,7 @@ test('admin can run backup manually and verify decryption successfully', functio
     expect($data['log']['status'])->toBe('success');
 
     $filename = $data['log']['filename'];
-    $filePath = storage_path('app/backups/' . $filename);
+    $filePath = storage_path('app/backups/'.$filename);
     expect(file_exists($filePath))->toBeTrue();
 
     // Verify correct decryption via verify endpoint
@@ -176,3 +180,73 @@ test('admin can run backup manually and verify decryption successfully', functio
     }
 });
 
+test('admin can view backup log details via AJAX', function () {
+    $log = BackupLog::create([
+        'filename' => 'backup_test.zip',
+        'type' => 'Full Backup',
+        'size' => 1048576, // 1 MB
+        'encrypted' => false,
+        'status' => 'success',
+        'duration' => 1.25,
+        'drive_uploaded' => false,
+    ]);
+
+    $response = $this->actingAs($this->admin)->getJson(route('admin.security.backup.log-details', ['id' => $log->id]));
+    $response->assertStatus(200);
+
+    $data = $response->json();
+    expect($data['success'])->toBeTrue();
+    expect($data['log']['id'])->toBe($log->id);
+    expect($data['formatted_size'])->toBe('1 MB');
+});
+
+test('admin gets 404 for non-existent backup log details', function () {
+    $response = $this->actingAs($this->admin)->getJson(route('admin.security.backup.log-details', ['id' => 9999]));
+    $response->assertStatus(404);
+});
+
+test('admin can fetch storage directories via AJAX', function () {
+    $publicStorage = storage_path('app/public');
+    if (! file_exists($publicStorage)) {
+        mkdir($publicStorage, 0755, true);
+    }
+
+    $tempTestDir = $publicStorage.'/test_folder_scan';
+    if (! file_exists($tempTestDir)) {
+        mkdir($tempTestDir, 0755, true);
+    }
+    file_put_contents($tempTestDir.'/test.txt', 'hello');
+
+    $response = $this->actingAs($this->admin)->getJson(route('admin.security.backup.storage-directories'));
+    $response->assertStatus(200);
+
+    $data = $response->json();
+    expect($data['success'])->toBeTrue();
+    expect($data['directories'])->toBeArray();
+
+    $dirNames = array_column($data['directories'], 'name');
+    expect($dirNames)->toContain('test_folder_scan');
+
+    unlink($tempTestDir.'/test.txt');
+    rmdir($tempTestDir);
+});
+
+test('admin can save backup settings with selective storage folders', function () {
+    $response = $this->actingAs($this->admin)->post(route('admin.security.backup.settings'), [
+        'schedule' => 'weekly',
+        'cron_expression' => '0 0 * * 0',
+        'enabled' => '1',
+        'backup_db' => '1',
+        'backup_storage' => '1',
+        'storage_folders' => ['documents', 'photos'],
+        'google_drive_enabled' => '0',
+        'google_drive_folder_id' => '1234567890abcdef',
+        'retention_days' => '45',
+    ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    $settings = SecuritySetting::getValue('backup_settings');
+    expect($settings['storage_folders'])->toBe(['documents', 'photos']);
+});
