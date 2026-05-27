@@ -37,7 +37,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="w-full aspect-video border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-850 flex items-center justify-center text-slate-400 dark:text-zinc-500 text-xs italic font-mono">
+                        <div class="w-full aspect-video border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800 flex items-center justify-center text-slate-400 dark:text-zinc-500 text-xs italic font-mono">
                             Tanpa Gambar Banner
                         </div>
                     @endif
@@ -48,13 +48,13 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-3 flex-wrap">
                             <h4 class="text-sm font-bold text-slate-800 dark:text-zinc-200">{{ $alert->title }}</h4>
-                            <span class="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-slate-100 dark:bg-zinc-850 text-slate-600 dark:text-zinc-400 border border-slate-200/50 dark:border-zinc-700/50">
+                            <span class="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200/50 dark:border-zinc-700/50">
                                 Size: {{ strtoupper($alert->popup_size) }}
                             </span>
-                            <span class="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-slate-100 dark:bg-zinc-850 text-slate-600 dark:text-zinc-400 border border-slate-200/50 dark:border-zinc-700/50">
+                            <span class="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200/50 dark:border-zinc-700/50">
                                 Freq: {{ str_replace('_', ' ', $alert->display_frequency) }}
                             </span>
-                            <span class="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-slate-100 dark:bg-zinc-850 text-slate-600 dark:text-zinc-400 border border-slate-200/50 dark:border-zinc-700/50">
+                            <span class="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200/50 dark:border-zinc-700/50">
                                 Target: {{ str_replace('_', ' ', $alert->target_page) }}
                             </span>
                         </div>

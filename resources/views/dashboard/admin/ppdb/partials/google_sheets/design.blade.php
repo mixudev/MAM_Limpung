@@ -11,7 +11,7 @@
         </select>
     </div>
     
-    <div class="p-4 bg-slate-50 dark:bg-zinc-850/40 border border-slate-200 dark:border-zinc-800">
+    <div class="p-4 bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-800">
         <h4 class="text-xs font-bold text-slate-800 dark:text-white block mb-2">Tips Tampilan Google Sheets Mewah</h4>
         <ul class="list-disc list-inside text-xs text-slate-400 dark:text-zinc-500 space-y-1.5 leading-relaxed">
             <li>Sistem otomatis membekukan baris pertama (frozen row) agar judul kolom tetap di atas saat Anda melakukan scroll.</li>

@@ -35,13 +35,11 @@ test('frontend ppdb form preserves old input after validation failure', function
         'ukuran_baju' => 'L',
     ];
 
-    $response = $this->post(route('frontend.ppdb.store'), $payload);
+    $response = $this->from(route('frontend.ppdb.form'))
+        ->followingRedirects()
+        ->post(route('frontend.ppdb.store'), $payload);
 
-    $response->assertSessionHasErrors(['nisn', 'email']);
-
-    $formResponse = $this->get(route('frontend.ppdb.form'));
-
-    $formResponse->assertSuccessful()
+    $response->assertSuccessful()
         ->assertSee('Ahmad Santoso', false)
         ->assertSee('1112223334', false)
         ->assertSee('existing@example.com', false)

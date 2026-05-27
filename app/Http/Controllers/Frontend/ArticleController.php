@@ -76,6 +76,9 @@ class ArticleController extends Controller
             }
         }
 
+        // Eager load the polymorphic SEO relations
+        $article->load('seo');
+
         // Get read time estimation (roughly 200 words per minute)
         $wordCount = str_word_count(strip_tags($article->konten));
         $readTime = max(1, ceil($wordCount / 200));

@@ -57,7 +57,7 @@
     </div>
 
     <!-- Main Navbar -->
-    <nav class="bg-white shadow-lg sticky top-0 z-[50] transition-all duration-300" id="navbar">
+    <nav class="bg-white shadow-lg sticky top-0 z-[40] transition-all duration-300" id="navbar">
         <div class="max-w-6xl mx-auto px-5">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->

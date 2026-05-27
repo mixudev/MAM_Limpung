@@ -42,7 +42,7 @@
                     <!-- Format Excel -->
                     <label class="relative border border-slate-200 dark:border-zinc-800 hover:border-emerald-500 dark:hover:border-emerald-500 p-5 flex items-start gap-4 cursor-pointer transition-all bg-slate-50/30 dark:bg-zinc-900/30 select-none group">
                         <input type="radio" name="format" value="excel" checked class="mt-1 accent-emerald-600 h-4 w-4" onchange="toggleFormatDetails('excel')">
-                        <div class="flex-shrink-0 p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-all">
+                        <div class="flex-shrink-0 p-3  text-emerald-600 dark:text-emerald-400 ">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
@@ -56,7 +56,7 @@
                     <!-- Format PDF -->
                     <label class="relative border border-slate-200 dark:border-zinc-800 hover:border-red-500 dark:hover:border-red-500 p-5 flex items-start gap-4 cursor-pointer transition-all bg-slate-50/30 dark:bg-zinc-900/30 select-none group">
                         <input type="radio" name="format" value="pdf" class="mt-1 accent-red-600 h-4 w-4" onchange="toggleFormatDetails('pdf')">
-                        <div class="flex-shrink-0 p-3 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 group-hover:scale-105 transition-all">
+                        <div class="flex-shrink-0 p-3 text-red-600 dark:text-red-400 ">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
@@ -104,7 +104,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Tahun Ajaran -->
                     <div>
-                        <label for="tahun_ajaran" class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-2">Tahun Pelajaran</label>
+                        <label for="tahun_ajaran" class="text-[10px] font-mono font-bold  tracking-wider text-slate-400 dark:text-zinc-500 block mb-2">Tahun Pelajaran</label>
                         <select name="tahun_ajaran" id="tahun_ajaran" class="w-full py-2 px-3 text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                             @foreach($years as $yr)
                                 <option value="{{ $yr }}" {{ $selectedYear === $yr ? 'selected' : '' }}>
@@ -116,7 +116,7 @@
 
                     <!-- Status Kelulusan -->
                     <div>
-                        <label for="status" class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-2">Status Kelulusan Calon Siswa</label>
+                        <label for="status" class="text-[10px] font-mono font-bold  tracking-wider text-slate-400 dark:text-zinc-500 block mb-2">Status Kelulusan Calon Siswa</label>
                         <select name="status" id="status" class="w-full py-2 px-3 text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                             <option value="">Semua Pendaftar (Menunggu, Diterima, Ditolak)</option>
                             <option value="pending">Hanya Menunggu Verifikasi</option>

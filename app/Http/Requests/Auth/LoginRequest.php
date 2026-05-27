@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Services\SystemLogService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -51,6 +52,8 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey(), 300);          // per IP+email, 5-min decay
             RateLimiter::hit($this->globalThrottleKey(), 600);    // per email only, 10-min decay
 
+            SystemLogService::logSecurity('login_failed', 'Gagal masuk: email atau password salah untuk '.$this->input('email'));
+
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
@@ -58,7 +61,10 @@ class LoginRequest extends FormRequest
 
         // Ensure account is active
         if (! Auth::user()->is_active) {
+            $inactiveUser = Auth::user();
             Auth::logout();
+
+            SystemLogService::logSecurity('login_failed_inactive', 'Gagal masuk: akun tidak aktif untuk '.$inactiveUser->email, $inactiveUser);
 
             throw ValidationException::withMessages([
                 'email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.',

@@ -34,6 +34,11 @@ class UpdateSiteSettingRequest extends FormRequest
             'twitter_url' => ['nullable', 'url', 'max:255'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:1000'],
+            'meta_keywords' => ['nullable', 'string', 'max:255'],
+            'google_analytics_id' => ['nullable', 'string', 'max:50'],
+            'google_search_console_id' => ['nullable', 'string', 'max:100'],
+            'google_tag_manager_id' => ['nullable', 'string', 'max:50'],
+            'is_indexed' => ['nullable', 'boolean'],
             // Kepala Sekolah
             'headmaster_name' => ['nullable', 'string', 'max:255'],
             'headmaster_nip' => ['nullable', 'string', 'max:50'],

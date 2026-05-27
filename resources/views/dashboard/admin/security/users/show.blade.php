@@ -75,17 +75,63 @@
                     Tindakan Cepat
                 </h3>
                 
-                <div class="space-y-3">
-                    <button type="button" disabled
-                            class="w-full py-2 px-4 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-400 dark:text-zinc-600 font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 cursor-not-allowed transition-all">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Kirim Notifikasi Email (Beta)
-                    </button>
-                    <p class="text-[9px] text-slate-400 dark:text-zinc-500 text-center leading-relaxed">
-                        Fitur notifikasi email akan tersedia pada pembaruan mendatang.
-                    </p>
+                <div class="space-y-4">
+                    <!-- Email Verification Action -->
+                    @if ($user->email_verified_at)
+                        <div class="w-full py-2.5 px-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Email Terverifikasi
+                        </div>
+                    @else
+                        <form method="POST" action="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.users.verify-email', $user) : route('admin.users.verify-email', $user) }}">
+                            @csrf
+                            <button type="submit"
+                                    class="w-full py-2.5 px-4 bg-[#4f45b2] hover:bg-[#6366f1] text-white border border-transparent font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Kirim Link Verifikasi
+                            </button>
+                        </form>
+                    @endif
+
+                    <!-- Password Reset Action -->
+                    <form method="POST" action="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.users.reset-password-link', $user) : route('admin.users.reset-password-link', $user) }}">
+                        @csrf
+                        <button type="submit"
+                                class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-white border border-transparent font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m-9 5a2 2 0 01-2-2m7-7a2 2 0 00-2-2m0 0a2 2 0 00-2 2m0 0V4a2 2 0 00-2-2H5a2 2 0 00-2 2v3a2 2 0 002 2h4a2 2 0 002-2v-1z" />
+                            </svg>
+                            Generate Link Reset Password
+                        </button>
+                    </form>
+
+                    <!-- Verification URL Display -->
+                    @if (session('verification_url'))
+                        <div class="p-3 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800/50 rounded-none text-xs space-y-2 mt-4" x-data="{ copied: false }">
+                            <p class="font-mono text-[10px] text-indigo-800 dark:text-indigo-400 font-bold uppercase">Copy Link Verifikasi (WhatsApp/Lainnya):</p>
+                            <textarea readonly class="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-mono focus:outline-none" rows="3">{{ session('verification_url') }}</textarea>
+                            <button type="button" @click="navigator.clipboard.writeText('{{ session('verification_url') }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+                                    class="w-full py-1.5 px-3 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 font-mono text-[9px] uppercase font-bold tracking-wider flex items-center justify-center gap-1">
+                                <span x-text="copied ? 'Tersalin!' : 'Salin Tautan'"></span>
+                            </button>
+                        </div>
+                    @endif
+
+                    <!-- Reset URL Display -->
+                    @if (session('reset_url'))
+                        <div class="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-none text-xs space-y-2 mt-4" x-data="{ copied: false }">
+                            <p class="font-mono text-[10px] text-amber-800 dark:text-amber-400 font-bold uppercase">Copy Link Reset Password (Sekali Pakai):</p>
+                            <textarea readonly class="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-mono focus:outline-none" rows="3">{{ session('reset_url') }}</textarea>
+                            <button type="button" @click="navigator.clipboard.writeText('{{ session('reset_url') }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+                                    class="w-full py-1.5 px-3 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 font-mono text-[9px] uppercase font-bold tracking-wider flex items-center justify-center gap-1">
+                                <span x-text="copied ? 'Tersalin!' : 'Salin Tautan'"></span>
+                            </button>
+                        </div>
+                    @endif
                 </div>
             </div>
             

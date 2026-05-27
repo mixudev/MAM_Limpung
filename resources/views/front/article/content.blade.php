@@ -1,5 +1,77 @@
 @extends('layouts.app')
 
+@section('seo_title', $article->seo->meta_title ?? $article->judul)
+@section('seo_description', $article->seo->meta_description ?? ($article->ringkasan ?? str($article->konten)->stripTags()->limit(160)))
+@section('seo_keywords', $article->seo->meta_keywords ?? '')
+@section('seo_robots', ($article->seo->is_indexed ?? true ? 'index' : 'noindex') . ', ' . ($article->seo->is_followed ?? true ? 'follow' : 'nofollow'))
+@section('canonical_url', $article->seo->canonical_url ?? route('frontend.article.show', $article->slug))
+
+@section('og_type', 'article')
+@section('og_title', $article->seo->og_title ?? $article->seo->meta_title ?? $article->judul)
+@section('og_description', $article->seo->og_description ?? $article->seo->meta_description ?? ($article->ringkasan ?? str($article->konten)->stripTags()->limit(160)))
+@section('og_image', $article->seo->og_image ? asset('storage/' . $article->seo->og_image) : $article->thumbnailUrl())
+
+@section('schema_json_ld')
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "BreadcrumbList",
+      "@@id": "{{ route('frontend.article.show', $article->slug) }}#breadcrumb",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Beranda",
+          "item": "{{ route('frontend.home') }}"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "Artikel",
+          "item": "{{ route('frontend.article.index') }}"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 3,
+          "name": "{{ $article->judul }}",
+          "item": "{{ route('frontend.article.show', $article->slug) }}"
+        }
+      ]
+    },
+    {
+      "@@type": "NewsArticle",
+      "@@id": "{{ route('frontend.article.show', $article->slug) }}#article",
+      "isPartOf": {
+        "@@id": "{{ route('frontend.home') }}#website"
+      },
+      "headline": "{{ $article->seo->meta_title ?? $article->judul }}",
+      "description": "{{ $article->seo->meta_description ?? ($article->ringkasan ?? str($article->konten)->stripTags()->limit(160)) }}",
+      "image": [
+        "{{ $article->thumbnailUrl() }}"
+      ],
+      "datePublished": "{{ $article->published_at ? $article->published_at->toIso8601String() : $article->created_at->toIso8601String() }}",
+      "dateModified": "{{ $article->updated_at->toIso8601String() }}",
+      "author": {
+        "@@type": "Person",
+        "name": "{{ $article->penulis ? $article->penulis->name : 'MA Muhammadiyah Limpung' }}"
+      },
+      "publisher": {
+        "@@type": "Organization",
+        "name": "{{ $siteSettings->school_name ?? 'MA Muhammadiyah Limpung' }}",
+        "logo": {
+          "@@type": "ImageObject",
+          "url": "{{ !empty($siteSettings->logo_path) ? asset('storage/' . $siteSettings->logo_path) : asset('images/logo.png') }}"
+        }
+      },
+      "mainEntityOfPage": "{{ route('frontend.article.show', $article->slug) }}"
+    }
+  ]
+}
+</script>
+@endsection
+
 @section('content')
 
 <!-- Zen Reading Environment -->
@@ -7,12 +79,22 @@
     
     <article class="container mx-auto px-4 sm:px-6 max-w-3xl">
         
-        <!-- Back Link -->
-        <div class="mb-6 md:mb-8 text-center sm:text-left">
-            <a href="{{ route('frontend.article.index') }}" class="inline-flex items-center gap-2 text-slate-500 hover:text-blue-700 transition-colors text-[10px] sm:text-sm font-bold uppercase tracking-widest">
-                <i class="fa-solid fa-arrow-left"></i> Kembali ke Indeks
-            </a>
-        </div>
+        <!-- Breadcrumbs Navigation -->
+        <nav class="mb-6 md:mb-8 text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 text-center sm:text-left" aria-label="Breadcrumb">
+            <ol class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                <li>
+                    <a href="{{ route('frontend.home') }}" class="hover:text-blue-700 transition-colors flex items-center gap-1">
+                        <i class="fa-solid fa-house text-[9px]"></i> Beranda
+                    </a>
+                </li>
+                <li class="text-slate-350">/</li>
+                <li>
+                    <a href="{{ route('frontend.article.index') }}" class="hover:text-blue-700 transition-colors">Artikel</a>
+                </li>
+                <li class="text-slate-350">/</li>
+                <li class="text-slate-800 truncate max-w-[200px] sm:max-w-xs" aria-current="page">{{ $article->judul }}</li>
+            </ol>
+        </nav>
 
         <!-- Article Header -->
         <header class="mb-8 md:mb-10 text-center sm:text-left">
@@ -43,7 +125,7 @@
         <!-- Sharp Featured Image -->
         @if($article->thumbnail)
         <div class="w-full aspect-video sm:aspect-[21/9] bg-slate-200 mb-8 md:mb-12 relative">
-            <img src="{{ $article->thumbnailUrl() }}" alt="{{ $article->judul }}" class="w-full h-full object-cover">
+            <img src="{{ $article->thumbnailUrl() }}" alt="{{ $article->judul }}" class="w-full h-full object-cover" loading="lazy">
         </div>
         @endif
 
@@ -56,6 +138,68 @@
             {!! $article->konten !!}
         </div>
 
+        <!-- Social Media Share Section -->
+        <div x-data="{ copied: false }" class="mt-12 mb-8 p-6 bg-white border border-slate-200 rounded-none shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h4 class="font-serif text-lg font-bold text-slate-900 mb-1">Bagikan Artikel Ini</h4>
+                <p class="text-xs text-slate-500 font-mono">Dukung sekolah kami dengan menyebarkan berita bermanfaat ini.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <!-- WhatsApp -->
+                <a href="https://api.whatsapp.com/send?text={{ rawurlencode($article->judul . ' - ' . route('frontend.article.show', $article->slug)) }}" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="w-10 h-10 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md"
+                   title="Bagikan ke WhatsApp">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                </a>
+                
+                <!-- Facebook -->
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('frontend.article.show', $article->slug)) }}" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="w-10 h-10 rounded-full bg-[#1877F2] hover:bg-[#166FE5] text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md"
+                   title="Bagikan ke Facebook">
+                    <i class="fa-brands fa-facebook-f text-base"></i>
+                </a>
+                
+                <!-- Twitter / X -->
+                <a href="https://twitter.com/intent/tweet?text={{ rawurlencode($article->judul) }}&url={{ urlencode(route('frontend.article.show', $article->slug)) }}" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="w-10 h-10 rounded-full bg-black hover:bg-slate-900 text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md"
+                   title="Bagikan ke Twitter / X">
+                    <i class="fa-brands fa-x-twitter text-base"></i>
+                </a>
+                
+                <!-- Telegram -->
+                <a href="https://telegram.me/share/url?url={{ urlencode(route('frontend.article.show', $article->slug)) }}&text={{ rawurlencode($article->judul) }}" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="w-10 h-10 rounded-full bg-[#0088cc] hover:bg-[#0077b5] text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md"
+                   title="Bagikan ke Telegram">
+                    <i class="fa-brands fa-telegram text-base"></i>
+                </a>
+                
+                <!-- LinkedIn -->
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(route('frontend.article.show', $article->slug)) }}" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="w-10 h-10 rounded-full bg-[#0077B5] hover:bg-[#046294] text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md"
+                   title="Bagikan ke LinkedIn">
+                    <i class="fa-brands fa-linkedin-in text-base"></i>
+                </a>
+                
+                <!-- Copy Link -->
+                <button @click="navigator.clipboard.writeText('{{ route('frontend.article.show', $article->slug) }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                        class="px-4 h-10 rounded-none border border-slate-350 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center gap-2 text-xs font-bold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-sm"
+                        title="Salin Tautan">
+                    <i class="fa-solid" :class="copied ? 'fa-check text-emerald-600' : 'fa-link'"></i>
+                    <span x-text="copied ? 'Tersalin!' : 'Salin Link'"></span>
+                </button>
+            </div>
+        </div>
+
         <!-- Related Articles Recommendations -->
         @if($relatedArticles->isNotEmpty())
         <div class="mt-16 pt-10 border-t border-slate-200">
@@ -64,7 +208,7 @@
                 @foreach($relatedArticles as $related)
                     <a href="{{ route('frontend.article.show', $related->slug) }}" class="group flex flex-col">
                         <div class="w-full aspect-video overflow-hidden bg-slate-200 mb-3 relative">
-                            <img src="{{ $related->thumbnailUrl() }}" alt="{{ $related->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <img src="{{ $related->thumbnailUrl() }}" alt="{{ $related->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
                         </div>
                         <span class="text-[9px] font-bold uppercase tracking-widest text-blue-700 mb-1">
                             {{ $related->category ? $related->category->name : 'Umum' }}

@@ -8,6 +8,8 @@ Route::prefix('super-admin')
     ->name('super-admin.')
     ->middleware(['auth', 'active', 'permission:access-super-admin-dashboard'])
     ->group(function () {
+        Route::post('users/{user}/verify-email', [UserAccountController::class, 'sendVerificationEmail'])->name('users.verify-email');
+        Route::post('users/{user}/reset-password-link', [UserAccountController::class, 'generateResetPasswordLink'])->name('users.reset-password-link');
         Route::resource('users', UserAccountController::class)->except(['create', 'edit']);
     });
 
@@ -16,5 +18,7 @@ Route::prefix('admin')
     ->name('admin.')
     ->middleware(['auth', 'active', 'permission:access-admin-dashboard'])
     ->group(function () {
+        Route::post('users/{user}/verify-email', [UserAccountController::class, 'sendVerificationEmail'])->name('users.verify-email');
+        Route::post('users/{user}/reset-password-link', [UserAccountController::class, 'generateResetPasswordLink'])->name('users.reset-password-link');
         Route::resource('users', UserAccountController::class)->except(['create', 'edit']);
     });

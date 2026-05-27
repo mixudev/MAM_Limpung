@@ -1,5 +1,5 @@
 <!-- Main Content -->
-<div class="bg-[#fcfbf9] py-20 md:py-32">
+<div class="bg-[#fcfbf9] py-10 md:py-32">
     <div class="container mx-auto px-6 max-w-4xl">
         
         <!-- Storytelling Section -->

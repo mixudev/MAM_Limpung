@@ -55,6 +55,8 @@ class SiteSettingController extends Controller
         }
         unset($data['headmaster_signature']);
 
+        $data['is_indexed'] = $request->has('is_indexed');
+
         $siteSetting->update($data);
 
         return redirect()->route('admin.settings.edit')

@@ -1,4 +1,4 @@
-<!-- Beautiful GCP Implementation Tutorial Box (Full Width below settings) -->
+{{-- <!-- Beautiful GCP Implementation Tutorial Box (Full Width below settings) -->
 <div class="bg-slate-900 text-white border border-slate-805 p-6 shadow-xl relative overflow-hidden group">
     <!-- Sleek abstract geometric background glow -->
     <div class="absolute -right-24 -top-24 w-96 h-96 bg-[#4f45b2]/10 rounded-full blur-3xl group-hover:bg-[#4f45b2]/20 transition-all duration-500"></div>
@@ -84,4 +84,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}

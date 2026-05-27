@@ -1,7 +1,7 @@
 <!-- Tab 2: Tab Structure & Custom Sheet Names -->
 <div x-show="activeTab === 'structure'" class="space-y-6 animate-fadeIn" style="display: none;">
     <!-- Split Tab Mode Toggle -->
-    <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-850/40 border border-slate-200 dark:border-zinc-800">
+    <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-800">
         <div>
             <label for="split_by_status" class="text-sm font-bold text-slate-800 dark:text-white block cursor-pointer">Pisahkan Berdasarkan Status Seleksi (Multi-Tab)</label>
             <span class="text-xs text-slate-400 dark:text-zinc-500 block mt-0.5">Jika aktif, data calon siswa otomatis dipisah ke tab lembar kerja terpisah sesuai kelulusan mereka.</span>
@@ -28,8 +28,8 @@
             @endphp
 
             @foreach($availableSheets as $key => $sheetInfo)
-            <div class="p-4 bg-slate-50 dark:bg-zinc-855/40 border border-slate-200 dark:border-zinc-800/80 flex items-start gap-4">
-                <input type="checkbox" name="active_sheets[]" value="{{ $key }}" id="sheet_active_{{ $key }}" {{ in_array($key, $settings['active_sheets'] ?? []) ? 'checked' : '' }} class="mt-1 rounded-none text-[#4f45b2] focus:ring-[#4f45b2]/40 border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-850 w-4 h-4">
+            <div class="p-4 bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-800/80 flex items-start gap-4">
+                <input type="checkbox" name="active_sheets[]" value="{{ $key }}" id="sheet_active_{{ $key }}" {{ in_array($key, $settings['active_sheets'] ?? []) ? 'checked' : '' }} class="mt-1 rounded-none text-[#4f45b2] focus:ring-[#4f45b2]/40 border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 w-4 h-4">
                 <div class="flex-1">
                     <label for="sheet_active_{{ $key }}" class="text-xs font-bold text-slate-800 dark:text-white cursor-pointer block">{{ $sheetInfo['label'] }}</label>
                     <span class="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5 block leading-relaxed">{{ $sheetInfo['desc'] }}</span>

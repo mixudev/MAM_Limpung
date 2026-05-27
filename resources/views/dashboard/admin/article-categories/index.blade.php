@@ -52,7 +52,7 @@
                 <!-- Search Box -->
                 <form action="{{ route('admin.article-categories.index') }}" method="GET" class="flex gap-2">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kategori..." 
-                        class="px-3 py-1.5 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]" />
+                        class="px-3 py-1.5 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]" />
                     <button type="submit" class="py-1.5 px-3 bg-slate-900 dark:bg-zinc-800 text-white dark:text-zinc-300 font-bold text-xs rounded-none hover:bg-slate-800 transition-all font-mono">
                         CARI
                     </button>
@@ -67,7 +67,7 @@
             <div class="overflow-x-auto border border-slate-100 dark:border-zinc-800">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 dark:bg-zinc-850 border-b border-slate-200 dark:border-zinc-800 text-[10px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-zinc-400">
+                        <tr class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 text-[10px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-zinc-400">
                             <th class="py-3 px-4">Nama & Slug</th>
                             <th class="py-3 px-4">Deskripsi</th>
                             <th class="py-3 px-4 text-center w-24">Artikel</th>
@@ -76,7 +76,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
                         @forelse($categories as $cat)
-                            <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-850/30 transition-colors">
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                                 <td class="py-3 px-4">
                                     <div class="font-bold text-slate-800 dark:text-zinc-300">{{ $cat->name }}</div>
                                     <div class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5 font-mono">{{ $cat->slug }}</div>
@@ -143,13 +143,13 @@
                     <div>
                         <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Nama Kategori <span class="text-rose-500">*</span></label>
                         <input type="text" name="name" value="{{ old('name', $editCat->name) }}" required
-                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
                     </div>
 
                     <div>
                         <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Deskripsi Kategori</label>
                         <textarea name="description" rows="5"
-                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">{{ old('description', $editCat->description) }}</textarea>
+                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">{{ old('description', $editCat->description) }}</textarea>
                     </div>
 
                     <div class="flex gap-2 pt-2">
@@ -172,13 +172,13 @@
                     <div>
                         <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Nama Kategori <span class="text-rose-500">*</span></label>
                         <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: Kegiatan Sekolah"
-                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
                     </div>
 
                     <div>
                         <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Deskripsi Kategori</label>
                         <textarea name="description" rows="5" placeholder="Masukkan penjelasan singkat kategori..."
-                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">{{ old('description') }}</textarea>
+                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">{{ old('description') }}</textarea>
                     </div>
 
                     <div class="pt-2">

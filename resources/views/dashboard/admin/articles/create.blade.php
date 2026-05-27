@@ -63,28 +63,49 @@
                     <div>
                         <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Judul Artikel <span class="text-rose-500">*</span></label>
                         <input type="text" name="judul" value="{{ old('judul') }}" required placeholder="Contoh: Kemenangan Bersejarah Tim Basket Sekolah"
-                            class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                            class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
                     </div>
 
                     <!-- Ringkasan (Excerpt) -->
                     <div>
                         <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Ringkasan Singkat (Maks 500 Karakter)</label>
                         <textarea name="ringkasan" rows="3" placeholder="Masukkan ringkasan artikel untuk deskripsi di halaman depan..."
-                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">{{ old('ringkasan') }}</textarea>
+                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">{{ old('ringkasan') }}</textarea>
                         <p class="text-[10px] text-slate-400 dark:text-zinc-500 mt-1">Jika dikosongkan, ringkasan akan otomatis mengambil 150 karakter pertama dari konten.</p>
                     </div>
+                    <style>
+                        /* Tinggi area ketik Quill */
+                        #editor-container .ql-editor {
+                            min-height: 220px;
+                            max-height: 650px;
+                            overflow-y: auto;
+                            font-size: 14px;
+                            line-height: 1.75;
+                        }
 
+                        /* Biar toolbar & editor nyatu rapi */
+                        #editor-container .ql-toolbar {
+                            border-color: rgb(226 232 240); /* slate-200 */
+                        }
+
+                        .dark #editor-container .ql-toolbar,
+                        .dark #editor-container .ql-container {
+                            border-color: rgb(63 63 70); /* zinc-700 */
+                        }
+                    </style>
                     <!-- Konten (Rich Text Editor) -->
                     <div>
                         <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Isi Artikel Lengkap <span class="text-rose-500">*</span></label>
                         <input type="hidden" name="konten" id="konten-input" value="{{ old('konten') }}">
                         <div class="border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
                             <!-- Quill Editor Container -->
-                            <div id="editor-container" class="h-96 text-slate-800 dark:text-zinc-200 font-sans" style="font-size: 14px;">
+                            <div id="editor-container" class=" text-slate-800 dark:text-zinc-200 font-sans" style="font-size: 14px;">
                                 {!! old('konten') !!}
                             </div>
                         </div>
                     </div>
+
+                    
                 </div>
 
                 <!-- Right Section: Category, Metadata, Uploads (1 Col) -->
@@ -93,7 +114,7 @@
                     <div>
                         <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 font-mono">Kategori <span class="text-rose-500">*</span></label>
                         <select name="category_id" required
-                            class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                            class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                             <option value="" disabled selected>Pilih Kategori</option>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -106,7 +127,7 @@
                     <div>
                         <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 font-mono">Status Publikasi <span class="text-rose-500">*</span></label>
                         <select name="status" id="status" required
-                            class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                            class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                             <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Simpan sebagai Draft</option>
                             <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>Terbitkan Langsung</option>
                             <option value="archived" {{ old('status') === 'archived' ? 'selected' : '' }}>Simpan sebagai Arsip</option>
@@ -117,7 +138,7 @@
                     <div id="publish_time_container" class="hidden">
                         <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Tanggal & Waktu Rilis</label>
                         <input type="datetime-local" name="published_at" value="{{ old('published_at') }}"
-                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
                         <p class="text-[10px] text-slate-400 dark:text-zinc-500 mt-1">Kosongkan untuk menjadwalkan artikel terbit langsung saat ini.</p>
                     </div>
 
@@ -133,7 +154,7 @@
                         <input type="file" id="thumbnail-file-input" name="thumbnail" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden" />
                         
                         <!-- Drag & Drop Container -->
-                        <div id="dropzone" class="relative group border-2 border-dashed border-slate-200 dark:border-zinc-700 hover:border-[#4f45b2] dark:hover:border-[#4f45b2] bg-slate-50/50 dark:bg-zinc-850/30 p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 rounded-lg min-h-[180px]">
+                        <div id="dropzone" class="relative group border-2 border-dashed border-slate-200 dark:border-zinc-700 hover:border-[#4f45b2] dark:hover:border-[#4f45b2] bg-slate-50/50 dark:bg-zinc-800/30 p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 rounded-lg min-h-[180px]">
                             
                             <!-- State 1: Drop Prompt (No File Selected) -->
                             <div id="dropzone-prompt" class="space-y-3">
@@ -189,7 +210,163 @@
                     </div>
                 </div>
             </div>
+            <!-- PANEL SEO & PENCARIAN -->
+            <div class="mt-8 p-6 bg-slate-50/50 dark:bg-zinc-800/20 border border-slate-200 dark:border-zinc-800 rounded-lg space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="p-1.5 bg-[#4f45b2]/10 rounded text-[#4f45b2]">
+                            <i class="fa-solid fa-chart-line text-sm"></i>
+                        </span>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800 dark:text-zinc-200">Optimasi SEO & Pencarian Google</h3>
+                            <p class="text-[10px] text-slate-400 dark:text-zinc-500">Sesuaikan tampilan artikel di halaman mesin pencari Google dan media sosial.</p>
+                        </div>
+                    </div>
+                    <span class="py-0.5 px-2 bg-[#4f45b2]/10 text-[#4f45b2] dark:text-indigo-400 font-mono text-[9px] font-bold uppercase tracking-wider rounded">Custom SEO</span>
+                </div>
 
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <!-- Left Column: Inputs (2/3 width) -->
+                    <div class="xl:col-span-2 space-y-4">
+                        <!-- Focus Keyword -->
+                        <div>
+                            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Kata Kunci Fokus (Focus Keyword)</label>
+                            <input type="text" name="seo_focus_keyword" id="seo_focus_keyword" value="{{ old('seo_focus_keyword') }}" placeholder="Contoh: prestasi sekolah, ppdb 2026"
+                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                        </div>
+
+                        <!-- Meta Title -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Judul SEO (Meta Title)</label>
+                                <span id="title-counter" class="text-[10px] font-mono text-slate-400 dark:text-zinc-500">0 / 60 karakter</span>
+                            </div>
+                            <input type="text" name="seo_meta_title" id="seo_meta_title" value="{{ old('seo_meta_title') }}" placeholder="Kosongkan untuk menggunakan judul artikel utama"
+                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                        </div>
+
+                        <!-- Meta Description -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <div class="flex items-center gap-1.5">
+                                    <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Deskripsi SEO (Meta Description)</label>
+                                    <button type="button" id="btn-generate-seo" class="py-0.5 px-2 bg-indigo-50 dark:bg-zinc-800 text-[#4f45b2] dark:text-indigo-400 hover:bg-[#4f45b2]/10 font-bold font-mono text-[9px] uppercase tracking-wider transition-all border border-indigo-100 dark:border-zinc-700">
+                                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Auto-Generate
+                                    </button>
+                                </div>
+                                <span id="desc-counter" class="text-[10px] font-mono text-slate-400 dark:text-zinc-500">0 / 160 karakter</span>
+                            </div>
+                            <textarea name="seo_meta_description" id="seo_meta_description" rows="3" placeholder="Masukkan ringkasan artikel yang memikat pembaca di hasil pencarian..."
+                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2] resize-y">{{ old('seo_meta_description') }}</textarea>
+                        </div>
+
+                        <!-- Meta Keywords -->
+                        <div>
+                            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Kata Kunci Tambahan (Keywords - Pisahkan dengan koma)</label>
+                            <input type="text" name="seo_meta_keywords" id="seo_meta_keywords" value="{{ old('seo_meta_keywords') }}" placeholder="sekolah unggul, mam limpung, prestasi batang"
+                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                        </div>
+
+                        <!-- Canonical URL -->
+                        <div>
+                            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Canonical URL (Kosongkan kecuali merujuk ke website eksternal)</label>
+                            <input type="text" name="seo_canonical_url" id="seo_canonical_url" value="{{ old('seo_canonical_url') }}" placeholder="https://website-asal.com/artikel-asli"
+                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                        </div>
+
+                        <!-- Advanced SEO Robot Toggles -->
+                        <div class="grid grid-cols-2 gap-4 pt-2">
+                            <div class="flex items-start gap-2.5">
+                                <div class="flex items-center h-5">
+                                    <input type="checkbox" name="seo_is_indexed" id="seo_is_indexed" value="1" {{ old('seo_is_indexed', '1') == '1' ? 'checked' : '' }}
+                                        class="w-4 h-4 text-[#4f45b2] border-slate-300 rounded focus:ring-[#4f45b2]">
+                                </div>
+                                <div class="text-xs">
+                                    <label for="seo_is_indexed" class="font-bold text-slate-700 dark:text-zinc-300">Izinkan Mesin Pencari (Index)</label>
+                                    <p class="text-[10px] text-slate-400 dark:text-zinc-500">Jika dimatikan, halaman akan diberi tag 'noindex' agar tidak terdaftar di Google.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2.5">
+                                <div class="flex items-center h-5">
+                                    <input type="checkbox" name="seo_is_followed" id="seo_is_followed" value="1" {{ old('seo_is_followed', '1') == '1' ? 'checked' : '' }}
+                                        class="w-4 h-4 text-[#4f45b2] border-slate-300 rounded focus:ring-[#4f45b2]">
+                                </div>
+                                <div class="text-xs">
+                                    <label for="seo_is_followed" class="font-bold text-slate-700 dark:text-zinc-300">Ikuti Link di Artikel (Follow)</label>
+                                    <p class="text-[10px] text-slate-400 dark:text-zinc-500">Mengarahkan Google bot untuk merayap ('follow') seluruh link luar di dalam artikel.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Snippet Preview & SEO Checklist (1/3 width) -->
+                    <div class="space-y-6">
+                        <!-- Google Snippet Mockup Container -->
+                        <div class="p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-sm space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-100 dark:border-zinc-850 pb-2">
+                                <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Google Search Preview</span>
+                                <div class="flex gap-2 text-[9px] font-mono">
+                                    <button type="button" id="preview-tab-mobile" class="px-1.5 py-0.5 font-bold uppercase tracking-wider bg-slate-100 dark:bg-zinc-850 text-[#4f45b2] rounded">Mobile</button>
+                                    <button type="button" id="preview-tab-desktop" class="px-1.5 py-0.5 font-bold uppercase tracking-wider text-slate-400 rounded">Desktop</button>
+                                </div>
+                            </div>
+
+                            <!-- LIVE SNIPPET MOCKUP -->
+                            <div class="space-y-2 pt-1 font-sans text-left">
+                                <!-- Breadcrumb/URL -->
+                                <div class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-zinc-400">
+                                    <span class="w-4 h-4 bg-slate-100 dark:bg-zinc-850 rounded-full flex items-center justify-center text-[9px]"><i class="fa-solid fa-globe"></i></span>
+                                    <div class="flex flex-col leading-none">
+                                        <span class="text-[10px] font-medium text-slate-800 dark:text-zinc-300">mamlimpung.sch.id</span>
+                                        <span id="snippet-url" class="text-[9px] text-slate-400 dark:text-zinc-500 truncate max-w-[200px]">/artikel/contoh-slug</span>
+                                    </div>
+                                </div>
+
+                                <!-- Live Title -->
+                                <h4 id="snippet-title" class="text-sm font-medium text-blue-800 dark:text-blue-400 hover:underline cursor-pointer leading-tight line-clamp-2">
+                                    Judul Artikel Utama Tampil di Sini...
+                                </h4>
+
+                                <!-- Live Snippet Text -->
+                                <p id="snippet-desc" class="text-xs text-slate-600 dark:text-zinc-400 leading-snug line-clamp-3">
+                                    Deskripsi pencarian artikel Google. Masukkan ringkasan menarik di kolom deskripsi SEO untuk menggoda pengunjung mencet artikel ini...
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- SEO Real-time Checklist -->
+                        <div class="p-4 bg-slate-100/50 dark:bg-zinc-950/20 border border-slate-200 dark:border-zinc-800 space-y-3">
+                            <h4 class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 border-b border-slate-200 dark:border-zinc-850 pb-2 flex items-center justify-between">
+                                <span>Analisis Real-time SEO</span>
+                                <span id="seo-score" class="font-bold text-[#4f45b2]">0% Score</span>
+                            </h4>
+
+                            <ul class="space-y-2.5 text-xs">
+                                <li id="check-title-len" class="flex items-start gap-2 text-slate-500 dark:text-zinc-450">
+                                    <i class="fa-solid fa-circle-xmark text-rose-500 mt-0.5"></i>
+                                    <span>Judul SEO ideal (50-60 karakter)</span>
+                                </li>
+                                <li id="check-desc-len" class="flex items-start gap-2 text-slate-500 dark:text-zinc-450">
+                                    <i class="fa-solid fa-circle-xmark text-rose-500 mt-0.5"></i>
+                                    <span>Deskripsi SEO ideal (120-160 karakter)</span>
+                                </li>
+                                <li id="check-keyword-filled" class="flex items-start gap-2 text-slate-500 dark:text-zinc-450">
+                                    <i class="fa-solid fa-circle-xmark text-rose-500 mt-0.5"></i>
+                                    <span>Kata Kunci Fokus diisi</span>
+                                </li>
+                                <li id="check-keyword-in-title" class="flex items-start gap-2 text-slate-500 dark:text-zinc-450">
+                                    <i class="fa-solid fa-circle-xmark text-rose-500 mt-0.5"></i>
+                                    <span>Kata Kunci Fokus ada di Judul SEO</span>
+                                </li>
+                                <li id="check-keyword-in-desc" class="flex items-start gap-2 text-slate-500 dark:text-zinc-450">
+                                    <i class="fa-solid fa-circle-xmark text-rose-500 mt-0.5"></i>
+                                    <span>Kata Kunci Fokus ada di Deskripsi SEO</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Submit Section -->
             <div class="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-zinc-800">
                 <a href="{{ route('admin.articles.index') }}" class="py-2.5 px-5 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 font-bold text-xs rounded-none transition-all font-mono">
@@ -407,6 +584,203 @@
             resetDropzone();
             hideError();
         });
+
+        // ─── LIVE SEO & SEARCH ENGINE SNIPPET PREVIEW ─────────────────────────────────
+        const judulInput = document.querySelector('input[name="judul"]');
+        const seoTitleInput = document.getElementById('seo_meta_title');
+        const seoDescInput = document.getElementById('seo_meta_description');
+        const seoKeywordInput = document.getElementById('seo_focus_keyword');
+        
+        const snippetTitle = document.getElementById('snippet-title');
+        const snippetDesc = document.getElementById('snippet-desc');
+        const snippetUrl = document.getElementById('snippet-url');
+        
+        const titleCounter = document.getElementById('title-counter');
+        const descCounter = document.getElementById('desc-counter');
+        
+        const btnGenerateSeo = document.getElementById('btn-generate-seo');
+        
+        // Checklist Elements
+        const checkTitleLen = document.getElementById('check-title-len');
+        const checkDescLen = document.getElementById('check-desc-len');
+        const checkKeywordFilled = document.getElementById('check-keyword-filled');
+        const checkKeywordInTitle = document.getElementById('check-keyword-in-title');
+        const checkKeywordInDesc = document.getElementById('check-keyword-in-desc');
+        const seoScore = document.getElementById('seo-score');
+
+        // Helper: Convert Title to Slug
+        function generateSlug(text) {
+            return text.toString().toLowerCase().trim()
+                .replace(/\s+/g, '-')           // Replace spaces with -
+                .replace(/&/g, '-and-')         // Replace & with 'and'
+                .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+                .replace(/\-\-+/g, '-');        // Replace multiple - with single -
+        }
+
+        // Live preview updates
+        function updateSeoPreview() {
+            let titleVal = seoTitleInput.value.trim() || judulInput.value.trim() || 'Judul Artikel Utama Tampil di Sini...';
+            let descVal = seoDescInput.value.trim() || 'Deskripsi pencarian artikel Google. Masukkan ringkasan menarik di kolom deskripsi SEO untuk menggoda pengunjung mencet artikel ini...';
+            let slugVal = generateSlug(judulInput.value.trim() || 'contoh-slug');
+            
+            snippetTitle.textContent = titleVal;
+            snippetDesc.textContent = descVal;
+            snippetUrl.textContent = '/artikel/' + slugVal;
+            
+            // Character counters
+            titleCounter.textContent = `${seoTitleInput.value.length} / 60 karakter`;
+            descCounter.textContent = `${seoDescInput.value.length} / 160 karakter`;
+            
+            if (seoTitleInput.value.length > 60) {
+                titleCounter.classList.add('text-rose-500', 'font-bold');
+            } else {
+                titleCounter.classList.remove('text-rose-500', 'font-bold');
+            }
+            
+            if (seoDescInput.value.length > 160) {
+                descCounter.classList.add('text-rose-500', 'font-bold');
+            } else {
+                descCounter.classList.remove('text-rose-500', 'font-bold');
+            }
+            
+            runSeoAnalysis();
+        }
+
+        // SEO Real-time Checker
+        function runSeoAnalysis() {
+            let title = seoTitleInput.value.trim() || judulInput.value.trim() || '';
+            let desc = seoDescInput.value.trim() || '';
+            let keyword = seoKeywordInput.value.trim().toLowerCase();
+            
+            let passedCount = 0;
+            let totalChecks = 5;
+
+            // 1. Title Length
+            let titleLen = title.length;
+            if (titleLen >= 40 && titleLen <= 60) {
+                setCheckPassed(checkTitleLen, true);
+                passedCount++;
+            } else {
+                setCheckPassed(checkTitleLen, false, 'Panjang judul ideal: 40-60 karakter (' + titleLen + ')');
+            }
+
+            // 2. Description Length
+            let descLen = desc.length;
+            if (descLen >= 110 && descLen <= 160) {
+                setCheckPassed(checkDescLen, true);
+                passedCount++;
+            } else {
+                setCheckPassed(checkDescLen, false, 'Panjang deskripsi ideal: 110-160 karakter (' + descLen + ')');
+            }
+
+            // 3. Keyword Filled
+            if (keyword.length > 0) {
+                setCheckPassed(checkKeywordFilled, true);
+                passedCount++;
+                
+                // 4. Keyword in Title
+                if (title.toLowerCase().includes(keyword)) {
+                    setCheckPassed(checkKeywordInTitle, true);
+                    passedCount++;
+                } else {
+                    setCheckPassed(checkKeywordInTitle, false);
+                }
+
+                // 5. Keyword in Description
+                if (desc.toLowerCase().includes(keyword)) {
+                    setCheckPassed(checkKeywordInDesc, true);
+                    passedCount++;
+                } else {
+                    setCheckPassed(checkKeywordInDesc, false);
+                }
+            } else {
+                setCheckPassed(checkKeywordFilled, false);
+                setCheckPassed(checkKeywordInTitle, false);
+                setCheckPassed(checkKeywordInDesc, false);
+            }
+
+            // Update score
+            let scorePercent = Math.round((passedCount / totalChecks) * 100);
+            seoScore.textContent = `${scorePercent}% Score`;
+            
+            if (scorePercent >= 80) {
+                seoScore.className = 'font-bold text-emerald-500';
+            } else if (scorePercent >= 50) {
+                seoScore.className = 'font-bold text-amber-500';
+            } else {
+                seoScore.className = 'font-bold text-rose-500';
+            }
+        }
+
+        function setCheckPassed(element, isPassed, customText = null) {
+            const icon = element.querySelector('i');
+            const label = element.querySelector('span');
+            if (isPassed) {
+                element.className = "flex items-start gap-2 text-emerald-600 dark:text-emerald-500 font-medium";
+                icon.className = "fa-solid fa-circle-check text-emerald-500 mt-0.5";
+            } else {
+                element.className = "flex items-start gap-2 text-slate-500 dark:text-zinc-450";
+                icon.className = "fa-solid fa-circle-xmark text-rose-500 mt-0.5";
+            }
+            if (customText) {
+                label.textContent = customText;
+            }
+        }
+
+        // Auto-Generate Meta Description from Quill Content
+        btnGenerateSeo.addEventListener('click', function() {
+            // Get content from Quill editor
+            let cleanText = quill.getText().trim();
+            
+            // Clean up double spaces or newlines
+            cleanText = cleanText.replace(/\s+/g, ' ');
+            
+            if (cleanText.length > 0) {
+                // Take first 155 characters and add '...' if longer
+                let excerpt = cleanText.substring(0, 155);
+                if (cleanText.length > 155) {
+                    excerpt += '...';
+                }
+                seoDescInput.value = excerpt;
+                updateSeoPreview();
+            } else {
+                alert('Tulis isi artikel terlebih dahulu untuk men-generate deskripsi otomatis.');
+            }
+        });
+
+        // Event listeners
+        [judulInput, seoTitleInput, seoDescInput, seoKeywordInput].forEach(el => {
+            if (el) {
+                el.addEventListener('input', updateSeoPreview);
+            }
+        });
+
+        // Toggle Preview Mobile vs Desktop
+        const btnMobile = document.getElementById('preview-tab-mobile');
+        const btnDesktop = document.getElementById('preview-tab-desktop');
+        
+        btnMobile.addEventListener('click', function() {
+            btnMobile.classList.add('bg-slate-100', 'dark:bg-zinc-850', 'text-[#4f45b2]');
+            btnMobile.classList.remove('text-slate-400');
+            btnDesktop.classList.remove('bg-slate-100', 'dark:bg-zinc-850', 'text-[#4f45b2]');
+            btnDesktop.classList.add('text-slate-400');
+            
+            snippetTitle.classList.remove('text-base');
+            snippetTitle.classList.add('text-sm');
+        });
+        
+        btnDesktop.addEventListener('click', function() {
+            btnDesktop.classList.add('bg-slate-100', 'dark:bg-zinc-850', 'text-[#4f45b2]');
+            btnDesktop.classList.remove('text-slate-400');
+            btnMobile.classList.remove('bg-slate-100', 'dark:bg-zinc-850', 'text-[#4f45b2]');
+            btnMobile.classList.add('text-slate-400');
+            
+            snippetTitle.classList.remove('text-sm');
+            snippetTitle.classList.add('text-base');
+        });
+
+        // Initial trigger
+        updateSeoPreview();
     });
 </script>
 @endsection

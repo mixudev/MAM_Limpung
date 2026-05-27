@@ -36,7 +36,7 @@ test('unauthorized users cannot access security settings page', function () {
 test('authorized admin can access security settings page', function () {
     $response = $this->actingAs($this->admin)->get(route('admin.security.index'));
     $response->assertStatus(200);
-    $response->assertSee('Pusat Keamanan & Sistem Backup', false);
+    $response->assertSee('Pusat Keamanan & Kredensial', false);
 });
 
 test('admin can save google service account credentials securely', function () {
@@ -62,8 +62,16 @@ test('admin can save google service account credentials securely', function () {
     expect($decrypted)->toBe($jsonCredentials);
 });
 
+// ── Backup route tests (now at admin.backup.*) ────────────────────────────────
+
+test('authorized admin can access backup page', function () {
+    $response = $this->actingAs($this->admin)->get(route('admin.backup.index'));
+    $response->assertStatus(200);
+    $response->assertSee('Manajemen Backup', false);
+});
+
 test('admin can save backup settings with encryption disabled', function () {
-    $response = $this->actingAs($this->admin)->post(route('admin.security.backup.settings'), [
+    $response = $this->actingAs($this->admin)->post(route('admin.backup.settings'), [
         'schedule' => 'weekly',
         'cron_expression' => '0 0 * * 0',
         'enabled' => '1',
@@ -86,7 +94,7 @@ test('admin can save backup settings with encryption disabled', function () {
 });
 
 test('admin cannot enable encryption without generating key first', function () {
-    $response = $this->actingAs($this->admin)->post(route('admin.security.backup.settings'), [
+    $response = $this->actingAs($this->admin)->post(route('admin.backup.settings'), [
         'schedule' => 'daily',
         'enabled' => '1',
         'encryption_enabled' => '1',
@@ -98,7 +106,7 @@ test('admin cannot enable encryption without generating key first', function () 
 
 test('admin can generate and download encryption key', function () {
     // Generate key
-    $generateResponse = $this->actingAs($this->admin)->post(route('admin.security.backup.generate-key'), [
+    $generateResponse = $this->actingAs($this->admin)->post(route('admin.backup.generate-key'), [
         'confirm_password' => 'password',
     ]);
     $generateResponse->assertRedirect();
@@ -111,7 +119,7 @@ test('admin can generate and download encryption key', function () {
     expect(strlen($decryptedKey))->toBe(64); // 64-char hex key
 
     // Download key
-    $downloadResponse = $this->actingAs($this->admin)->post(route('admin.security.backup.download-key'), [
+    $downloadResponse = $this->actingAs($this->admin)->post(route('admin.backup.download-key'), [
         'confirm_password' => 'password',
     ]);
     $downloadResponse->assertStatus(200);
@@ -142,7 +150,7 @@ test('admin can run backup manually and verify decryption successfully', functio
     }
 
     // Trigger manual backup via AJAX
-    $response = $this->actingAs($this->admin)->postJson(route('admin.security.backup.run'));
+    $response = $this->actingAs($this->admin)->postJson(route('admin.backup.run'));
     $response->assertStatus(200);
 
     $data = $response->json();
@@ -155,7 +163,7 @@ test('admin can run backup manually and verify decryption successfully', functio
     expect(file_exists($filePath))->toBeTrue();
 
     // Verify correct decryption via verify endpoint
-    $verifyResponse = $this->actingAs($this->admin)->postJson(route('admin.security.backup.verify'), [
+    $verifyResponse = $this->actingAs($this->admin)->postJson(route('admin.backup.verify'), [
         'filename' => $filename,
         'passphrase' => $rawKey,
     ]);
@@ -166,7 +174,7 @@ test('admin can run backup manually and verify decryption successfully', functio
     expect($verifyData['report']['has_db_dump'])->toBeTrue();
 
     // Verify decryption failure with wrong password
-    $verifyFailResponse = $this->actingAs($this->admin)->postJson(route('admin.security.backup.verify'), [
+    $verifyFailResponse = $this->actingAs($this->admin)->postJson(route('admin.backup.verify'), [
         'filename' => $filename,
         'passphrase' => 'wrongpassphrase12345678901234567890123456789012345678901234567890123456',
     ]);
@@ -191,7 +199,7 @@ test('admin can view backup log details via AJAX', function () {
         'drive_uploaded' => false,
     ]);
 
-    $response = $this->actingAs($this->admin)->getJson(route('admin.security.backup.log-details', ['id' => $log->id]));
+    $response = $this->actingAs($this->admin)->getJson(route('admin.backup.log-details', ['id' => $log->id]));
     $response->assertStatus(200);
 
     $data = $response->json();
@@ -201,7 +209,7 @@ test('admin can view backup log details via AJAX', function () {
 });
 
 test('admin gets 404 for non-existent backup log details', function () {
-    $response = $this->actingAs($this->admin)->getJson(route('admin.security.backup.log-details', ['id' => 9999]));
+    $response = $this->actingAs($this->admin)->getJson(route('admin.backup.log-details', ['id' => 9999]));
     $response->assertStatus(404);
 });
 
@@ -217,7 +225,7 @@ test('admin can fetch storage directories via AJAX', function () {
     }
     file_put_contents($tempTestDir.'/test.txt', 'hello');
 
-    $response = $this->actingAs($this->admin)->getJson(route('admin.security.backup.storage-directories'));
+    $response = $this->actingAs($this->admin)->getJson(route('admin.backup.storage-directories'));
     $response->assertStatus(200);
 
     $data = $response->json();
@@ -232,7 +240,7 @@ test('admin can fetch storage directories via AJAX', function () {
 });
 
 test('admin can save backup settings with selective storage folders', function () {
-    $response = $this->actingAs($this->admin)->post(route('admin.security.backup.settings'), [
+    $response = $this->actingAs($this->admin)->post(route('admin.backup.settings'), [
         'schedule' => 'weekly',
         'cron_expression' => '0 0 * * 0',
         'enabled' => '1',

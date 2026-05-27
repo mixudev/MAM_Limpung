@@ -15,7 +15,7 @@
     <div class="overflow-x-auto border border-slate-100 dark:border-zinc-800">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="bg-slate-50 dark:bg-zinc-850 border-b border-slate-200 dark:border-zinc-800 text-[10px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-zinc-400">
+                <tr class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 text-[10px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-zinc-400">
                     <th class="py-3.5 px-4">Judul & Isi Teks</th>
                     <th class="py-3.5 px-4 w-28 text-center">Status</th>
                     <th class="py-3.5 px-4 w-32 text-right">Aksi</th>
@@ -23,7 +23,7 @@
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
                 @forelse($runningTexts as $text)
-                    <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-850/30 transition-colors">
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                         <td class="py-3.5 px-4">
                             <div class="font-bold text-slate-800 dark:text-zinc-300">{{ $text->title }}</div>
                             <div class="text-[11px] text-slate-500 dark:text-zinc-400 mt-1 line-clamp-2 italic">"{{ $text->content }}"</div>

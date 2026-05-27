@@ -10,7 +10,7 @@
                 <th class="py-3 px-4 text-right">Aksi</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100 dark:divide-zinc-850">
+        <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
             @foreach ($roles as $role)
                 @php
                     $isSystemRole = in_array($role->name, ['super-admin', 'admin', 'guru', 'siswa']);
@@ -52,7 +52,7 @@
                             <!-- Delete Button -->
                             @if ($isSystemRole)
                                 <button type="button" disabled 
-                                        class="py-1 px-2.5 bg-slate-100 dark:bg-zinc-850 text-slate-400 dark:text-zinc-600 font-mono font-bold text-[10px] uppercase tracking-wider cursor-not-allowed"
+                                        class="py-1 px-2.5 bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-600 font-mono font-bold text-[10px] uppercase tracking-wider cursor-not-allowed"
                                         title="Role bawaan sistem tidak dapat dihapus">
                                     Hapus
                                 </button>

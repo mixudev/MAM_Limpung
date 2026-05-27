@@ -26,7 +26,7 @@
     <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-none shadow-sm overflow-hidden">
         
         <!-- Tab Headers -->
-        <div class="flex border-b border-slate-200 dark:border-zinc-850 bg-slate-50 dark:bg-zinc-950">
+        <div class="flex border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950">
             <button type="button" onclick="switchTab('tab-roles')" id="btn-tab-roles" 
                     class="tab-btn px-6 py-3.5 text-xs font-mono font-bold uppercase tracking-wider border-b-2 border-indigo-600 text-indigo-600 dark:text-white transition-all focus:outline-none">
                 Kelola Roles

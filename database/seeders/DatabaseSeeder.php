@@ -23,6 +23,10 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             PpdbSettingSeeder::class,
+            ArticleCategorySeeder::class,
+            ArticleSeeder::class,
+            AnnouncementSeeder::class,
+            PrestasiSeeder::class,
         ]);
     }
 }

@@ -2,15 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\HasSeo;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class Article extends Model
 {
     use HasFactory;
+    use HasSeo;
+    use LogsActivity;
     use SoftDeletes;
 
     protected $fillable = [
@@ -52,6 +57,14 @@ class Article extends Model
             if ($article->isDirty('judul')) {
                 $article->slug = static::generateUniqueSlug($article->judul, $article->id);
             }
+        });
+
+        static::saved(function () {
+            Cache::forget('seo_sitemap_articles');
+        });
+
+        static::deleted(function () {
+            Cache::forget('seo_sitemap_articles');
         });
     }
 

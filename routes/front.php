@@ -10,6 +10,7 @@ use App\Http\Controllers\Frontend\KurikulumController;
 use App\Http\Controllers\Frontend\PpdbController;
 use App\Http\Controllers\Frontend\PrestasiController;
 use App\Http\Controllers\Frontend\ProfileController;
+use App\Http\Controllers\Frontend\SeoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,6 +22,10 @@ use Illuminate\Support\Facades\Route;
 | Semua route diberi prefix name 'frontend.' untuk konsistensi.
 |
 */
+
+// Dynamic SEO Routes
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('frontend.seo.sitemap');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('frontend.seo.robots');
 
 Route::name('frontend.')->group(function () {
 
@@ -63,6 +68,10 @@ Route::name('frontend.')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/kontak', [ContactController::class, 'index'])->name('contact');
 });
+
+Route::get('/link', function () {
+    return view('links.link');
+})->name('link');
 
 /*
 |--------------------------------------------------------------------------

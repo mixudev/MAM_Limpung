@@ -79,6 +79,12 @@ class PermissionSeeder extends Seeder
         ['view-reports',   'reports', 'View Reports',   'View generated reports'],
         ['export-reports', 'reports', 'Export Reports', 'Export reports to file'],
         ['generate-reports', 'reports', 'Generate Reports', 'Run report generation'],
+
+        // --- Achievements ---
+        ['view-achievements',    'achievements', 'View Achievements',    'View achievement list and details'],
+        ['create-achievements',  'achievements', 'Create Achievements',  'Create new achievement records'],
+        ['edit-achievements',    'achievements', 'Edit Achievements',    'Update achievement information'],
+        ['delete-achievements',  'achievements', 'Delete Achievements',  'Delete achievement records'],
     ];
 
     public function run(): void

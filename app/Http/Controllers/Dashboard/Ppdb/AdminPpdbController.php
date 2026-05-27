@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Dashboard\Ppdb;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\Ppdb\StorePpdbApplicantRequest;
+use App\Mail\Ppdb\PpdbRegistrationMail;
 use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
 use App\Services\PpdbService;
+use App\Services\SmtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -123,6 +125,13 @@ class AdminPpdbController extends Controller
         $files = $request->allFiles();
 
         $ppdbSiswa = $this->ppdbService->storeApplicant($validated, $files);
+
+        // Kirim email konfirmasi pendaftaran secara senyap
+        app(SmtpService::class)->sendQuiet(
+            new PpdbRegistrationMail($ppdbSiswa),
+            $ppdbSiswa->email,
+            $ppdbSiswa->nama_lengkap
+        );
 
         return redirect()->route('admin.ppdb.index')
             ->with('success', "Pendaftar {$ppdbSiswa->nama_lengkap} berhasil ditambahkan dengan Nomor Registrasi {$ppdbSiswa->nomor_registrasi}.");

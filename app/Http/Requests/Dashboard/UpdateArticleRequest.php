@@ -37,6 +37,13 @@ class UpdateArticleRequest extends FormRequest
             'temp_thumbnail' => ['nullable', 'string'],
             'status' => ['required', 'in:draft,published,archived'],
             'published_at' => ['nullable', 'required_if:status,published', 'date'],
+            'seo_meta_title' => ['nullable', 'string', 'max:255'],
+            'seo_meta_description' => ['nullable', 'string', 'max:500'],
+            'seo_meta_keywords' => ['nullable', 'string', 'max:255'],
+            'seo_focus_keyword' => ['nullable', 'string', 'max:100'],
+            'seo_canonical_url' => ['nullable', 'url', 'max:500'],
+            'seo_is_indexed' => ['nullable', 'boolean'],
+            'seo_is_followed' => ['nullable', 'boolean'],
         ];
     }
 

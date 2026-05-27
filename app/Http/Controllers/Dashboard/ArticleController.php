@@ -141,7 +141,18 @@ class ArticleController extends Controller
             $data['published_at'] = $data['published_at'] ?? now();
         }
 
-        Article::create($data);
+        $article = Article::create($data);
+
+        // Save SEO data
+        $article->seo()->create([
+            'meta_title' => $request->input('seo_meta_title'),
+            'meta_description' => $request->input('seo_meta_description'),
+            'meta_keywords' => $request->input('seo_meta_keywords'),
+            'focus_keyword' => $request->input('seo_focus_keyword'),
+            'canonical_url' => $request->input('seo_canonical_url'),
+            'is_indexed' => $request->boolean('seo_is_indexed', true),
+            'is_followed' => $request->boolean('seo_is_followed', true),
+        ]);
 
         return redirect()->route('admin.articles.index')
             ->with('success', 'Artikel berhasil diterbitkan/disimpan.');
@@ -212,6 +223,17 @@ class ArticleController extends Controller
         }
 
         $article->update($data);
+
+        // Update SEO data
+        $article->seo()->updateOrCreate([], [
+            'meta_title' => $request->input('seo_meta_title'),
+            'meta_description' => $request->input('seo_meta_description'),
+            'meta_keywords' => $request->input('seo_meta_keywords'),
+            'focus_keyword' => $request->input('seo_focus_keyword'),
+            'canonical_url' => $request->input('seo_canonical_url'),
+            'is_indexed' => $request->boolean('seo_is_indexed', true),
+            'is_followed' => $request->boolean('seo_is_followed', true),
+        ]);
 
         return redirect()->route('admin.articles.index')
             ->with('success', 'Artikel berhasil diperbarui.');

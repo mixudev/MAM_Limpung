@@ -25,7 +25,7 @@
     <!-- Core Contact Info: 3 Column Premium Grid -->
     <section class="py-24 bg-gray-50">
         <div class="container mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-0 bg-white shadow-2xl border border-gray-150 rounded-none overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-0 bg-white shadow-2xl border border-gray-200 rounded-none overflow-hidden">
                 
                 <!-- Telepon & WA Card -->
                 <div class="group border-b md:border-b-0 md:border-r border-gray-100 py-16 px-10 hover:bg-blue-50 transition-colors duration-500 cursor-default" data-aos="fade-up" data-aos-delay="0">
@@ -39,13 +39,13 @@
                     </p>
                     <div class="space-y-3 mb-8">
                         <a href="tel:+62285123456" class="block text-sm font-bold text-gray-800 hover:text-blue-900 transition-colors">
-                            <i class="fa-solid fa-phone text-[10px] mr-2 text-blue-600"></i> (0285) 123-456
+                            <i class="fa-solid fa-phone text-[10px] mr-2 text-blue-600"></i> {{ $siteSettings->phone ?? '' }}
                         </a>
-                        <a href="https://wa.me/628123456789" target="_blank" class="block text-sm font-bold text-gray-800 hover:text-blue-900 transition-colors">
-                            <i class="fa-brands fa-whatsapp text-[12px] mr-2 text-emerald-500 font-bold"></i> +62 812-3456-789
-                        </a>
+                        <a href="https://wa.me/{{ $siteSettings->whatsapp ?? '' }}" target="_blank" class="block text-sm font-bold text-gray-800 hover:text-blue-900 transition-colors">
+                            <i class="fa-brands fa-whatsapp text-[12px] mr-2 text-emerald-500 font-bold"></i>+ {{ preg_replace('/^(\d{2})(\d{3})(\d{4})(\d{4})$/', '$1 $2 $3 $4', $siteSettings->whatsapp ?? '') }}
+                        </a> 
                     </div>
-                    <a href="https://wa.me/628123456789" target="_blank" class="inline-flex items-center gap-3 bg-blue-900 text-white px-6 py-3 font-semibold hover:bg-black transition-colors uppercase tracking-widest text-[10px] rounded-none">
+                    <a href="https://wa.me/{{ $siteSettings->whatsapp ?? '' }}" target="_blank" class="inline-flex items-center gap-3 bg-blue-900 text-white px-6 py-3 font-semibold hover:bg-black transition-colors uppercase tracking-widest text-[10px] rounded-none">
                         Hubungi WhatsApp <i class="fa-brands fa-whatsapp text-xs"></i>
                     </a>
                 </div>
@@ -61,14 +61,14 @@
                         Kirimkan surat resmi kedinasan, berkas administrasi, proposal kerjasama akademis, atau pertanyaan umum ke email resmi kami.
                     </p>
                     <div class="space-y-3 mb-8">
-                        <a href="mailto:info@mamlimpung.sch.id" class="block text-sm font-bold text-gray-800 hover:text-emerald-700 transition-colors">
-                            <i class="fa-solid fa-envelope-open text-[10px] mr-2 text-emerald-600"></i> info@mamlimpung.sch.id
+                        <a href="mailto:{{ $siteSettings->email ?? '' }}" class="block text-sm font-bold text-gray-800 hover:text-emerald-700 transition-colors">
+                            <i class="fa-solid fa-envelope-open text-[10px] mr-2 text-emerald-600"></i> {{ $siteSettings->email ?? '' }}
                         </a>
-                        <a href="mailto:ppdb@mamlimpung.sch.id" class="block text-sm font-bold text-gray-800 hover:text-emerald-700 transition-colors">
-                            <i class="fa-solid fa-inbox text-[10px] mr-2 text-emerald-600"></i> ppdb@mamlimpung.sch.id
-                        </a>
+                        <!-- <a href="mailto:{{ $siteSettings->email ?? '' }}" class="block text-sm font-bold text-gray-800 hover:text-emerald-700 transition-colors">
+                            <i class="fa-solid fa-inbox text-[10px] mr-2 text-emerald-600"></i> {{ $siteSettings->email ?? '' }}
+                        </a> -->
                     </div>
-                    <a href="mailto:info@mamlimpung.sch.id" class="inline-flex items-center gap-3 bg-emerald-700 text-white px-6 py-3 font-semibold hover:bg-emerald-900 transition-colors uppercase tracking-widest text-[10px] rounded-none">
+                    <a href="mailto:{{ $siteSettings->email ?? '' }}" class="inline-flex items-center gap-3 bg-emerald-700 text-white px-6 py-3 font-semibold hover:bg-emerald-900 transition-colors uppercase tracking-widest text-[10px] rounded-none">
                         Kirim Email <i class="fa-solid fa-paper-plane text-xs"></i>
                     </a>
                 </div>
@@ -122,10 +122,10 @@
                         <div class="bg-gray-50 p-8 border-l-4 border-blue-900 shadow-sm mb-10">
                             <h4 class="font-bold text-stone-900 uppercase tracking-wider text-sm mb-3">Alamat Resmi Sekolah</h4>
                             <p class="text-gray-600 font-medium leading-relaxed mb-4 text-base">
-                                Jl. Cokronegoro No.34, Gepor, Limpung, Kec. Limpung, Kabupaten Batang, Jawa Tengah 51271
+                                {{ $siteSettings->address ?? 'Jl. Cokronegoro No.34, Gepor, Limpung, Kec. Limpung, Kabupaten Batang, Jawa Tengah 51271' }}
                             </p>
                             <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider">
-                                MAM Muhammadiyah Limpung — NPSN: 20364936
+                                {{ $siteSettings->school_name ?? 'MAM Limpung'}} — NPSN: 20364936
                             </span>
                         </div>
                     </div>
@@ -135,17 +135,17 @@
                         <h4 class="font-bold text-stone-900 uppercase tracking-wider text-xs mb-6">Media Sosial Resmi</h4>
                         <div class="grid grid-cols-3 gap-4">
                             <!-- Instagram -->
-                            <a href="https://www.instagram.com/mualim_bersahabat" target="_blank" class="group bg-white p-5 text-center border border-gray-200 hover:border-blue-900 hover:shadow-xl transition-all">
+                            <a href="{{ $siteSettings->instagram_url ?? '#' }}" target="_blank" class="group bg-white p-5 text-center border border-gray-200 hover:border-blue-900 hover:shadow-xl transition-all">
                                 <i class="fa-brands fa-instagram text-2xl text-gray-300 group-hover:text-pink-600 transition-colors mb-3 block"></i>
                                 <span class="text-[9px] font-bold text-gray-800 uppercase tracking-widest block">Instagram</span>
                             </a>
                             <!-- YouTube -->
-                            <a href="https://www.youtube.com/@mamlimpungofficial1846" target="_blank" class="group bg-white p-5 text-center border border-gray-200 hover:border-blue-900 hover:shadow-xl transition-all">
+                            <a href="{{ $siteSettings->youtube_url ?? '#' }}" target="_blank" class="group bg-white p-5 text-center border border-gray-200 hover:border-blue-900 hover:shadow-xl transition-all">
                                 <i class="fa-brands fa-youtube text-2xl text-gray-300 group-hover:text-red-600 transition-colors mb-3 block"></i>
                                 <span class="text-[9px] font-bold text-gray-800 uppercase tracking-widest block">YouTube</span>
                             </a>
                             <!-- Tikktok -->
-                            <a href="https://www.tiktok.com/@mualim_bersahabat" target="_blank" class="group bg-white p-5 text-center border border-gray-200 hover:border-blue-900 hover:shadow-xl transition-all">
+                            <a href="{{ $siteSettings->tiktok_url ?? '#' }}" target="_blank" class="group bg-white p-5 text-center border border-gray-200 hover:border-blue-900 hover:shadow-xl transition-all">
                                 <i class="fa-brands fa-tiktok text-2xl text-gray-300 group-hover:text-blue-700 transition-colors mb-3 block"></i>
                                 <span class="text-[9px] font-bold text-gray-800 uppercase tracking-widest block">TikTok</span>
                             </a>
@@ -154,7 +154,7 @@
                 </div>
 
                 <!-- Sisi Kanan: Embedded Maps -->
-                <div class="relative min-h-[450px] shadow-2xl border border-gray-150 group overflow-hidden" data-aos="fade-left">
+                <div class="relative min-h-[450px] shadow-2xl border border-gray-200 group overflow-hidden" data-aos="fade-left">
                     <iframe 
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3959.923915235983!2d109.91647967363026!3d-7.0182295687473255!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e701514018d6bed%3A0x4fc0ab1092d70606!2sMadrasah%20Aliyah%20Muhammadiyah%20Limpung!5e0!3m2!1sen!2sid!4v1779090722448!5m2!1sen!2sid" 
                         class="w-full h-full border-0 absolute inset-0 grayscale contrast-110 group-hover:grayscale-0 transition-all duration-1000" 

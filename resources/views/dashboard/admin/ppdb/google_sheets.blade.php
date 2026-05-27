@@ -99,14 +99,14 @@
                     @csrf
 
                     <!-- Toggle: Enable Integration -->
-                    <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-850/40 border border-slate-200 dark:border-zinc-800">
+                    <div class="flex items-center justify-between p-4 bg-green-100 dark:bg-zinc-800/40 border border-green-400 dark:border-zinc-800">
                         <div>
                             <label for="is_enabled" class="text-sm font-bold text-slate-800 dark:text-white block cursor-pointer">Aktifkan Integrasi Otomatis</label>
                             <span class="text-xs text-slate-400 dark:text-zinc-500 block mt-0.5">Jika aktif, data calon siswa otomatis dikirim ke Google Sheets secara real-time.</span>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer select-none">
                             <input type="checkbox" name="is_enabled" id="is_enabled" value="1" {{ $settings['is_enabled'] ? 'checked' : '' }} class="sr-only peer">
-                            <div class="w-11 h-6 bg-slate-200 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#4f45b2]"></div>
+                            <div class="w-11 h-6 bg-green-200 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#4f45b2]"></div>
                         </label>
                     </div>
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Dashboard\Security\RolePermissionController;
 use App\Http\Controllers\Dashboard\Security\SecuritySettingsController;
+use App\Http\Controllers\Dashboard\Security\SystemLogController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('super-admin')
@@ -12,21 +13,29 @@ Route::prefix('super-admin')
         Route::post('/roles', [RolePermissionController::class, 'storeRole'])->name('roles.store');
         Route::put('/roles/{role:name}', [RolePermissionController::class, 'updateRole'])->name('roles.update');
         Route::delete('/roles/{role:name}', [RolePermissionController::class, 'destroyRole'])->name('roles.destroy');
+
+        // System Logs
+        Route::get('/logs', [SystemLogController::class, 'index'])->name('logs.index');
+        Route::get('/logs/activity/{systemLog}', [SystemLogController::class, 'showActivity'])->name('logs.activity.show');
+        Route::get('/logs/failed-job/{id}', [SystemLogController::class, 'showFailedJob'])->name('logs.failed-job.show');
+        Route::post('/logs/failed-job/{id}/retry', [SystemLogController::class, 'retryFailedJob'])->name('logs.failed-job.retry');
+        Route::delete('/logs/failed-job/{id}', [SystemLogController::class, 'deleteFailedJob'])->name('logs.failed-job.destroy');
     });
 
 Route::prefix('admin')
     ->name('admin.')
     ->middleware(['auth', 'active', 'permission:access-admin-dashboard'])
     ->group(function () {
+        // Security — Credentials only
         Route::get('/security', [SecuritySettingsController::class, 'index'])->name('security.index');
         Route::post('/security/credentials', [SecuritySettingsController::class, 'updateCredentials'])->name('security.credentials.update');
-        Route::post('/security/backup/settings', [SecuritySettingsController::class, 'updateBackupSettings'])->name('security.backup.settings');
-        Route::post('/security/backup/generate-key', [SecuritySettingsController::class, 'generateKey'])->name('security.backup.generate-key');
-        Route::post('/security/backup/download-key', [SecuritySettingsController::class, 'downloadKey'])->name('security.backup.download-key');
-        Route::post('/security/backup/run', [SecuritySettingsController::class, 'runBackup'])->name('security.backup.run');
-        Route::get('/security/backup/download/{filename}', [SecuritySettingsController::class, 'downloadBackup'])->name('security.backup.download');
-        Route::delete('/security/backup/delete/{filename}', [SecuritySettingsController::class, 'deleteBackup'])->name('security.backup.delete');
-        Route::post('/security/backup/verify', [SecuritySettingsController::class, 'verifyBackup'])->name('security.backup.verify');
-        Route::get('/security/backup/storage-directories', [SecuritySettingsController::class, 'getStorageDirectories'])->name('security.backup.storage-directories');
-        Route::get('/security/backup/log/{id}', [SecuritySettingsController::class, 'getBackupLogDetails'])->name('security.backup.log-details');
+        Route::post('/security/smtp', [SecuritySettingsController::class, 'updateSmtpCredentials'])->name('security.smtp.update');
+        Route::post('/security/smtp/test', [SecuritySettingsController::class, 'testSmtpConnection'])->name('security.smtp.test');
+
+        // System Logs
+        Route::get('/logs', [SystemLogController::class, 'index'])->name('logs.index');
+        Route::get('/logs/activity/{systemLog}', [SystemLogController::class, 'showActivity'])->name('logs.activity.show');
+        Route::get('/logs/failed-job/{id}', [SystemLogController::class, 'showFailedJob'])->name('logs.failed-job.show');
+        Route::post('/logs/failed-job/{id}/retry', [SystemLogController::class, 'retryFailedJob'])->name('logs.failed-job.retry');
+        Route::delete('/logs/failed-job/{id}', [SystemLogController::class, 'deleteFailedJob'])->name('logs.failed-job.destroy');
     });

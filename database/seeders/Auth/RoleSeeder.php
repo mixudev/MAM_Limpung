@@ -44,6 +44,7 @@ class RoleSeeder extends Seeder
                 'view-article-categories', 'create-article-categories', 'edit-article-categories', 'delete-article-categories',
                 'view-articles', 'create-articles', 'edit-articles', 'delete-articles',
                 'view-reports', 'export-reports', 'generate-reports',
+                'view-achievements', 'create-achievements', 'edit-achievements', 'delete-achievements',
             ],
         ],
         [

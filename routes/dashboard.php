@@ -81,7 +81,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         });
 
     // -------------------------------------------------------------------------
-    //  Dynamic Modular Routes (e.g. PPDB, etc.)
+    //  Dynamic Modular Routes (e.g. PPDB, Profile, etc.)
     // -------------------------------------------------------------------------
     foreach (glob(__DIR__.'/dashboard/*.php') as $routeFile) {
         require $routeFile;

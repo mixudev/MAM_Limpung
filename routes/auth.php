@@ -20,3 +20,16 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 });
+
+// Public Verification & Password Reset Routes (Signed)
+Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->name('verification.verify')
+    ->middleware('signed');
+
+Route::get('/reset-password-direct/{id}/{token}', [AuthController::class, 'showDirectResetPassword'])
+    ->name('password.reset.direct')
+    ->middleware('signed');
+
+Route::post('/reset-password-direct/{id}/{token}', [AuthController::class, 'handleDirectResetPassword'])
+    ->name('password.update.direct')
+    ->middleware('signed');

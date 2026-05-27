@@ -6,7 +6,9 @@ use App\Actions\Ppdb\RejectStudentAction;
 use App\Actions\Ppdb\VerifyStudentAction;
 use App\Http\Controllers\Controller;
 use App\Jobs\SyncPpdbToGoogleSheetsJob;
+use App\Mail\Ppdb\PpdbStatusUpdateMail;
 use App\Models\PpdbSiswa;
+use App\Services\SmtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -17,7 +19,16 @@ class AdminPpdbVerificationController extends Controller
      */
     public function verify(Request $request, PpdbSiswa $ppdbSiswa, VerifyStudentAction $action): RedirectResponse
     {
+        $previousStatus = $ppdbSiswa->status;
+
         $action->execute($ppdbSiswa, $request->input('catatan_admin'));
+
+        // Kirim email status update secara senyap
+        app(SmtpService::class)->sendQuiet(
+            new PpdbStatusUpdateMail($ppdbSiswa, $previousStatus),
+            $ppdbSiswa->email,
+            $ppdbSiswa->nama_lengkap
+        );
 
         // Sinkronisasi otomatis ke Google Sheets via background job
         SyncPpdbToGoogleSheetsJob::dispatch($ppdbSiswa);
@@ -40,7 +51,16 @@ class AdminPpdbVerificationController extends Controller
             'catatan_admin.min' => 'Alasan penolakan minimal 5 karakter.',
         ]);
 
+        $previousStatus = $ppdbSiswa->status;
+
         $action->execute($ppdbSiswa, $request->input('catatan_admin'));
+
+        // Kirim email status update secara senyap
+        app(SmtpService::class)->sendQuiet(
+            new PpdbStatusUpdateMail($ppdbSiswa, $previousStatus),
+            $ppdbSiswa->email,
+            $ppdbSiswa->nama_lengkap
+        );
 
         // Sinkronisasi otomatis ke Google Sheets via background job
         SyncPpdbToGoogleSheetsJob::dispatch($ppdbSiswa);

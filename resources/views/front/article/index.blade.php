@@ -1,5 +1,42 @@
 @extends('layouts.app')
 
+@section('seo_title', 'Indeks Artikel & Literasi Sekolah - ' . ($siteSettings->school_name ?? 'MA Muhammadiyah Limpung'))
+@section('seo_description', 'Temukan kumpulan berita, pengumuman, literasi, karya siswa, dan informasi kegiatan terbaru dari ' . ($siteSettings->school_name ?? 'MA Muhammadiyah Limpung') . '.')
+@section('seo_keywords', 'berita sekolah, literasi siswa, artikel pendidikan, ' . ($siteSettings->meta_keywords ?? 'mam limpung'))
+@section('canonical_url', route('frontend.article.index'))
+
+@section('og_type', 'website')
+@section('og_title', 'Indeks Artikel & Literasi Sekolah - ' . ($siteSettings->school_name ?? 'MA Muhammadiyah Limpung'))
+@section('og_description', 'Temukan kumpulan berita, pengumuman, literasi, karya siswa, dan informasi kegiatan terbaru dari ' . ($siteSettings->school_name ?? 'MA Muhammadiyah Limpung') . '.')
+
+@section('schema_json_ld')
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "BreadcrumbList",
+      "@@id": "{{ route('frontend.article.index') }}#breadcrumb",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Beranda",
+          "item": "{{ route('frontend.home') }}"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "Artikel",
+          "item": "{{ route('frontend.article.index') }}"
+        }
+      ]
+    }
+  ]
+}
+</script>
+@endsection
+
 @section('content')
 
 <!-- Alpine App Container -->
@@ -42,7 +79,7 @@
             <!-- Left: Massive Featured Post -->
             <div class="lg:w-2/3 flex flex-col cursor-pointer group" @click="window.location.href='{{ route('frontend.article.show', $headline->slug) }}'">
                 <div class="w-full aspect-video overflow-hidden mb-5 sm:mb-6 bg-slate-200 relative">
-                    <img src="{{ $headline->thumbnailUrl() }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]" alt="{{ $headline->judul }}">
+                    <img src="{{ $headline->thumbnailUrl() }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]" alt="{{ $headline->judul }}" loading="lazy">
                     <div class="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors duration-500"></div>
                 </div>
                 <div>
@@ -56,7 +93,7 @@
             </div>
 
             <!-- Right: Trending / Latest Stack -->
-            <div class="lg:w-1/3 flex flex-col border-t-2 md:border-t-4 border-slate-900 pt-4">
+            <div class="lg:w-1/3 flex flex-col pt-4">
                 <h3 class="text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-4 sm:mb-6 text-slate-500">Terkini</h3>
                 
                 <div class="flex flex-col">
@@ -77,7 +114,7 @@
     @endif
 
     <!-- Main Article Grid -->
-    <div class="container mx-auto px-4 sm:px-6 max-w-7xl border-t-2 md:border-t-4 border-slate-900 pt-6">
+    <div class="container mx-auto px-4 sm:px-6 max-w-7xl  pt-6">
         
         <div class="flex items-center justify-between mb-8 sm:mb-10">
             <h2 class="text-lg sm:text-xl font-bold uppercase tracking-widest text-slate-900" x-text="searchQuery !== '' ? 'Pencarian: ' + searchQuery : (activeCategory === 'Semua' ? 'Arsip Berita' : 'Kategori: ' + activeCategory)"></h2>
@@ -99,7 +136,7 @@
             @forelse($articles as $article)
                 <a href="{{ route('frontend.article.show', $article->slug) }}" class="group flex flex-col">
                     <div class="w-full aspect-[4/3] overflow-hidden bg-slate-200 mb-4 relative">
-                        <img src="{{ $article->thumbnailUrl() }}" alt="{{ $article->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]">
+                        <img src="{{ $article->thumbnailUrl() }}" alt="{{ $article->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]" loading="lazy">
                         <div class="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors duration-500"></div>
                     </div>
                     <div class="flex flex-col flex-1">
@@ -125,7 +162,7 @@
             <template x-for="article in filteredArticles" :key="article.id">
                 <a :href="article.url" class="group flex flex-col">
                     <div class="w-full aspect-[4/3] overflow-hidden bg-slate-200 mb-4 relative">
-                        <img :src="article.image" :alt="article.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]">
+                        <img :src="article.image" :alt="article.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]" loading="lazy">
                         <div class="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors duration-500"></div>
                     </div>
                     <div class="flex flex-col flex-1">

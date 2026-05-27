@@ -18,7 +18,7 @@
                 ];
             @endphp
             @foreach($fieldsList as $key => $label)
-            <label class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-zinc-850/40 border border-slate-200 dark:border-zinc-800 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-zinc-800/40 transition-all select-none">
+            <label class="flex items-center gap-3 p-3 bg-zinc-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-zinc-800/40 transition-all select-none">
                 <input type="checkbox" name="sync_fields[]" value="{{ $key }}" {{ in_array($key, $settings['sync_fields'] ?? []) ? 'checked' : '' }} class="rounded-none text-[#4f45b2] focus:ring-[#4f45b2]/40 border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 w-4 h-4">
                 <span class="text-xs font-bold text-slate-700 dark:text-zinc-300">{{ $label }}</span>
             </label>

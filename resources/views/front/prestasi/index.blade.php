@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="prestasiData()" class="bg-[#f4f6f8] min-h-screen pt-12 pb-20 font-sans">
+<div x-data="prestasiData()" class="bg-[#f4f6f8] min-h-screen pt-12 pb-20 font-sans relative">
     
     <!-- Hero Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
@@ -85,8 +85,23 @@
                             <tr class="hover:bg-slate-50 transition-colors group">
                                 <td class="px-6 py-5 whitespace-nowrap text-slate-500 font-mono text-xs" x-text="item.date"></td>
                                 <td class="px-6 py-5">
-                                    <div class="font-bold text-slate-900 group-hover:text-blue-900 transition-colors" x-text="item.student"></div>
-                                    <div class="text-[10px] uppercase tracking-widest text-slate-400 mt-1" x-text="item.category"></div>
+                                    <div class="flex items-center gap-3">
+                                        <!-- Thumbnail Foto -->
+                                        <div class="w-12 h-8 shrink-0 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 overflow-hidden flex items-center justify-center shadow-sm">
+                                            <template x-if="item.foto">
+                                                <img :src="item.foto" class="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform" @click="lightboxImg = item.foto; showLightbox = true">
+                                            </template>
+                                            <template x-if="!item.foto">
+                                                <svg class="w-4 h-4 text-slate-350" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </template>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-slate-900 group-hover:text-blue-900 transition-colors" x-text="item.student"></div>
+                                            <div class="text-[10px] uppercase tracking-widest text-slate-400 mt-1" x-text="item.category"></div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-5">
                                     <div class="font-bold text-amber-600 flex items-center">
@@ -97,13 +112,15 @@
                                 <td class="px-6 py-5 whitespace-nowrap">
                                     <span class="inline-flex px-3 py-1 text-[10px] font-bold uppercase tracking-widest border"
                                         :class="{
+                                            'bg-purple-50 text-purple-700 border-purple-200': item.level === 'Internasional',
                                             'bg-blue-50 text-blue-700 border-blue-200': item.level === 'Nasional',
                                             'bg-slate-100 text-slate-700 border-slate-200': item.level === 'Provinsi',
-                                            'bg-emerald-50 text-emerald-700 border-emerald-200': item.level === 'Kabupaten'
+                                            'bg-emerald-50 text-emerald-700 border-emerald-200': item.level === 'Kabupaten/Kota' || item.level === 'Kabupaten',
+                                            'bg-slate-50 text-slate-505 border-slate-200': item.level === 'Sekolah'
                                         }" x-text="item.level">
                                     </span>
                                 </td>
-                                <td class="px-6 py-5 text-slate-500 max-w-xs truncate" :title="item.description" x-text="item.description"></td>
+                                <td class="px-6 py-5 text-slate-505 max-w-xs truncate" :title="item.description" x-text="item.description"></td>
                             </tr>
                         </template>
                         
@@ -114,7 +131,7 @@
                                     <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
                                 <h3 class="text-lg font-bold text-slate-900 mb-1">Data Tidak Ditemukan</h3>
-                                <p class="text-sm text-slate-500">Coba gunakan kata kunci atau filter lain.</p>
+                                <p class="text-sm text-slate-505">Coba gunakan kata kunci atau filter lain.</p>
                             </td>
                         </tr>
                     </tbody>
@@ -122,12 +139,23 @@
             </div>
             
             <!-- Footer -->
-            <div class="p-4 bg-slate-50 border-t border-slate-200 text-xs font-bold text-slate-500 text-center uppercase tracking-widest">
+            <div class="p-4 bg-slate-50 border-t border-slate-200 text-xs font-bold text-slate-505 text-center uppercase tracking-widest">
                 Menampilkan <span class="text-slate-900" x-text="filteredAchievements.length"></span> Prestasi
             </div>
 
         </div>
     </div>
+
+    <!-- Lightbox Modal -->
+    <div x-show="showLightbox" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn" x-transition.opacity style="display: none;" @click="showLightbox = false">
+        <div class="relative max-w-4xl max-h-[85vh] bg-white p-2 border border-white/20 shadow-2xl" @click.stop>
+            <button class="absolute -top-10 -right-2 text-white hover:text-gray-300 font-bold text-3xl drop-shadow-md z-50" @click="showLightbox = false">
+                &times;
+            </button>
+            <img :src="lightboxImg" class="max-w-full max-h-[80vh] object-contain">
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -136,64 +164,21 @@
             searchQuery: '',
             selectedCategory: 'Semua',
             selectedLevel: 'Semua',
+            showLightbox: false,
+            lightboxImg: '',
             
             achievements: [
+                @foreach($prestasis as $pres)
                 {
-                    date: '15 Mei 2026',
-                    student: 'Ahmad Fauzan',
-                    title: 'Juara 1 Olimpiade Matematika',
-                    level: 'Provinsi',
-                    category: 'Akademik',
-                    description: 'Olimpiade Sains Nasional tingkat Provinsi Jawa Tengah'
+                    date: {!! json_encode($pres->tanggal_prestasi?->translatedFormat('d F Y') ?? (string) $pres->tahun) !!},
+                    student: {!! json_encode($pres->peraih) !!},
+                    title: {!! json_encode(($pres->juara ? $pres->juara . ' - ' : '') . $pres->judul) !!},
+                    level: {!! json_encode($pres->tingkatLabel()) !!},
+                    category: {!! json_encode($pres->jenis === 'akademik' ? 'Akademik' : 'Non-Akademik') !!},
+                    description: {!! json_encode(strip_tags($pres->deskripsi ?? '')) !!},
+                    foto: {!! json_encode($pres->foto ? asset('storage/' . $pres->foto) : '') !!}
                 },
-                {
-                    date: '10 April 2026',
-                    student: 'Siti Nurhaliza',
-                    title: 'Juara 2 Lomba Pidato Bahasa Arab',
-                    level: 'Nasional',
-                    category: 'Keagamaan',
-                    description: 'Pekan Keterampilan dan Seni Pendidikan Agama Islam (PENTAS PAI) Nasional'
-                },
-                {
-                    date: '22 Maret 2026',
-                    student: 'Tim Futsal MAM Limpung',
-                    title: 'Juara 1 Turnamen Futsal Pelajar',
-                    level: 'Kabupaten',
-                    category: 'Olahraga',
-                    description: 'Bupati Cup Antar SMA/MA Se-Kabupaten Batang'
-                },
-                {
-                    date: '14 Februari 2026',
-                    student: 'Budi Santoso',
-                    title: 'Juara Harapan 1 Cipta Puisi',
-                    level: 'Nasional',
-                    category: 'Seni',
-                    description: 'Festival Literasi Sekolah Tingkat Nasional'
-                },
-                {
-                    date: '05 Januari 2026',
-                    student: 'Tim Robotik',
-                    title: 'Medali Perak Line Follower',
-                    level: 'Nasional',
-                    category: 'Teknologi',
-                    description: 'Indonesian Robotic Olympiad (IRO) Tingkat Pelajar MA'
-                },
-                {
-                    date: '18 Desember 2025',
-                    student: 'Rina Melati',
-                    title: 'Juara 3 Pencak Silat Kelas B Putri',
-                    level: 'Provinsi',
-                    category: 'Olahraga',
-                    description: 'Kejuaraan Daerah POPDA Provinsi Jawa Tengah'
-                },
-                {
-                    date: '10 November 2025',
-                    student: 'Pramuka Ambalan',
-                    title: 'Juara Umum Lomba Tingkat Penegak',
-                    level: 'Kabupaten',
-                    category: 'Keterampilan',
-                    description: 'Perkemahan Bakti Pramuka Kabupaten Batang'
-                }
+                @endforeach
             ],
 
             get categories() {
@@ -207,7 +192,8 @@
             get filteredAchievements() {
                 return this.achievements.filter(a => {
                     const matchesSearch = a.title.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
-                                          a.student.toLowerCase().includes(this.searchQuery.toLowerCase());
+                                          a.student.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                                          a.description.toLowerCase().includes(this.searchQuery.toLowerCase());
                     const matchesCategory = this.selectedCategory === 'Semua' || a.category === this.selectedCategory;
                     const matchesLevel = this.selectedLevel === 'Semua' || a.level === this.selectedLevel;
                     return matchesSearch && matchesCategory && matchesLevel;

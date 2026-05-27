@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Frontend\PpdbStoreRequest;
 use App\Jobs\SyncPpdbToGoogleSheetsJob;
+use App\Mail\Ppdb\PpdbRegistrationMail;
 use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
+use App\Services\SmtpService;
 use App\Support\PpdbTempUploadManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -147,6 +149,13 @@ class PpdbController extends Controller
         $ppdbSiswa = PpdbSiswa::create($validated);
 
         PpdbTempUploadManager::clear();
+
+        // Kirim email konfirmasi pendaftaran secara senyap
+        app(SmtpService::class)->sendQuiet(
+            new PpdbRegistrationMail($ppdbSiswa),
+            $ppdbSiswa->email,
+            $ppdbSiswa->nama_lengkap
+        );
 
         // Sinkronisasi otomatis ke Google Sheets via background job
         SyncPpdbToGoogleSheetsJob::dispatch($ppdbSiswa);

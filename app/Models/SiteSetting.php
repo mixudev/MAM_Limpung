@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 class SiteSetting extends Model
 {
     use HasFactory;
+    use LogsActivity;
 
     protected $table = 'site_settings';
 
@@ -27,6 +29,11 @@ class SiteSetting extends Model
         'twitter_url',
         'meta_title',
         'meta_description',
+        'meta_keywords',
+        'google_analytics_id',
+        'google_search_console_id',
+        'google_tag_manager_id',
+        'is_indexed',
         // Kepala Sekolah
         'headmaster_name',
         'headmaster_nip',
@@ -41,6 +48,16 @@ class SiteSetting extends Model
         'school_website',
         'school_email_official',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_indexed' => 'boolean',
+        ];
+    }
 
     protected static function booted()
     {

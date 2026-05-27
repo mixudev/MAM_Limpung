@@ -51,7 +51,7 @@
                     <!-- Data Diri -->
                     <div>
                         <h4 class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5">Data Diri Calon Siswa</h4>
-                        <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-zinc-955 p-4 border border-slate-100 dark:border-zinc-800/80">
+                        <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-zinc-950 p-4 border border-slate-100 dark:border-zinc-800/80">
                             <div>
                                 <span class="text-[10px] text-slate-400 dark:text-zinc-500 block uppercase font-mono">NISN</span>
                                 <span id="d_nisn" class="font-semibold text-slate-800 dark:text-zinc-200"></span>
@@ -74,7 +74,7 @@
                     <!-- Kontak & Sekolah -->
                     <div>
                         <h4 class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5">Kontak & Akademik</h4>
-                        <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-zinc-955 p-4 border border-slate-100 dark:border-zinc-800/80">
+                        <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-zinc-950 p-4 border border-slate-100 dark:border-zinc-800/80">
                             <div>
                                 <span class="text-[10px] text-slate-400 dark:text-zinc-500 block uppercase font-mono">Sekolah Asal</span>
                                 <span id="d_sekolah" class="font-semibold text-slate-800 dark:text-zinc-200"></span>
@@ -97,7 +97,7 @@
                     <!-- Wali Orang Tua -->
                     <div>
                         <h4 class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5">Informasi Orang Tua</h4>
-                        <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-zinc-955 p-4 border border-slate-100 dark:border-zinc-800/80">
+                        <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-zinc-950 p-4 border border-slate-100 dark:border-zinc-800/80">
                             <div>
                                 <span class="text-[10px] text-slate-400 dark:text-zinc-500 block uppercase font-mono">Nama Ayah</span>
                                 <span id="d_ayah" class="font-semibold text-slate-800 dark:text-zinc-200"></span>
@@ -112,7 +112,7 @@
                     <!-- Informasi Tambahan (Dynamic Fields) -->
                     <div id="d_additional_section" class="hidden">
                         <h4 class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5">Informasi Tambahan</h4>
-                        <div id="d_additional_grid" class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-zinc-955 p-4 border border-slate-100 dark:border-zinc-800/80">
+                        <div id="d_additional_grid" class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-zinc-950 p-4 border border-slate-100 dark:border-zinc-800/80">
                             <!-- Populated dynamically via JS -->
                         </div>
                     </div>
@@ -120,7 +120,7 @@
                     <!-- Berkas Persyaratan (Dynamic Uploads) -->
                     <div id="d_requirements_section" class="hidden">
                         <h4 class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5">Berkas Persyaratan Mandiri</h4>
-                        <div id="d_requirements_list" class="space-y-2 bg-slate-50 dark:bg-zinc-955 p-4 border border-slate-100 dark:border-zinc-800/80">
+                        <div id="d_requirements_list" class="space-y-2 bg-slate-50 dark:bg-zinc-950 p-4 border border-slate-100 dark:border-zinc-800/80">
                             <!-- Populated dynamically via JS -->
                         </div>
                     </div>
@@ -128,7 +128,7 @@
                     <!-- Catatan Verifikasi -->
                     <div id="d_notes_section" class="hidden">
                         <h4 class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5">Catatan/Alasan Verifikator</h4>
-                        <div class="bg-red-50/50 dark:bg-red-950/10 p-4 border border-red-100 dark:border-red-955/20 text-red-800 dark:text-red-400">
+                        <div class="bg-red-50/50 dark:bg-red-950/10 p-4 border border-red-100 dark:border-red-950/20 text-red-800 dark:text-red-400">
                             <span id="d_notes" class="font-medium text-xs"></span>
                         </div>
                     </div>

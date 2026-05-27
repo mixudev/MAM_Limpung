@@ -42,13 +42,13 @@
             <div>
                 <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Cari Artikel</label>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul/konten..." 
-                    class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]" />
+                    class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]" />
             </div>
 
             <!-- Category -->
             <div>
                 <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5 font-mono">Kategori</label>
-                <select name="category_id" class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]">
+                <select name="category_id" class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]">
                     <option value="">Semua Kategori</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -59,7 +59,7 @@
             <!-- Status -->
             <div>
                 <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5 font-mono">Status</label>
-                <select name="status" class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]">
+                <select name="status" class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]">
                     <option value="">Semua Status</option>
                     <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
                     <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Diterbitkan (Published)</option>
@@ -88,7 +88,7 @@
         <div class="overflow-x-auto border border-slate-100 dark:border-zinc-800">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 dark:bg-zinc-850 border-b border-slate-200 dark:border-zinc-800 text-[10px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-zinc-400">
+                    <tr class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 text-[10px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-zinc-400">
                         <th class="py-3.5 px-4 w-16">Thumbnail</th>
                         <th class="py-3.5 px-4">Judul Artikel</th>
                         <th class="py-3.5 px-4 w-40">Kategori</th>
@@ -100,9 +100,9 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
                     @forelse($articles as $art)
-                        <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-850/30 transition-colors">
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                             <td class="py-3 px-4">
-                                <div class="w-12 h-9 bg-slate-100 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 overflow-hidden">
+                                <div class="w-12 h-9 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 overflow-hidden">
                                     <img src="{{ $art->thumbnailUrl() }}" class="w-full h-full object-cover" alt="Thumb">
                                 </div>
                             </td>
@@ -126,7 +126,7 @@
                                         DRAFT
                                     </span>
                                 @else
-                                    <span class="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-slate-100 dark:bg-zinc-850 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700">
+                                    <span class="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700">
                                         ARSIP
                                     </span>
                                 @endif

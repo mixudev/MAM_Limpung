@@ -74,7 +74,7 @@
                         <th class="py-3 px-4 text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-zinc-850">
+                <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
                     @forelse ($users as $u)
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-900/30 transition-colors">
                             <td class="py-3.5 px-4">
@@ -122,7 +122,7 @@
                                     @can('delete-users')
                                     @if ($u->id === Auth::user()->id)
                                         <button type="button" disabled 
-                                                class="py-1 px-2.5 bg-slate-100 dark:bg-zinc-850 text-slate-400 dark:text-zinc-600 font-mono font-bold text-[10px] uppercase tracking-wider cursor-not-allowed"
+                                                class="py-1 px-2.5 bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-600 font-mono font-bold text-[10px] uppercase tracking-wider cursor-not-allowed"
                                                 title="Anda tidak bisa menghapus akun Anda sendiri">
                                             Hapus
                                         </button>

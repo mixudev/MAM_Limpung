@@ -30,6 +30,7 @@
             @include('dashboard.admin.settings.partials.tabs.social')
             @include('dashboard.admin.settings.partials.tabs.headmaster')
             @include('dashboard.admin.settings.partials.tabs.school-data')
+            @include('dashboard.admin.settings.partials.tabs.seo')
 
             <!-- Footer Actions -->
             @include('dashboard.admin.settings.partials.footer')

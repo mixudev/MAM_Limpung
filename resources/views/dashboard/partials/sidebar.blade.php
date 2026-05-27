@@ -123,6 +123,19 @@
                     </a>
                 </li>
                 @endcan
+                @can('view-achievements')
+                <li>
+                    <a href="{{ route('admin.prestasi.index') }}" class="sidebar-link {{ Route::is('admin.prestasi.*') ? 'active' : '' }}" aria-label="Prestasi">
+                        <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trophy" viewBox="0 0 16 16">
+                                <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.319.232.319.437a.5.5 0 0 1-.5.5H3.5a.5.5 0 0 1-.5-.5c0-.205.125-.389.319-.437L4.75 13.62v-2.17c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5zm.099 2.54a2 2 0 0 0 .72 3.935c-.033-.48-.04-1.02-.033-1.611a31 31 0 0 1 .033-2.324zm10.802 0a31 31 0 0 1 .033 2.324c.007.592-.003 1.131-.033 1.61a2 2 0 0 0 .72-3.934zm-7.902 0h5c-.007.46-.018.946-.03 1.485a7 7 0 0 1-.418 2.062c-.417.896-.86 1.496-1.3 1.704a.5.5 0 0 1-.5 0c-.44-.208-.883-.808-1.3-1.704a7 7 0 0 1-.418-2.062 44 44 0 0 1-.033-1.485z"/>
+                            </svg>
+                        </span>
+                        <span class="sidebar-label">Prestasi</span>
+                        <span class="sidebar-tooltip">Prestasi</span>
+                    </a>
+                </li>
+                @endcan
                 @if(Auth::user()->hasAnyPermission(['access-admin-dashboard', 'access-super-admin-dashboard']))
                 <li>
                     <a href="{{ route('admin.announcements.index') }}" data-page="pengumuman" class="sidebar-link {{ Route::is('admin.announcements.*') ? 'active' : '' }}" aria-label="Pengumuman">
@@ -187,8 +200,9 @@
                 class="sidebar-section-title px-3 mb-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-white/50 dark:text-zinc-500">
                 Security</p>
             <ul class="space-y-0.5">
+                @if(Auth::user()->hasAnyPermission(['access-admin-dashboard', 'access-super-admin-dashboard']))
                 <li>
-                    <a href="#" data-page="audit" class="sidebar-link disabled" aria-label="Audit">
+                    <a href="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.logs.index') : route('admin.logs.index') }}" data-page="audit" class="sidebar-link {{ Route::is('*.logs.*') ? 'active' : '' }}" aria-label="Log Sistem">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
                                 class="w-4 h-4">
@@ -196,10 +210,11 @@
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
                         </span>
-                        <span class="sidebar-label">Audit Logs</span>
-                        <span class="sidebar-tooltip">Audit Logs</span>
+                        <span class="sidebar-label">Log Sistem</span>
+                        <span class="sidebar-tooltip">Log Sistem</span>
                     </a>
                 </li>
+                @endif
                 @hasrole('super-admin')
                 <li>
                     <a href="{{ route('super-admin.roles-permissions.index') }}" data-page="roles-permission" class="sidebar-link {{ Route::is('super-admin.roles-permissions.*') ? 'active' : '' }}" aria-label="Roles-Permission">
@@ -242,6 +257,19 @@
                         </span>
                         <span class="sidebar-label">Keamanan (Security)</span>
                         <span class="sidebar-tooltip">Keamanan (Security)</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.backup.index') }}" data-page="backup" class="sidebar-link {{ Route::is('admin.backup.*') ? 'active' : '' }}" aria-label="Backup">
+                        <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
+                                class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                            </svg>
+                        </span>
+                        <span class="sidebar-label">Backup Data</span>
+                        <span class="sidebar-tooltip">Backup Data</span>
                     </a>
                 </li>
                 @endif

@@ -23,7 +23,7 @@
                             <img src="{{ asset('storage/' . $ad->image) }}" class="w-full h-full object-cover">
                         </div>
                     @else
-                        <div class="w-full aspect-video border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-850 flex items-center justify-center text-slate-400 dark:text-zinc-500 text-xs italic font-mono">
+                        <div class="w-full aspect-video border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800 flex items-center justify-center text-slate-400 dark:text-zinc-500 text-xs italic font-mono">
                             Tanpa Gambar Iklan
                         </div>
                     @endif
