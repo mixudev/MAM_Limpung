@@ -57,7 +57,7 @@ class AdminPpdbSettingController extends Controller
             'waves.*.id' => 'required|string|alpha_dash',
             'waves.*.name' => 'required|string|max:100',
             'waves.*.start_date' => 'required|date',
-            'waves.*.end_date' => 'required|date|after_or_equal:waves.*.start_date',
+            'waves.*.end_date' => 'nullable|date|after_or_equal:waves.*.start_date',
         ]);
 
         $wavesList = [];
@@ -67,7 +67,7 @@ class AdminPpdbSettingController extends Controller
                     'id' => Str::slug($wave['id'], '_'),
                     'name' => strip_tags($wave['name']),
                     'start_date' => $wave['start_date'],
-                    'end_date' => $wave['end_date'],
+                    'end_date' => $wave['end_date'] ?? null,
                 ];
             }
         }

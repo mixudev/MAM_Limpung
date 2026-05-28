@@ -3,6 +3,9 @@
 
 # Laravel Boost Guidelines
 
+## AI System Documentation (CRITICAL)
+- At the start of any session or task, you MUST first read the documentation files in the `docs/ai/` directory (specifically `PROJECT_MANIFEST.md`, `ARCHITECTURE_OVERVIEW.md`, `UI_UX_RULES.md`, `CODING_STANDARDS.md`, `FILE_RESPONSIBILITY_MAP.md`, and `AI_BEHAVIOR_RULES.md`) to establish the Single Source of Truth for your behavior, architecture, UI, and coding standards. Obey them without exception.
+
 The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to ensure the best experience when building Laravel applications.
 
 ## Foundational Context

@@ -85,6 +85,13 @@ class PermissionSeeder extends Seeder
         ['create-achievements',  'achievements', 'Create Achievements',  'Create new achievement records'],
         ['edit-achievements',    'achievements', 'Edit Achievements',    'Update achievement information'],
         ['delete-achievements',  'achievements', 'Delete Achievements',  'Delete achievement records'],
+
+        // --- Gallery ---
+        ['view-galeri',    'galeri', 'View Gallery',    'View gallery list and details'],
+        ['create-galeri',  'galeri', 'Create Gallery',  'Create new gallery records'],
+        ['edit-galeri',    'galeri', 'Edit Gallery',    'Update gallery information'],
+        ['delete-galeri',  'galeri', 'Delete Gallery',  'Delete gallery records'],
+        ['approve-galeri', 'galeri', 'Approve Gallery', 'Approve or reject gallery uploads'],
     ];
 
     public function run(): void

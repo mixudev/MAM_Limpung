@@ -7,6 +7,7 @@ use App\Models\Prestasi;
 use App\Services\Prestasi\PrestasiExportService;
 use App\Services\Prestasi\PrestasiImportService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -168,76 +169,122 @@ class AdminPrestasiIOController extends Controller
     {
         Gate::authorize('create', Prestasi::class);
 
-        $validated = $request->validate([
+        $request->validate([
             'data' => ['required', 'array'],
-            'data.*.row_number' => ['required', 'integer'],
-            'data.*.tanggal' => ['nullable', 'string'],
-            'data.*.tahun' => ['required', 'integer'],
-            'data.*.peraih' => ['required', 'string'],
-            'data.*.judul' => ['required', 'string'],
-            'data.*.juara' => ['nullable', 'string'],
-            'data.*.tingkat' => ['required', 'string'],
-            'data.*.jenis' => ['required', 'string'],
-            'data.*.penyelenggara' => ['nullable', 'string'],
-            'data.*.unggulan' => ['nullable', 'string'],
-            'data.*.deskripsi' => ['nullable', 'string'],
         ]);
 
         $importService = app(PrestasiImportService::class);
         $userId = $request->user()->id;
         $importedCount = 0;
-        $errors = [];
+        $failedRows = [];
 
-        foreach ($validated['data'] as $row) {
+        $getStringValue = function ($value) {
+            if (is_array($value)) {
+                if (isset($value['date'])) {
+                    return trim((string) $value['date']);
+                }
+
+                return '';
+            }
+
+            return trim((string) $value);
+        };
+
+        foreach ($request->input('data', []) as $row) {
+            $rowNumber = $row['row_number'] ?? 0;
+            $rowErrors = [];
+
+            $judul = isset($row['judul']) ? $getStringValue($row['judul']) : '';
+            $peraih = isset($row['peraih']) ? $getStringValue($row['peraih']) : '';
+            $tahunRaw = isset($row['tahun']) ? $getStringValue($row['tahun']) : '';
+            $tanggalRaw = isset($row['tanggal']) ? $getStringValue($row['tanggal']) : '';
+            $tingkatRaw = isset($row['tingkat']) ? $getStringValue($row['tingkat']) : '';
+            $jenisRaw = isset($row['jenis']) ? $getStringValue($row['jenis']) : '';
+            $juara = isset($row['juara']) ? $getStringValue($row['juara']) : '';
+            $penyelenggara = isset($row['penyelenggara']) ? $getStringValue($row['penyelenggara']) : '';
+            $unggulan = isset($row['unggulan']) ? $getStringValue($row['unggulan']) : '';
+            $deskripsi = isset($row['deskripsi']) ? $getStringValue($row['deskripsi']) : '';
+
+            if (empty($judul)) {
+                $rowErrors[] = 'Judul Prestasi tidak boleh kosong.';
+            }
+            if (empty($peraih)) {
+                $rowErrors[] = 'Peraih tidak boleh kosong.';
+            }
+
+            $tahun = (int) $tahunRaw;
+            if (empty($tahunRaw) || $tahun < 2000 || $tahun > 2100) {
+                $rowErrors[] = 'Tahun harus berupa angka di antara 2000 - 2100.';
+            }
+
+            $tanggal = null;
+            if (! empty($tanggalRaw)) {
+                $tanggal = $importService->parseDate($tanggalRaw);
+                if ($tanggal === null) {
+                    $rowErrors[] = 'Format tanggal tidak valid.';
+                }
+            }
+
+            $tingkat = null;
+            if (! empty($tingkatRaw)) {
+                $tingkat = $importService->normalizeTingkat($tingkatRaw);
+                if ($tingkat === null) {
+                    $rowErrors[] = 'Tingkat tidak valid (Pilihan: Sekolah, Kabupaten, Provinsi, Nasional, Internasional).';
+                }
+            } else {
+                $rowErrors[] = 'Tingkat tidak boleh kosong.';
+            }
+
+            $jenis = null;
+            if (! empty($jenisRaw)) {
+                $jenis = $importService->normalizeJenis($jenisRaw);
+                if ($jenis === null) {
+                    $rowErrors[] = 'Jenis tidak valid (Pilihan: Akademik, Non-Akademik).';
+                }
+            } else {
+                $rowErrors[] = 'Jenis tidak boleh kosong.';
+            }
+
+            if (! empty($rowErrors)) {
+                $failedRows[] = array_merge($row, [
+                    'errors' => $rowErrors,
+                ]);
+
+                continue;
+            }
+
             try {
-                $tanggal = null;
-                if (! empty($row['tanggal'])) {
-                    $tanggal = $importService->parseDate($row['tanggal']);
-                }
-
-                $tingkat = $importService->normalizeTingkat($row['tingkat']);
-                $jenis = $importService->normalizeJenis($row['jenis']);
-
-                if (! $tingkat) {
-                    $errors[] = 'Baris '.$row['row_number'].': Tingkat tidak valid.';
-
-                    continue;
-                }
-                if (! $jenis) {
-                    $errors[] = 'Baris '.$row['row_number'].': Jenis tidak valid.';
-
-                    continue;
-                }
-
-                DB::transaction(function () use ($userId, $row, $tanggal, $tingkat, $jenis) {
+                DB::transaction(function () use ($userId, $judul, $peraih, $tahun, $tanggal, $tingkat, $jenis, $juara, $penyelenggara, $unggulan, $deskripsi) {
                     Prestasi::updateOrCreate(
                         [
-                            'judul' => $row['judul'],
-                            'peraih' => $row['peraih'],
-                            'tahun' => (int) $row['tahun'],
+                            'judul' => $judul,
+                            'peraih' => $peraih,
+                            'tahun' => $tahun,
                         ],
                         [
                             'user_id' => $userId,
-                            'deskripsi' => $row['deskripsi'] ?: null,
+                            'deskripsi' => $deskripsi ?: null,
                             'tingkat' => $tingkat,
                             'jenis' => $jenis,
-                            'penyelenggara' => $row['penyelenggara'] ?: null,
-                            'juara' => $row['juara'] ?: null,
+                            'penyelenggara' => $penyelenggara ?: null,
+                            'juara' => $juara ?: null,
                             'tanggal_prestasi' => $tanggal,
-                            'is_featured' => strtolower($row['unggulan']) === 'ya' ? true : false,
+                            'is_featured' => in_array(strtolower($unggulan), ['ya', '1', 'yes', 'true']),
                         ]
                     );
                 });
                 $importedCount++;
             } catch (\Exception $e) {
-                $errors[] = 'Baris '.$row['row_number'].': '.$e->getMessage();
+                $failedRows[] = array_merge($row, [
+                    'errors' => ['Gagal menyimpan: '.$e->getMessage()],
+                ]);
             }
         }
 
         return response()->json([
-            'success' => count($errors) === 0,
+            'success' => count($failedRows) === 0,
             'imported_count' => $importedCount,
-            'errors' => $errors,
+            'failed_rows' => $failedRows,
         ]);
     }
 }

@@ -12,8 +12,8 @@
                                 <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="w-full h-full object-contain" alt="Logo {{ $siteSettings->school_name ?? 'MAM Limpung' }}">
                             </div>
                         @else
-                            <div class="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
-                                <i class="fas fa-graduation-cap text-xl text-white"></i>
+                            <div class="w-12 h-12 bg-white border-amber-500 border-2 rounded-full flex items-center justify-center">
+                                <img src="{{ asset('assets/img/logo.png') }}" class="w-full h-full object-contain" alt="Logo {{ $siteSettings->school_name ?? 'MAM Limpung' }}">
                             </div>
                         @endif
                         <div>

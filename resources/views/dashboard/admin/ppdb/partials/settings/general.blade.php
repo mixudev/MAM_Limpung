@@ -56,7 +56,7 @@
                             <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">ID Kode (Slug)</th>
                             <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Nama Gelombang</th>
                             <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Tanggal Mulai</th>
-                            <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Tanggal Selesai</th>
+                            <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Tanggal Selesai <span class="text-slate-300 dark:text-zinc-600 text-[9px] font-normal">(Opsional)</span></th>
                             <th class="px-4 py-3 text-xs font-mono font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -76,8 +76,8 @@
                                         class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    <input type="date" name="waves[{{ $index }}][end_date]" value="{{ $wave['end_date'] }}" required
-                                        class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                                    <input type="date" name="waves[{{ $index }}][end_date]" value="{{ $wave['end_date'] }}" placeholder="Opsional"
+                                        class="w-full bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-blue-400/20 focus:border-blue-400 transition-colors">
                                 </td>
                                 <td class="px-4 py-3 text-right whitespace-nowrap">
                                     <button type="button" onclick="removeWaveRow('{{ $index }}')" class="p-1.5  text-red-600 rounded-none transition-all">

@@ -128,11 +128,25 @@
                     <a href="{{ route('admin.prestasi.index') }}" class="sidebar-link {{ Route::is('admin.prestasi.*') ? 'active' : '' }}" aria-label="Prestasi">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trophy" viewBox="0 0 16 16">
-                                <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.319.232.319.437a.5.5 0 0 1-.5.5H3.5a.5.5 0 0 1-.5-.5c0-.205.125-.389.319-.437L4.75 13.62v-2.17c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5zm.099 2.54a2 2 0 0 0 .72 3.935c-.033-.48-.04-1.02-.033-1.611a31 31 0 0 1 .033-2.324zm10.802 0a31 31 0 0 1 .033 2.324c.007.592-.003 1.131-.033 1.61a2 2 0 0 0 .72-3.934zm-7.902 0h5c-.007.46-.018.946-.03 1.485a7 7 0 0 1-.418 2.062c-.417.896-.86 1.496-1.3 1.704a.5.5 0 0 1-.5 0c-.44-.208-.883-.808-1.3-1.704a7 7 0 0 1-.418-2.062 44 44 0 0 1-.033-1.485z"/>
+                                <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935M3.504 1q.01.775.056 1.469c.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.5.5 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667q.045-.694.056-1.469z"/>
                             </svg>
                         </span>
                         <span class="sidebar-label">Prestasi</span>
                         <span class="sidebar-tooltip">Prestasi</span>
+                    </a>
+                </li>
+                @endcan
+                @can('view-galeri')
+                <li>
+                    <a href="{{ route('admin.galeri.index') }}" class="sidebar-link {{ Route::is('admin.galeri.*') ? 'active' : '' }}" aria-label="Galeri Foto">
+                        <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera" viewBox="0 0 16 16">
+                                <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4z"/>
+                                <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
+                            </svg>
+                        </span>
+                        <span class="sidebar-label">Galeri Foto</span>
+                        <span class="sidebar-tooltip">Galeri Foto</span>
                     </a>
                 </li>
                 @endcan
@@ -255,8 +269,8 @@
                                     d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
                             </svg>
                         </span>
-                        <span class="sidebar-label">Keamanan (Security)</span>
-                        <span class="sidebar-tooltip">Keamanan (Security)</span>
+                        <span class="sidebar-label">Keamanan</span>
+                        <span class="sidebar-tooltip">Keamanan</span>
                     </a>
                 </li>
                 <li>

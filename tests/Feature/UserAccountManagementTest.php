@@ -75,6 +75,7 @@ test('authorized user can update another user details and roles', function () {
         'password' => '', // leave empty to not update
         'is_active' => '0', // deactivate
         'roles' => ['guru'],
+        'permissions' => ['view-reports'],
     ];
 
     $response = $this->actingAs($admin)->put(route('admin.users.update', $otherUser), $data);
@@ -87,6 +88,7 @@ test('authorized user can update another user details and roles', function () {
     expect($otherUser->is_active)->toBeFalse();
     expect($otherUser->hasRole('guru'))->toBeTrue();
     expect($otherUser->hasRole('siswa'))->toBeFalse();
+    expect($otherUser->hasDirectPermission('view-reports'))->toBeTrue();
 });
 
 test('user cannot deactivate themselves', function () {

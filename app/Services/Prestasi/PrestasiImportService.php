@@ -352,6 +352,7 @@ class PrestasiImportService
         $previewData = [];
         $rowCount = 0;
         $errors = [];
+        $seen = [];
 
         foreach ($reader->getSheetIterator() as $sheet) {
             // Only read first sheet
@@ -397,10 +398,20 @@ class PrestasiImportService
                 }
 
                 // Extract values (lenient - don't validate yet)
+                $tanggalVal = $values[1] ?? '';
+                if ($tanggalVal instanceof \DateTimeInterface) {
+                    $tanggalVal = $tanggalVal->format('Y-m-d');
+                }
+
+                $tahunVal = $values[2] ?? '';
+                if ($tahunVal instanceof \DateTimeInterface) {
+                    $tahunVal = $tahunVal->format('Y');
+                }
+
                 $rowData = [
                     'row_number' => $rowCount,
-                    'tanggal' => $values[1] ?? '',
-                    'tahun' => $values[2] ?? '',
+                    'tanggal' => $tanggalVal,
+                    'tahun' => $tahunVal,
                     'peraih' => trim((string) ($values[3] ?? '')),
                     'judul' => trim((string) ($values[4] ?? '')),
                     'juara' => trim((string) ($values[5] ?? '')),
@@ -422,6 +433,53 @@ class PrestasiImportService
         }
 
         $reader->close();
+
+        // Pass 2: Query existing records from DB in a single lightweight batch request
+        $years = [];
+        foreach ($previewData as $row) {
+            if (! empty($row['tahun'])) {
+                $years[] = (int) $row['tahun'];
+            }
+        }
+        $years = array_unique($years);
+
+        $existingMap = [];
+        if (! empty($years)) {
+            $existing = Prestasi::select('judul', 'peraih', 'tahun')
+                ->whereIn('tahun', $years)
+                ->get();
+
+            foreach ($existing as $item) {
+                $key = strtolower(trim($item->judul).'|'.trim($item->peraih).'|'.$item->tahun);
+                $existingMap[$key] = true;
+            }
+        }
+
+        // Pass 3: Process duplicates (file-level and db-level)
+        $seen = [];
+        foreach ($previewData as &$row) {
+            $isDuplicate = false;
+            $isFileDuplicate = false;
+
+            if (! empty($row['judul']) && ! empty($row['peraih']) && ! empty($row['tahun'])) {
+                // Check file duplicate
+                $fileKey = strtolower($row['judul'].'|'.$row['peraih'].'|'.$row['tahun']);
+                if (isset($seen[$fileKey])) {
+                    $isFileDuplicate = true;
+                } else {
+                    $seen[$fileKey] = true;
+                }
+
+                // Check DB duplicate using our in-memory lookup map
+                if (isset($existingMap[$fileKey])) {
+                    $isDuplicate = true;
+                }
+            }
+
+            $row['is_duplicate'] = $isDuplicate;
+            $row['is_file_duplicate'] = $isFileDuplicate;
+        }
+        unset($row); // break reference
 
         return [
             'success' => count($errors) === 0,

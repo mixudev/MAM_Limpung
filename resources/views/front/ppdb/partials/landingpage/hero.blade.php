@@ -187,7 +187,7 @@
              x-init="updateActive()"
              @scroll.window="updateActive()"
              @resize.window="updateActive()"
-             class="static md:sticky md:top-[64px] z-[40] bg-white border-b border-gray-200/80 shadow-sm transition-all duration-300">
+             class="static md:sticky md:top-[64px] z-[30] bg-white border-b border-gray-200/80 shadow-sm transition-all duration-300">
             <div class="max-w-6xl mx-auto px-6 py-2.5">
                 
                 <!-- Desktop Viewport: Tabs -->

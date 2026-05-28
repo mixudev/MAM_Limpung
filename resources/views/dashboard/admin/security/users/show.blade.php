@@ -1,11 +1,14 @@
 @extends('dashboard.layouts.main')
 
 @section('content')
+<!-- Load Alpine.js CDN for dynamic client-side interactions -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const breadcrumb = document.getElementById('breadcrumb');
         if (breadcrumb) {
-            breadcrumb.textContent = 'User Accounts / Info Detail';
+            breadcrumb.textContent = 'Manajemen Pengguna / Detail Akun';
         }
     });
 </script>
@@ -38,7 +41,7 @@
                     
                     <div class="mt-4 flex flex-wrap justify-center gap-1.5">
                         @foreach ($user->roles as $role)
-                            <span class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider rounded-none bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50">
+                            <span class="px-2.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded-none bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50">
                                 {{ $role->display_name ?: $role->name }}
                             </span>
                         @endforeach
@@ -49,12 +52,12 @@
                     <div class="w-full flex justify-between items-center text-xs">
                         <span class="text-slate-500 dark:text-zinc-400">Status Akun:</span>
                         @if ($user->is_active)
-                            <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">ACTIVE</span>
+                            <span class="px-2 py-0.5 text-[9px] font-bold font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-850/40">AKTIF</span>
                         @else
-                            <span class="font-mono font-bold text-rose-600 dark:text-rose-400">INACTIVE</span>
+                            <span class="px-2 py-0.5 text-[9px] font-bold font-mono text-rose-700 bg-rose-50 border border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-850/40">DIBLOKIR</span>
                         @endif
                     </div>
-                    <div class="w-full flex justify-between items-center text-xs mt-2">
+                    <div class="w-full flex justify-between items-center text-xs mt-3">
                         <span class="text-slate-500 dark:text-zinc-400">Login Terakhir:</span>
                         <span class="font-semibold text-slate-700 dark:text-zinc-300">
                             {{ $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Belum Pernah' }}
@@ -72,7 +75,7 @@
             <!-- Quick Actions -->
             <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-none shadow-sm p-6">
                 <h3 class="text-sm font-bold text-slate-800 dark:text-zinc-100 mb-4 border-b border-slate-100 dark:border-zinc-800 pb-2">
-                    Tindakan Cepat
+                    Tindakan Pengamanan
                 </h3>
                 
                 <div class="space-y-4">
@@ -97,41 +100,24 @@
                         </form>
                     @endif
 
-                    <!-- Password Reset Action -->
-                    <form method="POST" action="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.users.reset-password-link', $user) : route('admin.users.reset-password-link', $user) }}">
+                    <!-- Password Reset Action (With Alert Warning Popup) -->
+                    <form id="reset-password-form" method="POST" action="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.users.reset-password-link', $user) : route('admin.users.reset-password-link', $user) }}">
                         @csrf
-                        <button type="submit"
+                        <button type="button"
+                                onclick="AppPopup.confirm({
+                                    title: 'Kirim Link Reset Password?',
+                                    description: 'Aksi ini akan mengirimkan tautan reset kata sandi resmi ke email <strong>{{ $user->email }}</strong> secara aman. Tautan verifikasi hanya berlaku sekali pakai.',
+                                    confirmText: 'Ya, Kirim Email',
+                                    cancelText: 'Batal',
+                                    onConfirm: () => document.getElementById('reset-password-form').submit()
+                                })"
                                 class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-white border border-transparent font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m-9 5a2 2 0 01-2-2m7-7a2 2 0 00-2-2m0 0a2 2 0 00-2 2m0 0V4a2 2 0 00-2-2H5a2 2 0 00-2 2v3a2 2 0 002 2h4a2 2 0 002-2v-1z" />
                             </svg>
-                            Generate Link Reset Password
+                            Kirim Tautan Reset Sandi
                         </button>
                     </form>
-
-                    <!-- Verification URL Display -->
-                    @if (session('verification_url'))
-                        <div class="p-3 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800/50 rounded-none text-xs space-y-2 mt-4" x-data="{ copied: false }">
-                            <p class="font-mono text-[10px] text-indigo-800 dark:text-indigo-400 font-bold uppercase">Copy Link Verifikasi (WhatsApp/Lainnya):</p>
-                            <textarea readonly class="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-mono focus:outline-none" rows="3">{{ session('verification_url') }}</textarea>
-                            <button type="button" @click="navigator.clipboard.writeText('{{ session('verification_url') }}'); copied = true; setTimeout(() => copied = false, 2000)" 
-                                    class="w-full py-1.5 px-3 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 font-mono text-[9px] uppercase font-bold tracking-wider flex items-center justify-center gap-1">
-                                <span x-text="copied ? 'Tersalin!' : 'Salin Tautan'"></span>
-                            </button>
-                        </div>
-                    @endif
-
-                    <!-- Reset URL Display -->
-                    @if (session('reset_url'))
-                        <div class="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-none text-xs space-y-2 mt-4" x-data="{ copied: false }">
-                            <p class="font-mono text-[10px] text-amber-800 dark:text-amber-400 font-bold uppercase">Copy Link Reset Password (Sekali Pakai):</p>
-                            <textarea readonly class="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-mono focus:outline-none" rows="3">{{ session('reset_url') }}</textarea>
-                            <button type="button" @click="navigator.clipboard.writeText('{{ session('reset_url') }}'); copied = true; setTimeout(() => copied = false, 2000)" 
-                                    class="w-full py-1.5 px-3 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 font-mono text-[9px] uppercase font-bold tracking-wider flex items-center justify-center gap-1">
-                                <span x-text="copied ? 'Tersalin!' : 'Salin Tautan'"></span>
-                            </button>
-                        </div>
-                    @endif
                 </div>
             </div>
             
@@ -183,37 +169,48 @@
                             @enderror
                         </div>
 
-                        <!-- Status -->
+                        <!-- Status (Segmented Toggle / Radio cards instead of standard Checkbox) -->
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-2">Status Login</label>
-                            <label class="inline-flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" name="is_active" value="1" {{ old('is_active', $user->is_active) ? 'checked' : '' }}
-                                       class="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600 dark:bg-zinc-950 dark:border-zinc-700 dark:focus:ring-emerald-500 transition-colors">
-                                <span class="text-sm font-medium text-slate-800 dark:text-zinc-200">
-                                    Izinkan Akses Login (Active)
-                                </span>
-                            </label>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-2">Status Login & Akses Akun</label>
+                            <div class="flex gap-2 md:w-2/3">
+                                {{-- Active segment button --}}
+                                <label class="flex-1 cursor-pointer select-none">
+                                    <input type="radio" name="is_active" value="1" {{ old('is_active', $user->is_active) ? 'checked' : '' }} class="sr-only peer">
+                                    <div class="px-4 py-2.5 text-center text-xs font-mono font-bold uppercase border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-500 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/20 peer-checked:text-emerald-700 dark:peer-checked:bg-emerald-950/15 dark:peer-checked:text-emerald-400 peer-checked:ring-1 peer-checked:ring-emerald-500 transition-all hover:bg-slate-50 dark:hover:bg-zinc-800/40">
+                                        AKTIF (ACTIVE)
+                                    </div>
+                                </label>
+
+                                {{-- Blocked segment button --}}
+                                <label class="flex-1 cursor-pointer select-none">
+                                    <input type="radio" name="is_active" value="0" {{ !old('is_active', $user->is_active) ? 'checked' : '' }} class="sr-only peer">
+                                    <div class="px-4 py-2.5 text-center text-xs font-mono font-bold uppercase border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-500 peer-checked:border-rose-500 peer-checked:bg-rose-50/20 peer-checked:text-rose-700 dark:peer-checked:bg-rose-950/15 dark:peer-checked:text-rose-400 peer-checked:ring-1 peer-checked:ring-rose-500 transition-all hover:bg-slate-50 dark:hover:bg-zinc-800/40">
+                                        BLOKIR (BANNED)
+                                    </div>
+                                </label>
+                            </div>
                         </div>
 
-                        <!-- Roles Section -->
+                        <!-- Roles Section (Redesigned with minimal cards without checkbox circle) -->
                         <div class="border-t border-slate-100 dark:border-zinc-800 pt-5">
-                            <label class="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-3">Hak Akses & Peran (Roles) <span class="text-rose-500">*</span></label>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1">Peran & Tingkat Otoritas (Roles) <span class="text-rose-500">*</span></label>
+                            <p class="text-[11px] text-slate-400 dark:text-zinc-500 mb-3">Tentukan tingkat kewenangan sistem yang dimiliki akun ini.</p>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-zinc-800 rounded-none">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                                 @php
                                     $userRoleNames = $user->roles->pluck('name')->toArray();
                                 @endphp
 
                                 @foreach ($roles as $role)
-                                    <label class="flex items-start gap-3 cursor-pointer p-2 hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-zinc-800">
+                                    <label class="relative cursor-pointer block select-none">
                                         <input type="checkbox" name="roles[]" value="{{ $role->name }}" 
                                                {{ in_array($role->name, old('roles', $userRoleNames)) ? 'checked' : '' }}
-                                               class="w-4 h-4 rounded border-slate-300 text-[#4f45b2] focus:ring-[#4f45b2] mt-0.5 dark:bg-zinc-950 dark:border-zinc-700">
-                                        <div class="flex flex-col">
-                                            <span class="text-sm font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wider">
+                                               class="absolute opacity-0 pointer-events-none w-0 h-0 peer">
+                                        <div class="p-3.5 text-center border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-all peer-checked:border-[#4f45b2] dark:peer-checked:border-indigo-500 peer-checked:bg-indigo-50/10 dark:peer-checked:bg-indigo-950/10 peer-checked:ring-1 peer-checked:ring-[#4f45b2] flex flex-col justify-center items-center">
+                                            <span class="text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">
                                                 {{ $role->display_name ?: $role->name }}
                                             </span>
-                                            <span class="text-[10px] text-slate-500 dark:text-zinc-500 font-mono mt-0.5">
+                                            <span class="text-[9px] text-slate-400 dark:text-zinc-500 font-mono mt-0.5">
                                                 Level Akses: {{ $role->level }}
                                             </span>
                                         </div>
@@ -223,6 +220,145 @@
                             @error('roles')
                                 <p class="text-[10px] text-rose-500 mt-2">{{ $message }}</p>
                             @enderror
+                        </div>
+
+                        <!-- Direct Permissions Section (Custom reactive labels & AppModal) -->
+                        <div x-data='{
+                            assignedPermissions: @json($user->permissions->pluck('name')->toArray()),
+                            allPermissions: @json($permissions->pluck('name')->toArray()),
+                            searchQuery: "",
+                            
+                            get unassignedPermissions() {
+                                return this.allPermissions.filter(p => !this.assignedPermissions.includes(p));
+                            },
+                            
+                            get filteredUnassignedPermissions() {
+                                if (!this.searchQuery) return this.unassignedPermissions;
+                                const q = this.searchQuery.toLowerCase();
+                                return this.unassignedPermissions.filter(p => p.toLowerCase().includes(q));
+                            },
+                            
+                            addPermission(name) {
+                                if (!this.assignedPermissions.includes(name)) {
+                                    this.assignedPermissions.push(name);
+                                }
+                            },
+                            
+                            removePermission(name) {
+                                this.assignedPermissions = this.assignedPermissions.filter(p => p !== name);
+                            }
+                        }' class="border-t border-slate-100 dark:border-zinc-800 pt-5">
+                            
+                            <!-- Inherited Permissions (Daftar hak akses bawaan dari Peran - Collapsible) -->
+                            <div class="mb-5" x-data="{ showInherited: false }">
+                                <div @click="showInherited = !showInherited" 
+                                     class="flex items-center justify-between cursor-pointer select-none p-3 bg-slate-50 hover:bg-slate-100/80 dark:bg-zinc-950/40 dark:hover:bg-zinc-950/60 border border-slate-200 dark:border-zinc-800 transition-colors">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-slate-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-zinc-300 cursor-pointer mb-0">
+                                            Hak Akses Bawaan Peran (Inherited Permissions)
+                                        </label>
+                                        <span class="px-1.5 py-0.2 text-[9px] font-mono font-bold bg-slate-200/60 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-300/40 dark:border-zinc-700">
+                                            {{ count($user->getPermissionsViaRoles()) }}
+                                        </span>
+                                    </div>
+                                    <div class="text-slate-400 hover:text-slate-650 dark:hover:text-zinc-300">
+                                        <i class="fa-solid" :class="showInherited ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                    </div>
+                                </div>
+
+                                <div x-show="showInherited" x-transition class="p-3 border-x border-b border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40">
+                                    <p class="text-[11px] text-slate-400 dark:text-zinc-500 mb-3">Daftar izin akses yang didapatkan secara otomatis melalui peran (roles) aktif di atas.</p>
+                                    
+                                    <div class="flex flex-wrap gap-1.5">
+                                        @forelse ($user->getPermissionsViaRoles() as $perm)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-450 border border-slate-200 dark:border-zinc-700" title="Didapatkan secara otomatis dari peran">
+                                                {{ $perm->name }}
+                                            </span>
+                                        @empty
+                                            <span class="text-xs text-slate-400 dark:text-zinc-550 italic py-1">Belum ada hak akses bawaan dari peran (silakan pilih peran di atas).</span>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Direct/Custom Permissions (Hak Akses Tambahan) -->
+                            <div class="border-t border-dashed border-slate-100 dark:border-zinc-800 pt-5">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1">Hak Akses Kustom Tambahan (Direct Permissions)</label>
+                                <p class="text-[11px] text-slate-400 dark:text-zinc-500 mb-3">Tambahkan atau hapus izin akses spesifik langsung ke akun ini tanpa merubah peran global.</p>
+                                
+                                {{-- Trigger Button --}}
+                                <div class="mb-4">
+                                    <button type="button" @click="AppModal.open('addPermissionModal')"
+                                        class="inline-flex py-1.5 px-3 bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 border border-slate-300 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 font-mono font-bold text-[9px] uppercase tracking-wider transition-all rounded-none items-center gap-1.5 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                        Tambah Hak Akses
+                                    </button>
+                                </div>
+
+                                {{-- Active Permission Tags --}}
+                                <div class="flex flex-wrap gap-2 mb-3">
+                                    <template x-for="perm in assignedPermissions" :key="perm">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider border border-indigo-200 dark:border-indigo-800 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400">
+                                            <span x-text="perm"></span>
+                                            <button type="button" @click="removePermission(perm)" class="text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-200 font-bold focus:outline-none text-[13px] leading-none cursor-pointer">
+                                                &times;
+                                            </button>
+                                            {{-- Hidden inputs to submit to PHP backend request --}}
+                                            <input type="hidden" name="permissions[]" :value="perm">
+                                        </span>
+                                    </template>
+                                    
+                                    <template x-if="assignedPermissions.length === 0">
+                                        <span class="text-xs text-slate-400 dark:text-zinc-500 italic py-1">Belum ada hak akses kustom tambahan untuk user ini.</span>
+                                    </template>
+                                </div>
+                            </div>
+
+                            {{-- ── Add Permission Modal (x-app-modal) ── --}}
+                            <x-app-modal id="addPermissionModal" title="Pilih Hak Akses Baru" maxWidth="lg" iconColor="indigo"
+                                icon='<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>'>
+                                <div class="space-y-4">
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Pilih izin akses kustom di bawah untuk ditambahkan langsung ke pengguna ini.</p>
+                                    
+                                    {{-- Search Box --}}
+                                    <div class="relative">
+                                        <input type="text" x-model="searchQuery" placeholder="Cari hak akses..." 
+                                            class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:border-[#4f45b2] focus:ring-1 focus:ring-[#4f45b2]">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-zinc-500">
+                                            <i class="fa-solid fa-magnifying-glass text-[11px]"></i>
+                                        </div>
+                                        <button type="button" x-show="searchQuery" @click="searchQuery = ''" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-650 text-xs">
+                                            &times;
+                                        </button>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto custom-scrollbar p-1">
+                                        <template x-for="perm in filteredUnassignedPermissions" :key="perm">
+                                            <button type="button" @click="addPermission(perm); AppModal.close('addPermissionModal'); searchQuery = ''"
+                                                class="w-full text-left p-3 border border-slate-200 dark:border-zinc-800 bg-white hover:bg-indigo-50/50 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/40 text-[11px] font-mono text-slate-600 hover:text-[#4f45b2] dark:text-zinc-400 dark:hover:text-indigo-400 transition-all rounded-none focus:outline-none cursor-pointer">
+                                                <span x-text="perm"></span>
+                                            </button>
+                                        </template>
+                                        
+                                        <template x-if="filteredUnassignedPermissions.length === 0">
+                                            <div class="col-span-2 text-center py-6 text-xs text-slate-400 dark:text-zinc-500 italic">
+                                                Semua hak akses sistem sudah dimiliki atau tidak ditemukan.
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                                
+                                <x-slot name="footer">
+                                    <button type="button" onclick="AppModal.close('addPermissionModal'); searchQuery = ''" class="modal-btn-cancel">
+                                        TUTUP
+                                    </button>
+                                </x-slot>
+                            </x-app-modal>
                         </div>
 
                         <!-- Actions -->

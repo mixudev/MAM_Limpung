@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class UserAccountController extends Controller
@@ -70,12 +71,14 @@ class UserAccountController extends Controller
     {
         Gate::authorize('view-users', User::class);
 
-        $user->load('roles');
+        $user->load('roles', 'permissions');
         $roles = Role::orderBy('level', 'desc')->get();
+        $permissions = Permission::orderBy('name')->get();
 
         return view('dashboard.admin.security.users.show', [
             'user' => $user,
             'roles' => $roles,
+            'permissions' => $permissions,
         ]);
     }
 
@@ -98,6 +101,7 @@ class UserAccountController extends Controller
         $data['is_active'] = $request->boolean('is_active');
         $user->update($data);
         $user->syncRoles($request->input('roles'));
+        $user->syncPermissions($request->input('permissions', []));
 
         return redirect()->back()
             ->with('success', "Akun '{$user->name}' berhasil diperbarui.");

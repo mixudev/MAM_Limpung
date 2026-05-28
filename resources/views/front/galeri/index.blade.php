@@ -112,13 +112,49 @@
         <div class="relative w-full h-full max-w-7xl max-h-screen md:max-h-[85vh] bg-white flex flex-col md:flex-row overflow-hidden shadow-2xl border border-slate-800" @click.away="closeLightbox()">
             
             <!-- Close Button (Inside the container for mobile, absolute for desktop) -->
-            <button @click="closeLightbox()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 bg-slate-100 hover:bg-amber-500 hover:text-blue-900 text-slate-900 flex items-center justify-center transition-colors z-50 shadow-md">
+            <button @click="closeLightbox()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 bg-slate-100 hover:bg-amber-500 hover:text-blue-900 text-slate-900 flex items-center justify-center transition-colors z-50 shadow-md cursor-pointer">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
 
             <!-- Left: Main Image Display -->
             <div class="w-full md:w-2/3 bg-slate-50 relative flex items-center justify-center h-[50vh] md:h-full group">
                 <img :src="currentImage" class="absolute inset-0 w-full h-full object-contain p-2 md:p-8">
+                
+                <!-- Top Control Buttons (Play/Pause & Download) -->
+                <div class="absolute top-4 left-4 md:top-6 md:left-6 flex gap-2 z-30">
+                    <!-- Play/Pause Button -->
+                    <button x-show="currentAlbum?.images.length > 1" @click.stop="toggleAutoplay()" 
+                        class="w-10 h-10 bg-black/25 hover:bg-black/55 text-white rounded-none flex items-center justify-center transition-all duration-200 cursor-pointer shadow-md"
+                        :title="autoplayActive ? 'Hentikan Otomatis' : 'Mulai Otomatis'">
+                        <i class="fa-solid" :class="autoplayActive ? 'fa-pause' : 'fa-play'"></i>
+                    </button>
+                    
+                    <!-- Download Button -->
+                    <a :href="currentImage" download target="_blank"
+                        class="w-10 h-10 bg-black/25 hover:bg-black/55 text-white rounded-none flex items-center justify-center transition-all duration-200 cursor-pointer shadow-md"
+                        title="Unduh Foto">
+                        <i class="fa-solid fa-download"></i>
+                    </a>
+                </div>
+
+                <!-- Slide Left Button (Transparent/Hover visible) -->
+                <button x-show="currentAlbum?.images.length > 1" @click.stop="prevImageManual()" 
+                    class="absolute left-2 group-hover:left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/15 hover:bg-black/50 text-white rounded-none flex items-center justify-center transition-all duration-300 z-30 cursor-pointer"
+                    title="Foto Sebelumnya">
+                    <i class="fa-solid fa-chevron-left text-sm"></i>
+                </button>
+
+                <!-- Slide Right Button (Transparent/Hover visible) -->
+                <button x-show="currentAlbum?.images.length > 1" @click.stop="nextImageManual()" 
+                    class="absolute right-2 group-hover:right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/15 hover:bg-black/50 text-white rounded-none flex items-center justify-center transition-all duration-300 z-30 cursor-pointer"
+                    title="Foto Berikutnya">
+                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                </button>
+
+                <!-- Border-like loading bar -->
+                <div x-show="autoplayActive && currentAlbum?.images.length > 1" class="absolute bottom-0 left-0 w-full h-[4px] bg-slate-200/50 z-30">
+                    <div class="h-full bg-amber-500 transition-all ease-linear" :style="'width: ' + progress + '%'; transitionDuration: '50ms'"></div>
+                </div>
             </div>
 
             <!-- Right: Info & Thumbnails -->
@@ -131,19 +167,19 @@
                 </div>
                 
                 <div class="prose prose-sm text-slate-600 mb-8 leading-relaxed">
-                    <p x-text="currentAlbum?.description || 'Seru banget kegiatan yang satu ini! Momen langka yang berhasil tertangkap kamera buat kenang-kenangan kita semua.'"></p>
+                    <p x-text="currentAlbum?.description || ''"></p>
                 </div>
                 
                 <!-- Thumbnails Gallery for Albums -->
                 <div x-show="currentAlbum?.images.length > 1" class="mt-auto pt-6 border-t border-slate-100">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Isi Album (<span x-text="currentAlbum?.images.length"></span>)</h4>
-                        <div class="text-xs text-slate-300">Tap gambar</div>
+                        <div class="text-xs text-slate-355">Tap gambar</div>
                     </div>
                     
                     <div class="grid grid-cols-4 gap-2">
                         <template x-for="(img, index) in currentAlbum?.images" :key="index">
-                            <button @click="currentImage = img" class="relative aspect-square border-2 transition-all duration-300"
+                            <button @click="selectImageManual(img)" class="relative aspect-square border-2 transition-all duration-300 cursor-pointer"
                                     :class="currentImage === img ? 'border-amber-500 p-0.5' : 'border-transparent opacity-60 hover:opacity-100'">
                                 <img :src="img" class="absolute inset-0 w-full h-full object-cover bg-slate-100">
                             </button>
@@ -171,93 +207,17 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('gallery', () => ({
         activeCategory: 'Semua',
-        categories: ['Semua', 'Belajar', 'Ekskul', 'Fasilitas', 'Event Seru'],
+        categories: @json($categories),
         lightboxOpen: false,
         currentAlbum: null,
         currentImage: null,
         
-        // Data Dummy (Bentuk Album, 1 album bisa berisi banyak foto)
-        albums: [
-            { 
-                id: 1, 
-                title: 'Serunya Praktikum Biologi', 
-                category: 'Belajar', 
-                date: 'Okt 2025', 
-                description: 'Anak-anak IPA lagi serius banget bedah kodok nih. Walau awalnya pada geli, ujung-ujungnya pada ketagihan praktek!',
-                images: [
-                    'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1581093588401-fbb62a02f120?q=80&w=800&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1564473379685-db7c73367129?q=80&w=800&auto=format&fit=crop'
-                ] 
-            },
-            { 
-                id: 2, 
-                title: 'Latihan Tapak Suci', 
-                category: 'Ekskul', 
-                date: 'Sep 2025', 
-                description: 'Latihan sore buat persiapan turnamen tingkat kabupaten. Tetap semangat walau keringat bercucuran!',
-                images: [
-                    'https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=800&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=800&auto=format&fit=crop'
-                ] 
-            },
-            { 
-                id: 3, 
-                title: 'Nongkrong di Perpus', 
-                category: 'Fasilitas', 
-                date: 'Agt 2025', 
-                description: 'Wajah baru perpustakaan madrasah kita. Super cozy, adem, dan koleksi bukunya makin lengkap. Tempat favorit jam istirahat!',
-                images: [
-                    'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=800&auto=format&fit=crop'
-                ] 
-            },
-            { 
-                id: 4, 
-                title: 'Lomba 17-an Paling Pecah', 
-                category: 'Event Seru', 
-                date: 'Agt 2025', 
-                description: 'Keseruan lomba tarik tambang antar kelas. Kelas 12 IPA 1 jadi juara umum tahun ini, mantap!',
-                images: [
-                    'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=800&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?q=80&w=800&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=800&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=800&auto=format&fit=crop'
-                ] 
-            },
-            { 
-                id: 5, 
-                title: 'Mabit & Kajian Asik', 
-                category: 'Event Seru', 
-                date: 'Jul 2025', 
-                description: 'Malam bina iman dan taqwa bareng kakak kelas dan alumni. Acaranya nyantai tapi ilmunya dapet banget.',
-                images: [
-                    'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=800&auto=format&fit=crop'
-                ] 
-            },
-            { 
-                id: 6, 
-                title: 'Lab Komputer Baru', 
-                category: 'Fasilitas', 
-                date: 'Jun 2025', 
-                description: 'Siap-siap belajar coding dan desain grafis pakai komputer generasi terbaru. Super ngebut!',
-                images: [
-                    'https://images.unsplash.com/photo-1571260899304-425070114f55?q=80&w=800&auto=format&fit=crop'
-                ] 
-            },
-            { 
-                id: 7, 
-                title: 'Kemah Bakti HW', 
-                category: 'Ekskul', 
-                date: 'Mei 2025', 
-                description: 'Tiga hari dua malam yang nggak bakal terlupakan. Api unggun, jurit malam, dan kebersamaan tiada tara.',
-                images: [
-                    'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=800&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?q=80&w=800&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1504280390227-331bf9bb28b8?q=80&w=800&auto=format&fit=crop'
-                ] 
-            },
-        ],
+        albums: @json($albums),
+        
+        // Slideshow states
+        slideshowInterval: null,
+        progress: 0,
+        autoplayActive: false,
         
         get filteredAlbums() {
             if (this.activeCategory === 'Semua') {
@@ -271,17 +231,112 @@ document.addEventListener('alpine:init', () => {
             this.currentImage = album.images[0]; // Set foto pertama sebagai tampilan utama
             this.lightboxOpen = true;
             document.body.style.overflow = 'hidden';
+            
+            // Start autoplay slideshow
+            setTimeout(() => {
+                this.startAutoplay();
+            }, 100);
         },
         
         closeLightbox() {
             this.lightboxOpen = false;
             document.body.style.overflow = 'auto';
+            this.stopAutoplay();
+            
             setTimeout(() => {
                 if(!this.lightboxOpen) {
                     this.currentAlbum = null;
                     this.currentImage = null;
                 }
             }, 300);
+        },
+
+        nextImage() {
+            if (!this.currentAlbum) return;
+            const images = this.currentAlbum.images;
+            const currentIndex = images.indexOf(this.currentImage);
+            const nextIndex = (currentIndex + 1) % images.length;
+            this.currentImage = images[nextIndex];
+        },
+
+        prevImage() {
+            if (!this.currentAlbum) return;
+            const images = this.currentAlbum.images;
+            const currentIndex = images.indexOf(this.currentImage);
+            const prevIndex = (currentIndex - 1 + images.length) % images.length;
+            this.currentImage = images[prevIndex];
+        },
+
+        nextImageManual() {
+            this.nextImage();
+            this.resetAutoplay();
+        },
+
+        prevImageManual() {
+            this.prevImage();
+            this.resetAutoplay();
+        },
+
+        selectImageManual(img) {
+            this.currentImage = img;
+            this.resetAutoplay();
+        },
+
+        startAutoplay() {
+            if (this.slideshowInterval) clearInterval(this.slideshowInterval);
+            if (!this.currentAlbum || this.currentAlbum.images.length <= 1) {
+                this.progress = 0;
+                this.autoplayActive = false;
+                return;
+            }
+            
+            this.progress = 0;
+            this.autoplayActive = true;
+            
+            const tickRate = 50; // ms
+            const duration = 6000; // 3 seconds
+            const increment = (tickRate / duration) * 100;
+
+            this.slideshowInterval = setInterval(() => {
+                if (!this.lightboxOpen) {
+                    this.stopAutoplay();
+                    return;
+                }
+                
+                if (this.autoplayActive) {
+                    this.progress += increment;
+                    if (this.progress >= 100) {
+                        this.progress = 0;
+                        this.nextImage();
+                    }
+                }
+            }, tickRate);
+        },
+
+        stopAutoplay() {
+            if (this.slideshowInterval) {
+                clearInterval(this.slideshowInterval);
+                this.slideshowInterval = null;
+            }
+            this.progress = 0;
+            this.autoplayActive = false;
+        },
+
+        toggleAutoplay() {
+            if (this.autoplayActive) {
+                this.stopAutoplay();
+            } else {
+                this.startAutoplay();
+            }
+        },
+
+        resetAutoplay() {
+            this.progress = 0;
+            if (this.autoplayActive && this.currentAlbum && this.currentAlbum.images.length > 1) {
+                this.startAutoplay();
+            } else {
+                this.stopAutoplay();
+            }
         }
     }));
 });

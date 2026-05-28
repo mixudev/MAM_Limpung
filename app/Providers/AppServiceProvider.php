@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Share site settings dynamically with caching
         // Skip jika tabel belum ada (misal saat migrate awal)
-        if (! Schema::hasTable('cache') || ! Schema::hasTable('site_settings')) {
+        if (! Schema::hasTable('cache') || ! Schema::hasTable('site_settings') || ! Schema::hasTable('system_logs')) {
             return;
         }
 

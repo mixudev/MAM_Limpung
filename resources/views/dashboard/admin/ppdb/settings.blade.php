@@ -252,8 +252,8 @@
                     class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
             </td>
             <td class="px-4 py-3 whitespace-nowrap">
-                <input type="date" name="waves[${waveIndexCount}][end_date]" required
-                    class="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                <input type="date" name="waves[${waveIndexCount}][end_date]" placeholder="Opsional"
+                    class="w-full bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 rounded-none text-xs text-slate-700 dark:text-zinc-300 py-1.5 px-2.5 focus:ring-2 focus:ring-blue-400/20 focus:border-blue-400 transition-colors">
             </td>
             <td class="px-4 py-3 text-right whitespace-nowrap">
                 <button type="button" onclick="removeWaveRow('${waveIndexCount}')" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 rounded-none transition-all">

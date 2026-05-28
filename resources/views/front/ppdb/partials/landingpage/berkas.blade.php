@@ -1,76 +1,104 @@
 <section id="persyaratan" class="ppdb-section scroll-mt-[130px] py-16 bg-gray-50">
-            <div class="max-w-6xl mx-auto px-6">
-                
-                <!-- Header -->
-                <div class="text-center max-w-2xl mx-auto mb-12 fade-up-init">
-                    <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-sm uppercase tracking-wider">Persyaratan Dokumen</span>
-                    <h2 class="text-2xl font-bold text-gray-900 mt-2.5 leading-tight">Berkas Yang Diperlukan</h2>
-                    <p class="text-gray-500 mt-2 text-xs md:text-sm">Lengkapi berkas-berkas berikut untuk mempermudah panitia memverifikasi data pendaftaran Anda.</p>
+    <div class="max-w-6xl mx-auto px-6">
+
+        <!-- Header -->
+        <div class="text-center max-w-2xl mx-auto mb-12 fade-up-init">
+            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-sm uppercase tracking-wider">Persyaratan Dokumen</span>
+            <h2 class="text-2xl font-bold text-gray-900 mt-2.5 leading-tight">Berkas Yang Diperlukan</h2>
+            <p class="text-gray-500 mt-2 text-xs md:text-sm">Siapkan berkas berikut sebelum datang ke sekretariat.</p>
+        </div>
+
+        <!-- Checklist 2-col on desktop -->
+        <div class="max-w-3xl mx-auto fade-up-init">
+            <div class="bg-white rounded-md border border-gray-200 shadow-sm overflow-hidden">
+
+                <!-- Wajib items: 2 col grid -->
+                <div class="grid md:grid-cols-2 divide-y divide-gray-100 md:divide-y-0 md:[&>*:nth-child(odd)]:border-r md:[&>*:nth-child(odd)]:border-gray-100 md:[&>*:nth-child(n+3)]:border-t md:[&>*:nth-child(n+3)]:border-gray-100">
+
+                    <div class="flex items-start gap-3 px-5 py-3.5">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Formulir Pendaftaran</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Diisi lengkap saat daftar</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 px-5 py-3.5">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Fotokopi Ijazah / SKHU</p>
+                            <p class="text-xs text-gray-400 mt-0.5">1 lembar, dilegalisir</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 px-5 py-3.5">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Fotokopi Kartu Keluarga</p>
+                            <p class="text-xs text-gray-400 mt-0.5">1 lembar</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 px-5 py-3.5">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Fotokopi Akta Kelahiran</p>
+                            <p class="text-xs text-gray-400 mt-0.5">1 lembar</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 px-5 py-3.5">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Pas Foto 3×4 latar merah</p>
+                            <p class="text-xs text-gray-400 mt-0.5">2 lembar — berjilbab bagi putri</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 px-5 py-3.5">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Soft file foto ijazah SMP/MTs</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Format .jpg / .png — kirim ke <a href="https://wa.me/6289630637542" class="text-blue-500 hover:underline">089630637542</a> (Pak Fariz) atau CD</p>
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Simple Table -->
-                <div class="overflow-x-auto bg-white rounded-md shadow-sm border border-gray-200">
-                    <table class="w-full text-left border-collapse min-w-[500px]">
-                        <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200">
-                                <th class="py-3 px-4 md:px-6 font-bold text-gray-900 text-xs md:text-sm">Nama Dokumen</th>
-                                <th class="py-3 px-4 md:px-6 font-bold text-gray-900 text-xs md:text-sm">Keterangan</th>
-                                <th class="py-3 px-4 md:px-6 font-bold text-gray-900 text-xs md:text-sm w-20">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            @forelse($requirements as $req)
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="py-3 px-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">{{ $req['label'] }}</td>
-                                    <td class="py-3 px-4 md:px-6 text-xs text-gray-600">{{ $req['required'] ? 'Wajib disiapkan oleh semua siswa' : 'Opsional / sesuai program pilihan' }}</td>
-                                    <td class="py-3 px-4 md:px-6 text-xs font-semibold">
-                                        <span class="inline-block px-2 py-1 rounded text-white {{ $req['required'] ? 'bg-emerald-600' : 'bg-amber-500' }}">
-                                            {{ $req['required'] ? 'Wajib' : 'Opsional' }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="py-8 px-6 text-center text-xs text-gray-400">
-                                        Tidak ada persyaratan berkas yang dikonfigurasi.
-                                    </td>
-                                </tr>
-                            @endforelse
-
-                            <!-- Berkas Tambahan Section Header -->
-                            <tr class="bg-blue-50 border-b border-blue-200">
-                                <td colspan="3" class="py-3 px-4 md:px-6 text-xs font-bold text-blue-900 uppercase tracking-wide">Berkas Tambahan (Untuk Program Khusus / Beasiswa)</td>
-                            </tr>
-
-                            <!-- Item 1 -->
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="py-3 px-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">Piagam / Sertifikat Prestasi</td>
-                                <td class="py-3 px-4 md:px-6 text-xs text-gray-600">Untuk klaim Beasiswa Prestasi (Juara akademik/olahraga/kesenian min. Kabupaten)</td>
-                                <td class="py-3 px-4 md:px-6 text-xs font-semibold"><span class="inline-block px-2 py-1 rounded text-white bg-blue-500">Opsional</span></td>
-                            </tr>
-
-                            <!-- Item 2 -->
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="py-3 px-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">Kartu KIP, PKH, KPS, atau KKS</td>
-                                <td class="py-3 px-4 md:px-6 text-xs text-gray-600">Untuk verifikasi Beasiswa Afirmasi (Keluarga kurang mampu)</td>
-                                <td class="py-3 px-4 md:px-6 text-xs font-semibold"><span class="inline-block px-2 py-1 rounded text-white bg-blue-500">Opsional</span></td>
-                            </tr>
-
-                            <!-- Item 3 -->
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="py-3 px-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">Surat Rekomendasi Ranting Muhammadiyah</td>
-                                <td class="py-3 px-4 md:px-6 text-xs text-gray-600">Untuk kader Muhammadiyah mendapat potongan biaya khusus</td>
-                                <td class="py-3 px-4 md:px-6 text-xs font-semibold"><span class="inline-block px-2 py-1 rounded text-white bg-blue-500">Opsional</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Opsional separator -->
+                <div class="bg-amber-50 border-y border-amber-100 px-5 py-2.5">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Jika berlaku</p>
                 </div>
 
-                <!-- Info Note -->
-                <div class="mt-6 bg-blue-50 border border-blue-200 p-4 rounded-md flex items-start gap-3">
-                    <span class="text-blue-900 font-bold text-xs md:text-sm leading-relaxed">
-                        Catatan: Semua berkas diserahkan dalam map kertas warna Kuning (Putra) atau Merah (Putri).
-                    </span>
+                <!-- Opsional items: 2 col grid -->
+                <div class="grid md:grid-cols-2 divide-y divide-gray-100 md:divide-y-0 md:[&>*:nth-child(odd)]:border-r md:[&>*:nth-child(odd)]:border-gray-100 md:[&>*:nth-child(n+3)]:border-t md:[&>*:nth-child(n+3)]:border-gray-100">
+
+                    <div class="flex items-start gap-3 px-5 py-3.5">
+                        <i class="fa-regular fa-circle-check text-amber-400 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Fotokopi KIP / KPS / KKS / PKH</p>
+                            <p class="text-xs text-gray-400 mt-0.5">1 lembar — untuk beasiswa afirmasi</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 px-5 py-3.5">
+                        <i class="fa-regular fa-circle-check text-amber-400 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Surat Pindah & Raport</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Khusus siswa pindahan</p>
+                        </div>
+                    </div>
+
                 </div>
+
             </div>
-        </section>
+        </div>
+
+        <!-- Info Note -->
+        <div class="mt-6 max-w-3xl mx-auto bg-blue-50 border border-blue-200 px-5 py-3.5 rounded-md flex items-center gap-3 fade-up-init">
+            <i class="fa-solid fa-folder-open text-blue-500 flex-shrink-0"></i>
+            <p class="text-xs text-blue-800 font-semibold">Masukkan semua berkas dalam map kertas — <span class="text-blue-600">Kuning untuk Putra</span>, <span class="text-violet-600">Merah untuk Putri</span>.</p>
+        </div>
+
+    </div>
+</section>
