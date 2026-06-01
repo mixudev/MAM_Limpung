@@ -78,7 +78,7 @@
                             <div class="notif-item px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 cursor-pointer flex gap-3 items-start"
                                 data-read="false">
                                 <span
-                                    class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-500">
+                                    class="w-7 h-7 rounded-full shrink-0 flex items-center justify-center mt-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-500">
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -93,13 +93,13 @@
                                     <div class="text-[10px] text-zinc-400 mt-0.5">2 min ago</div>
                                 </div>
                                 <span
-                                    class="unread-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 flex-shrink-0 mt-1.5"></span>
+                                    class="unread-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0 mt-1.5"></span>
                             </div>
                             <!-- Notification Item 2 -->
                             <div class="notif-item px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 cursor-pointer flex gap-3 items-start"
                                 data-read="false">
                                 <span
-                                    class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500">
+                                    class="w-7 h-7 rounded-full shrink-0 flex items-center justify-center mt-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500">
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -113,13 +113,13 @@
                                     <div class="text-[10px] text-zinc-400 mt-0.5">14 min ago</div>
                                 </div>
                                 <span
-                                    class="unread-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 flex-shrink-0 mt-1.5"></span>
+                                    class="unread-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0 mt-1.5"></span>
                             </div>
                             <!-- Notification Item 3 -->
                             <div class="notif-item px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 cursor-pointer flex gap-3 items-start"
                                 data-read="false">
                                 <span
-                                    class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-500">
+                                    class="w-7 h-7 rounded-full shrink-0 flex items-center justify-center mt-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-500">
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -134,13 +134,13 @@
                                     <div class="text-[10px] text-zinc-400 mt-0.5">1 hr ago</div>
                                 </div>
                                 <span
-                                    class="unread-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 flex-shrink-0 mt-1.5"></span>
+                                    class="unread-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0 mt-1.5"></span>
                             </div>
                             <!-- Notification Item 4 -->
                             <div class="notif-item px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 cursor-pointer flex gap-3 items-start opacity-60"
                                 data-read="true">
                                 <span
-                                    class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500">
+                                    class="w-7 h-7 rounded-full shrink-0 flex items-center justify-center mt-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500">
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -180,7 +180,7 @@
                         class="flex items-center gap-2.5 px-2 py-1.5 rounded-none hover:bg-zinc-100 dark:hover:bg-zinc-800"
                         style="transition:background 150ms">
                         <div
-                            class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-semibold flex-shrink-0">
+                            class="w-7 h-7 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-semibold shrink-0">
                             JD</div>
                         <span class="hidden sm:block text-sm font-medium text-zinc-700 dark:text-zinc-300">James
                             Dawson</span>

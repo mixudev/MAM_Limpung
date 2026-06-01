@@ -12,7 +12,6 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,900&display=swap" rel="stylesheet">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-[#f4f6f8] font-sans text-slate-800 antialiased h-screen w-screen overflow-hidden flex items-center justify-center p-4">
 
@@ -54,49 +53,35 @@
         @endif
 
         <!-- Form -->
-        <form method="POST" action="{{ route('login.otp.verify.post') }}" class="space-y-6">
+        <form method="POST" action="{{ route('login.otp.verify.post') }}" id="otp-form" class="space-y-6">
             @csrf
             
             <input type="hidden" name="email" value="{{ $email }}">
+            <input type="hidden" name="otp_code" id="otp_code">
 
             <!-- OTP Input Grid -->
-            <div class="my-5" x-data="{
-                otp: ['', '', '', '', '', ''],
-                updateOtp() {
-                    $refs.otp_code.value = this.otp.join('');
-                },
-                handleInput(e, index) {
-                    let val = e.target.value;
-                    // strip non-numeric
-                    val = val.replace(/\D/g, '');
-                    this.otp[index] = val.substring(val.length - 1);
-                    this.updateOtp();
-                    if (this.otp[index] && index < 5) {
-                        this.$refs['digit' + (index + 1)].focus();
-                    }
-                },
-                handleKeyDown(e, index) {
-                    if (e.key === 'Backspace' && !this.otp[index] && index > 0) {
-                        this.otp[index - 1] = '';
-                        this.updateOtp();
-                        this.$refs['digit' + (index - 1)].focus();
-                    }
-                }
-            }">
+            <div class="my-5">
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 text-center">Masukkan 6-Digit OTP</label>
                 
-                <input type="hidden" id="otp_code" name="otp_code" x-ref="otp_code">
-                
-                <div class="flex gap-2 justify-center items-center">
-                    <template x-for="(digit, index) in otp" :key="index">
-                        <input type="text" maxlength="1" pattern="[0-9]*" inputmode="numeric"
-                            :x-ref="'digit' + index"
-                            x-model="otp[index]"
-                            @input="handleInput($event, index)"
-                            @keydown="handleKeyDown($event, index)"
-                            class="w-11 h-12 text-center text-xl font-bold bg-slate-50 border border-slate-200 focus:outline-none focus:border-blue-900 focus:bg-white text-slate-800 transition-all border-2"
-                        >
-                    </template>
+                <div class="flex gap-2 justify-center items-center" id="otp-inputs">
+                    <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+                        class="otp-digit w-11 h-12 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 focus:outline-none focus:border-blue-900 focus:bg-white text-slate-800 transition-all"
+                        data-index="0">
+                    <input type="text" maxlength="1" inputmode="numeric"
+                        class="otp-digit w-11 h-12 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 focus:outline-none focus:border-blue-900 focus:bg-white text-slate-800 transition-all"
+                        data-index="1">
+                    <input type="text" maxlength="1" inputmode="numeric"
+                        class="otp-digit w-11 h-12 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 focus:outline-none focus:border-blue-900 focus:bg-white text-slate-800 transition-all"
+                        data-index="2">
+                    <input type="text" maxlength="1" inputmode="numeric"
+                        class="otp-digit w-11 h-12 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 focus:outline-none focus:border-blue-900 focus:bg-white text-slate-800 transition-all"
+                        data-index="3">
+                    <input type="text" maxlength="1" inputmode="numeric"
+                        class="otp-digit w-11 h-12 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 focus:outline-none focus:border-blue-900 focus:bg-white text-slate-800 transition-all"
+                        data-index="4">
+                    <input type="text" maxlength="1" inputmode="numeric"
+                        class="otp-digit w-11 h-12 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 focus:outline-none focus:border-blue-900 focus:bg-white text-slate-800 transition-all"
+                        data-index="5">
                 </div>
                 @error('otp_code')
                     <p class="mt-2 text-center text-[10px] font-bold text-red-600">{{ $message }}</p>
@@ -116,6 +101,95 @@
 
     </div>
 </div>
+
+<script>
+(function () {
+    const digits = Array.from(document.querySelectorAll('.otp-digit'));
+    const hidden  = document.getElementById('otp_code');
+    const form    = document.getElementById('otp-form');
+
+    function syncHidden() {
+        hidden.value = digits.map(d => d.value).join('');
+    }
+
+    function focusNext(index) {
+        if (index < digits.length - 1) digits[index + 1].focus();
+    }
+
+    function focusPrev(index) {
+        if (index > 0) digits[index - 1].focus();
+    }
+
+    digits.forEach((input, i) => {
+
+        // Pilih semua teks saat fokus agar mudah diganti
+        input.addEventListener('focus', () => input.select());
+
+        input.addEventListener('input', (e) => {
+            // Bersihkan semua karakter non-angka
+            const val = e.target.value.replace(/\D/g, '');
+            input.value = val ? val[val.length - 1] : '';
+            syncHidden();
+            if (input.value) focusNext(i);
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+                if (input.value) {
+                    input.value = '';
+                    syncHidden();
+                } else {
+                    focusPrev(i);
+                }
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                focusPrev(i);
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                focusNext(i);
+                e.preventDefault();
+            } else if (e.key === 'Enter') {
+                form.requestSubmit();
+            }
+        });
+
+        // Handle paste — bisa paste dari mana saja (digit pertama maupun tengah)
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData)
+                .getData('text')
+                .replace(/\D/g, '')
+                .slice(0, 6);
+
+            if (!pasted) return;
+
+            // Isi mulai dari digit saat ini atau dari index 0
+            const start = i;
+            pasted.split('').forEach((char, offset) => {
+                const target = digits[start + offset];
+                if (target) target.value = char;
+            });
+
+            syncHidden();
+
+            // Fokus ke digit setelah paste terakhir atau digit terakhir
+            const nextFocus = Math.min(start + pasted.length, digits.length - 1);
+            digits[nextFocus].focus();
+        });
+    });
+
+    // Auto-submit saat 6 digit sudah terisi
+    form.addEventListener('input', () => {
+        if (hidden.value.length === 6) {
+            // Beri jeda singkat agar user bisa lihat sebelum submit
+            setTimeout(() => form.requestSubmit(), 300);
+        }
+    });
+
+    // Fokus otomatis ke digit pertama saat halaman dibuka
+    digits[0].focus();
+})();
+</script>
 
 </body>
 </html>

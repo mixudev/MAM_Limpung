@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckDashboardAccess;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\EnsureUserIsActive;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => EnsureUserIsActive::class,
             'permission' => CheckPermission::class,
             'role' => CheckRole::class,
+            'check.dashboard.access' => CheckDashboardAccess::class,
 
             // Spatie's built-in aliases (optional, for Spatie 6.x compatibility)
             // 'role'       => \Spatie\Permission\Middleware\RoleMiddleware::class,

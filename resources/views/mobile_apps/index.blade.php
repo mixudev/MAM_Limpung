@@ -98,11 +98,11 @@
 
         {{-- ── KEPALA SEKOLAH ────────────────────────────── --}}
         <section class="reveal px-5 mt-7 mb-4">
-            <div class="bg-gradient-to-br from-primary-700 via-primary-800 to-primary-900 rounded-2xl p-5 relative overflow-hidden">
+            <div class="bg-linear-to-br from-primary-700 via-primary-800 to-primary-900 rounded-2xl p-5 relative overflow-hidden">
                 <!-- Deco -->
                 <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full translate-x-10 -translate-y-10"></div>
                 <div class="flex items-center gap-4 relative z-10">
-                    <div class="w-14 h-14 bg-white/15 rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/20">
+                    <div class="w-14 h-14 bg-white/15 rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <circle cx="12" cy="7" r="4"/>
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>

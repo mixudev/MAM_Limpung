@@ -25,7 +25,7 @@
                 Main</p>
             <ul class="space-y-0.5">
                 <li>
-                    <a href="{{ route(Auth::user()->dashboardRoute()) }}" data-page="dashboard" class="sidebar-link {{ Route::is('*.dashboard') ? 'active' : '' }}" aria-label="Dashboard">
+                    <a href="{{ route('dashboard') }}" data-page="dashboard" class="sidebar-link {{ Route::is('dashboard') ? 'active' : '' }}" aria-label="Dashboard">
                         <span class="sidebar-icon w-5 h-5 flex-shrink-0 flex items-center justify-center">
                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
                                 class="w-4 h-4">
