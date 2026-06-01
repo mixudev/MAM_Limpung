@@ -22,7 +22,7 @@
             [{{ $student->nomor_registrasi }}]
         </div>
         <div class="signature-verification" style="font-size: 7pt; font-family: sans-serif; font-style: italic; color: #15803d; font-weight: bold; margin-top: 0px; letter-spacing: 0.2px;">
-            ✓ TERVERIFIKASI ASLI
+            TERVERIFIKASI ASLI
         </div>
     </div>
 </div>

@@ -25,10 +25,17 @@
             font-family: 'Times New Roman', Times, serif;
             font-size: {{ $baseFontPx }};
             line-height: 1.35;
-            color: #000;
-            background: #fff;
+            color: #000 !important;
+            /* background: #fff !important; */
             margin: 0;
             padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+        /* Force semua teks ke hitam agar tidak pudar saat cetak */
+        p, span, td, th, div, li, h1, h2, h3, h4, h5, h6 {
+            color: inherit;
         }
         .print-page { width: 100%; }
 
@@ -101,7 +108,7 @@
             font-size: 9.5pt;
             font-weight: bold;
             text-transform: uppercase;
-            border-bottom: 1.5px solid #000;
+            border-bottom: 1.5px solid #3d3c3c6d;
             padding: 2px 0;
             margin-top: 12px;
             margin-bottom: 6px;
@@ -191,7 +198,18 @@
         /* ─── Print Media ─────────────────────────────────────────────── */
         @media print {
             .no-print { display: none !important; }
-            body { padding: 0; background: #fff; }
+            html, body {
+                padding: 0;
+                background: #fff !important;
+                color: #000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            /* Pastikan semua teks tercetak hitam penuh */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
         }
     </style>
 

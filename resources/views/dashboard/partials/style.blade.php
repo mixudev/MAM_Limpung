@@ -25,7 +25,7 @@
         select,
         textarea {
             width: 100% !important;
-            padding: 0.55rem 0.85rem !important;
+            padding: 0.55rem 0.85rem ;
             font-size: 0.8rem !important; /* text-[13px] */
             color: #334155 !important; /* text-slate-700 */
             background-color: #ffffff !important;

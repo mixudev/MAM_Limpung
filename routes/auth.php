@@ -12,9 +12,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\OtpAuthController;
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login.post')->middleware('throttle:10,1');
+
+    // Forgot Password Routes
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email')->middleware('throttle:3,10');
+    Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
+
+    // OTP Authentication Routes
+    Route::get('/login-otp', [OtpAuthController::class, 'showRequestForm'])->name('login.otp');
+    Route::post('/login-otp', [OtpAuthController::class, 'sendOtp'])->name('login.otp.send')->middleware('throttle:3,10');
+    Route::get('/login-otp/verify', [OtpAuthController::class, 'showVerifyForm'])->name('login.otp.verify');
+    Route::post('/login-otp/verify', [OtpAuthController::class, 'verify'])->name('login.otp.verify.post')->middleware('throttle:5,1');
 });
 
 Route::middleware(['auth', 'active'])->group(function () {

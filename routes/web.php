@@ -21,3 +21,4 @@ require __DIR__.'/front.php';
 require __DIR__.'/auth.php';
 require __DIR__.'/dashboard.php';
 require __DIR__.'/test.php';
+require __DIR__.'/mobile_apps.php';

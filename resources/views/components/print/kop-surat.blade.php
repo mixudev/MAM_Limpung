@@ -37,7 +37,7 @@
     >
     <div class="kop-body" style="padding-left: {{ $bodyPadLeft }}; padding-right: 10px;">
         @if($line1)
-            <p class="kop-line-1">{{ $line1 }}</p>
+            <p class="kop-line-1 ">{{ $line1 }}</p>
         @endif
         <h1 class="kop-line-2">{{ $line2 }}</h1>
         @if($line3)
