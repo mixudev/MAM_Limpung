@@ -20,8 +20,8 @@
     <!-- Left Side: Image Banner -->
     <div class="hidden md:block md:w-1/2 relative overflow-hidden bg-slate-900">
         <img src="{{ asset('assets/img/school.png') }}" alt="Sekolah" class="absolute inset-0 w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/80 to-blue-900/30 z-10 mix-blend-multiply"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-linear-to-tr from-slate-950 via-slate-900/80 to-blue-900/30 z-10 mix-blend-multiply"></div>
+        <div class="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/40 to-transparent z-10"></div>
         
         <div class="absolute bottom-10 left-10 z-20">
             <div class="w-8 h-1 bg-amber-500 mb-4 shadow-lg shadow-amber-500/20"></div>
