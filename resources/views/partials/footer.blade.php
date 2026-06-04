@@ -1,5 +1,5 @@
  <!-- Footer -->
-    <footer class="bg-gradient-to-br from-blue-900 to-blue-800 text-white mt-12">
+    <footer class="bg-linear-to-br from-blue-900 to-blue-800 text-white mt-12">
         <!-- Main Footer Content -->
         <div class="max-w-6xl mx-auto px-5 py-12">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -8,11 +8,11 @@
                 <div class="lg:col-span-2">
                     <div class="flex items-center space-x-3 mb-6">
                         @if(!empty($siteSettings->logo_path))
-                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 overflow-hidden">
+                            <div class="w-12 h-12 bg-white border-gray-500/50 border-2 rounded-full flex items-center justify-center p-1 overflow-hidden">
                                 <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="w-full h-full object-contain" alt="Logo {{ $siteSettings->school_name ?? 'MAM Limpung' }}">
                             </div>
                         @else
-                            <div class="w-12 h-12 bg-white border-amber-500 border-2 rounded-full flex items-center justify-center">
+                            <div class="w-12 h-12 bg-white border-gray-500/50 border-2 rounded-full flex items-center justify-center">
                                 <img src="{{ asset('assets/img/logo.png') }}" class="w-full h-full object-contain" alt="Logo {{ $siteSettings->school_name ?? 'MAM Limpung' }}">
                             </div>
                         @endif

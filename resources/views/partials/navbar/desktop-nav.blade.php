@@ -43,7 +43,7 @@
             {{-- Jurusan --}}
             <a href="{{ route('frontend.jurusan') }}"
                class="group flex items-start gap-4 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-gray-50 rounded-none">
-                <div class="w-9 h-9 bg-blue-50 text-blue-900 flex items-center justify-center flex-shrink-0 rounded-none group-hover:bg-blue-900 group-hover:text-white transition-colors">
+                <div class="w-9 h-9 bg-blue-50 text-blue-900 flex items-center justify-center shrink-0 rounded-none group-hover:bg-blue-900 group-hover:text-white transition-colors">
                     <i class="fa-solid fa-graduation-cap text-sm"></i>
                 </div>
                 <div>
@@ -55,7 +55,7 @@
             {{-- Kurikulum --}}
             <a href="{{ route('frontend.kurikulum') }}"
                class="group flex items-start gap-4 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-gray-50 rounded-none">
-                <div class="w-9 h-9 bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 rounded-none group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                <div class="w-9 h-9 bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 rounded-none group-hover:bg-amber-500 group-hover:text-white transition-colors">
                     <i class="fa-solid fa-book text-sm"></i>
                 </div>
                 <div>
@@ -67,7 +67,7 @@
             {{-- Ekstrakurikuler --}}
             <a href="{{ route('frontend.ekstrakurikuler') }}"
                class="group flex items-start gap-4 px-4 py-3 hover:bg-slate-50 transition-colors rounded-none">
-                <div class="w-9 h-9 bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 rounded-none group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <div class="w-9 h-9 bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 rounded-none group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                     <i class="fa-solid fa-volleyball text-sm"></i>
                 </div>
                 <div>
@@ -106,7 +106,7 @@
         </a>
         
         @auth
-            <a href="{{ route(auth()->user()->dashboardRoute()) }}"
+            <a href="{{ route('dashboard') }}"
                class="px-5 py-2.5 bg-slate-800 text-white text-[12px] font-semibold hover:bg-slate-700 transition-colors uppercase tracking-wider rounded-none border-b-2 border-slate-900 hover:border-slate-800">
                 Dashboard
             </a>

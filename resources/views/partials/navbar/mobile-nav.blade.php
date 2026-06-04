@@ -57,7 +57,7 @@
                 {{-- Jurusan --}}
                 <a href="{{ route('frontend.jurusan') }}"
                    class="flex items-start gap-3 p-3 transition-colors rounded-none group">
-                    <div class="w-8 h-8 bg-blue-100 text-blue-900 flex items-center justify-center flex-shrink-0 rounded-none group-hover:bg-blue-900 group-hover:text-white transition-all">
+                    <div class="w-8 h-8 bg-blue-100 text-blue-900 flex items-center justify-center shrink-0 rounded-none group-hover:bg-blue-900 group-hover:text-white transition-all">
                         <i class="fa-solid fa-graduation-cap text-xs"></i>
                     </div>
                     <div>
@@ -69,7 +69,7 @@
                 {{-- Kurikulum --}}
                 <a href="{{ route('frontend.kurikulum') }}"
                    class="flex items-start gap-3 p-3 transition-colors rounded-none group">
-                    <div class="w-8 h-8 bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 rounded-none group-hover:bg-amber-500 group-hover:text-white transition-all">
+                    <div class="w-8 h-8 bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 rounded-none group-hover:bg-amber-500 group-hover:text-white transition-all">
                         <i class="fa-solid fa-book text-xs"></i>
                     </div>
                     <div>
@@ -81,7 +81,7 @@
                 {{-- Ekstrakurikuler --}}
                 <a href="{{ route('frontend.ekstrakurikuler') }}"
                    class="flex items-start gap-3 p-3 transition-colors rounded-none group">
-                    <div class="w-8 h-8 bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 rounded-none group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                    <div class="w-8 h-8 bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 rounded-none group-hover:bg-emerald-600 group-hover:text-white transition-all">
                         <i class="fa-solid fa-volleyball text-xs"></i>
                     </div>
                     <div>
@@ -134,7 +134,7 @@
         </a>
         
         @auth
-            <a href="{{ route(auth()->user()->dashboardRoute()) }}"
+            <a href="{{ route('dashboard') }}"
                class="block w-full text-center bg-slate-800 text-white py-3 text-[13px] font-semibold uppercase tracking-wider transition-colors hover:bg-slate-700 rounded-none border-b-2 border-slate-900 hover:border-slate-800">
                 Dashboard Panel
             </a>

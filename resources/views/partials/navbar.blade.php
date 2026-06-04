@@ -57,7 +57,7 @@
     </div>
 
     <!-- Main Navbar -->
-    <nav class="bg-white shadow-lg sticky top-0 z-[40] transition-all duration-300" id="navbar">
+    <nav class="bg-white shadow-lg sticky top-0 z-40 transition-all duration-300" id="navbar">
         <div class="max-w-6xl mx-auto px-5">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
@@ -121,10 +121,10 @@
     @endif
 
     <!-- Mobile Sidebar Backdrop -->
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-[80]" id="sidebarBackdrop"></div>
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-80" id="sidebarBackdrop"></div>
 
     <!-- Mobile Sidebar Menu -->
-    <div class="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl hidden z-[100] flex flex-col transition-all" id="mobileSidebar">
+    <div class="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl hidden z-100 flex flex-col transition-all" id="mobileSidebar">
 
         @include('partials.navbar.mobile-nav')
 
