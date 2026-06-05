@@ -8,14 +8,25 @@ use App\Models\AnnounceAlert;
 use App\Models\AnnounceText;
 use App\Models\Article;
 use App\Models\PpdbSiswa;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class UnifiedDashboardController extends Controller
 {
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request): View|RedirectResponse
     {
         $user = $request->user()->load('roles', 'permissions');
+
+        // Jika user adalah siswa dan membuka dari hp, arahkan ke apps.home
+        if ($user->hasRole('siswa')) {
+            $userAgent = $request->header('User-Agent', '');
+            $isMobile = (bool) preg_match('/(android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini)/i', $userAgent);
+
+            if ($isMobile) {
+                return redirect()->route('apps.home');
+            }
+        }
 
         // Kumpulkan stats berdasarkan permissions yang dimiliki user
         $stats = $this->getAccessibleStats($user);

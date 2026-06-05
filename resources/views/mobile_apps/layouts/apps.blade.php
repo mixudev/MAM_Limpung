@@ -6,66 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#4f45b2" />
     <meta name="description" content="Portal Akademik Digital MAM Limpung — Sekolah Modern, Berkarakter, dan Berprestasi." />
-    <title>Beranda — MAM Limpung</title>
+    <title>Portal Siswa — MAM Limpung</title>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="apple-touch-icon" href="/assets/img/logo.png" />
 
-    <!-- Tailwind CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Compiled Assets via Vite -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sora: ['Sora', 'sans-serif'],
-                        jakarta: ['Plus Jakarta Sans', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            DEFAULT: '#4f45b2',
-                            50:  '#f0efff',
-                            100: '#e3e1ff',
-                            200: '#cbc7ff',
-                            300: '#a89fff',
-                            400: '#8272ff',
-                            500: '#6254ff',
-                            600: '#4f45b2',
-                            700: '#3d3491',
-                            800: '#2e2672',
-                            900: '#1e1850',
-                        },
-                        amber: {
-                            DEFAULT: '#f59e0b',
-                        },
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.6s ease both',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4,0,0.6,1) infinite',
-                        'float': 'float 4s ease-in-out infinite',
-                        'shimmer': 'shimmer 2s linear infinite',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-8px)' },
-                        },
-                        shimmer: {
-                            '0%': { backgroundPosition: '-200% 0' },
-                            '100%': { backgroundPosition: '200% 0' },
-                        },
-                    },
-                    backdropBlur: {
-                        xs: '2px',
-                    },
-                },
-            },
-        };
-    </script>
+    <!-- Hotwire Turbo for SPA transitions without page refresh -->
+    <script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-umd.js" defer></script>
+
+    <!-- AlpineJS globally loaded -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -87,11 +44,40 @@
         .nav-active { background: rgba(255, 255, 255, 0.12); }
         .nav-active svg, .nav-active span { color: #4f45b2 !important; }
 
+        /* Critical CSS to prevent layout shift of mobile shell and bottom nav on load/transitions */
+        .mobile-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 448px; /* max-w-md is 448px */
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            background-color: #f8fafc; /* bg-slate-50 */
+        }
+        #bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 448px;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid #f1f5f9;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            z-index: 50;
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.04);
+        }
     </style>
 </head>
 
 <body class="bg-slate-50 font-jakarta">
-<div class="flex flex-col min-h-screen max-w-md mx-auto relative bg-slate-50">
+<div class="mobile-container">
 
     @include('mobile_apps.partials.header')
 
@@ -103,9 +89,60 @@
 
     @include('mobile_apps.partials.bottom_nav')
 
-</div>{{-- end max-w-md --}}
+    <x-mobile-allert />
+
+</div>{{-- end mobile-container --}}
+
+<!-- Global Loader Overlay -->
+{{-- <div id="global-loader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-xs transition-all duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-4 max-w-xs text-center border border-slate-100 animate-fade-in-up">
+        <!-- Premium Animated Spinner -->
+        <div class="relative w-16 h-16 flex items-center justify-center">
+            <!-- Outer spinning ring -->
+            <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+            <div class="absolute inset-0 rounded-full border-4 border-t-primary-600 border-r-primary-600 animate-spin"></div>
+            <!-- Inner logo icon or custom graphic -->
+            <svg class="w-6 h-6 text-primary-500 animate-pulse-slow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+        </div>
+        <div>
+            <h4 class="font-sora font-bold text-slate-800 text-sm" id="global-loader-title">Memuat...</h4>
+            <p class="text-[10px] text-slate-400 font-semibold mt-1" id="global-loader-desc">Harap tunggu sebentar</p>
+        </div>
+    </div>
+</div> --}}
 
 <script>
+    /* ── Global Loader Helper functions ── */
+    window.showGlobalLoader = function(title = 'Memuat...', desc = 'Harap tunggu sebentar') {
+        const loader = document.getElementById('global-loader');
+        const titleEl = document.getElementById('global-loader-title');
+        const descEl = document.getElementById('global-loader-desc');
+        if (loader) {
+            if (titleEl) titleEl.innerText = title;
+            if (descEl) descEl.innerText = desc;
+            loader.classList.remove('opacity-0', 'pointer-events-none');
+            loader.classList.add('opacity-100');
+        }
+    };
+
+    window.hideGlobalLoader = function() {
+        const loader = document.getElementById('global-loader');
+        if (loader) {
+            loader.classList.remove('opacity-100');
+            loader.classList.add('opacity-0', 'pointer-events-none');
+        }
+    };
+
+    // Turbo events for page transition animations
+    document.addEventListener('turbo:visit', () => {
+        window.showGlobalLoader('Memuat Halaman...', 'Menyiapkan konten untuk Anda');
+    });
+    document.addEventListener('turbo:load', () => {
+        window.hideGlobalLoader();
+    });
+
     /* ── Bottom Nav Active State ── */
     function setActive(el) {
         document.querySelectorAll('.nav-item').forEach(btn => {
@@ -133,6 +170,15 @@
         });
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     revealEls.forEach(el => io.observe(el));
+
+    /* ── Service Worker Registration for PWA ── */
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered', reg))
+                .catch(err => console.error('Service Worker registration failed', err));
+        });
+    }
 </script>
 
 </body>

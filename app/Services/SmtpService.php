@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendEmailJob;
 use App\Mail\BaseMail;
 use App\Mail\System\TestConnectionMail;
 use Exception;
@@ -22,6 +23,23 @@ class SmtpService
      */
     public function send(Mailable $mailable, string $toEmail, ?string $toName = null): void
     {
+        // Jika driver queue bukan sync dan bukan TestConnectionMail, dispatch ke queue agar respons instan
+        if (config('queue.default') !== 'sync' && ! $mailable instanceof TestConnectionMail) {
+            SendEmailJob::dispatch($mailable, $toEmail, $toName);
+
+            return;
+        }
+
+        $this->sendNow($mailable, $toEmail, $toName);
+    }
+
+    /**
+     * Mengirimkan email secara sinkron (langsung).
+     *
+     * @throws Exception
+     */
+    public function sendNow(Mailable $mailable, string $toEmail, ?string $toName = null): void
+    {
         if (! BaseMail::isConfigured()) {
             throw new Exception('Konfigurasi SMTP belum diatur. Silakan isi kredensial SMTP di halaman Keamanan.');
         }
@@ -35,7 +53,7 @@ class SmtpService
             'username' => $cfg['username'],
             'password' => $cfg['password'],
             'encryption' => $cfg['encryption'],
-            'timeout' => 30,
+            'timeout' => 3, // Dioptimalkan menjadi 3 detik agar tidak memblokir proses terlalu lama jika gagal
         ]);
 
         $mailable->from($cfg['from_address'], $cfg['from_name']);

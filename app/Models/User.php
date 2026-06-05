@@ -27,6 +27,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'avatar',
         'password',
         'is_active',
         'last_login_at',
@@ -107,10 +108,31 @@ class User extends Authenticatable
      */
     public function dashboardRoute(): string
     {
-        return match ($this->primaryRole()) {
+        $role = $this->primaryRole();
+
+        if ($role === 'siswa') {
+            $userAgent = request()->header('User-Agent', '');
+            $isMobile = (bool) preg_match('/(android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini)/i', $userAgent);
+
+            if ($isMobile) {
+                return 'apps.home';
+            }
+        }
+
+        return match ($role) {
             'super-admin', 'admin', 'guru', 'siswa' => 'dashboard',
             default => 'frontend.home',
         };
+    }
+
+    /**
+     * Get the user's avatar URL or fall back to UI Avatars.
+     */
+    public function avatarUrl(): string
+    {
+        return $this->avatar
+            ? asset('storage/'.$this->avatar)
+            : 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=4f45b2&background=f0efff&bold=true';
     }
 
     /**

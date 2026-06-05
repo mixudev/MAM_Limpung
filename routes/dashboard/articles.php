@@ -33,6 +33,7 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::get('/{article}/edit', [ArticleController::class, 'edit'])->name('edit');
             Route::put('/{article}', [ArticleController::class, 'update'])->name('update');
             Route::delete('/{article}', [ArticleController::class, 'destroy'])->name('destroy');
+            Route::post('/{article}/approve', [ArticleController::class, 'approve'])->name('approve');
         });
 
 });

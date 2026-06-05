@@ -1,51 +1,50 @@
-    <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur-sm border-t border-slate-100 px-2 pt-2 z-50 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
-         style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+    <nav id="bottom-nav" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
         <div class="flex justify-around items-center">
 
-            <button id="nav-beranda" onclick="setActive(this)" data-tab="beranda"
-                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl transition-all duration-200 nav-active min-w-[56px]">
-                <svg class="w-6 h-6 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            <!-- Beranda -->
+            <a href="{{ route('apps.home') }}" id="nav-beranda"
+                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px] {{ request()->routeIs('apps.home') ? 'bg-primary-50 text-primary-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5 {{ request()->routeIs('apps.home') ? 'text-primary-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                <span class="text-[10px] font-semibold text-primary-600 leading-none">Beranda</span>
-            </button>
+                <span class="text-[9px] font-bold leading-none mt-0.5">Beranda</span>
+            </a>
 
-            <button id="nav-jelajah" onclick="setActive(this)" data-tab="jelajah"
-                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl transition-all duration-200 min-w-[56px]">
-                <svg class="w-6 h-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera" viewBox="0 0 16 16">
-                    <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4z"/>
-                    <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
-                </svg> 
-                <span class="text-[10px] font-semibold text-slate-400 leading-none">Galeri</span>
-            </button>
-
-            <button id="nav-notif" onclick="setActive(this)" data-tab="notif"
-                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl transition-all duration-200 min-w-[56px] relative">
-                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            <!-- Galeri -->
+            <a href="{{ route('apps.galeri') }}" id="nav-galeri"
+                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px] {{ request()->routeIs('apps.galeri*') ? 'bg-primary-50 text-primary-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5 {{ request()->routeIs('apps.galeri*') ? 'text-primary-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span class="text-[10px] font-semibold text-slate-400 leading-none">Notifikasi</span>
-                <span class="absolute top-1.5 right-3.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
-            </button>
+                <span class="text-[9px] font-bold leading-none mt-0.5">Galeri</span>
+            </a>
 
-            <button id="nav-pesan" onclick="setActive(this)" data-tab="pesan"
-                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl transition-all duration-200 min-w-[56px]">
-                <svg class="w-6 h-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-workspace" viewBox="0 0 16 16">
-                    <path d="M4 16s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-5.95a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
-                    <path d="M2 1a2 2 0 0 0-2 2v9.5A1.5 1.5 0 0 0 1.5 14h.653a5.4 5.4 0 0 1 1.066-2H1V3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9h-2.219c.554.654.89 1.373 1.066 2h.653a1.5 1.5 0 0 0 1.5-1.5V3a2 2 0 0 0-2-2z"/>
+            <!-- Tugas -->
+            <a href="{{ route('apps.tugas') }}" id="nav-tugas"
+                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px] {{ request()->routeIs('apps.tugas*') ? 'bg-primary-50 text-primary-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5 {{ request()->routeIs('apps.tugas*') ? 'text-primary-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
-                <span class="text-[10px] font-semibold text-slate-400 leading-none">Tugas</span>
-            </button>
+                <span class="text-[9px] font-bold leading-none mt-0.5">Tugas</span>
+            </a>
 
-            <button id="nav-profil" onclick="setActive(this)" data-tab="profil"
-                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl transition-all duration-200 min-w-[56px]">
-                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <circle cx="12" cy="7" r="4"/>
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <!-- Artikel -->
+            <a href="{{ route('apps.artikel') }}" id="nav-artikel"
+                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px] {{ request()->routeIs('apps.artikel*') ? 'bg-primary-50 text-primary-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5 {{ request()->routeIs('apps.artikel*') ? 'text-primary-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
-                <span class="text-[10px] font-semibold text-slate-400 leading-none">Profil</span>
-            </button>
+                <span class="text-[9px] font-bold leading-none mt-0.5">Artikel</span>
+            </a>
+
+            <!-- Profil -->
+            <a href="{{ route('apps.profile') }}" id="nav-profil"
+                class="nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px] {{ request()->routeIs('apps.profile*') ? 'bg-primary-50 text-primary-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5 {{ request()->routeIs('apps.profile*') ? 'text-primary-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span class="text-[9px] font-bold leading-none mt-0.5">Profil</span>
+            </a>
 
         </div>
     </nav>

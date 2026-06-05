@@ -1,60 +1,89 @@
-    <section class="bg-gray-900 relative overflow-hidden pt-safe">
-
+    <section class="bg-linear-to-br from-indigo-50 via-primary-50/30 to-white relative overflow-hidden pt-safe border-b border-primary-100/50">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-40">
+            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="none">
+                <defs>
+                    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+                        <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(79, 69, 178, 0.04)" stroke-width="1" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+        </div>
 
         <!-- Top bar -->
         <div class="relative z-10 flex items-center justify-between px-5 pt-5 pb-2">
-            <div>
-                {{-- <p class="text-white/60 text-xs font-medium tracking-widest uppercase">Portal Siswa</p> --}}
-                <h1 class="font-sora text-white font-bold text-lg leading-tight mt-0.5">MAM <span class="text-amber-400">Limpung</span></h1>
+            <div class="flex items-center gap-2">
+                <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="w-8 h-8 object-contain">
+                <div>
+                    <h1 class="font-sora text-primary-900 font-bold text-base leading-tight">MAM <span class="text-amber-500">Limpung</span></h1>
+                    <p class="text-[9px] text-slate-500 font-semibold tracking-wider uppercase leading-none mt-0.5">Portal Mobile Siswa</p>
+                </div>
             </div>
             <div class="flex items-center gap-2">
                 <!-- Notification Bell -->
-                <button id="btn-notif" class="relative w-9 h-9 glass border-2 border-white/30 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90">
-                    <svg class="text-white w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">
-                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
+                <button id="btn-notif" class="relative w-9 h-9 bg-white border border-slate-100 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-95 shadow-xs">
+                    <svg class="text-slate-600 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
-                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-400 rounded-full badge-glow"></span>
+                    <span class="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
                 </button>
-                <!-- Avatar -->
-                <button id="btn-avatar" class="w-9 h-9 rounded-xl overflow-hidden glass border-2 border-white/30 flex items-center justify-center transition-all duration-200 active:scale-90">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="7" r="4"/>
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    </svg>
-                </button>
+                
+                <!-- Logout Form Helper / Button -->
+                <form id="logout-form" action="{{ route('auth.logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="button" onclick="confirmMobileLogout()" title="Keluar" class="w-9 h-9 bg-white border border-rose-100 rounded-xl flex items-center justify-center text-rose-500 transition-all duration-200 active:scale-95 shadow-xs cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </button>
+                </form>
+                <script>
+                    function confirmMobileLogout() {
+                        if (window.MobilePopup) {
+                            window.MobilePopup.confirm({
+                                title: 'Keluar Aplikasi?',
+                                description: 'Apakah Anda yakin ingin keluar dari akun Anda?',
+                                confirmText: 'Ya, Keluar',
+                                cancelText: 'Batal',
+                                onConfirm: () => {
+                                    document.getElementById('logout-form').submit();
+                                }
+                            });
+                        } else {
+                            if (confirm('Apakah Anda yakin ingin keluar dari akun Anda?')) {
+                                document.getElementById('logout-form').submit();
+                            }
+                        }
+                    }
+                </script>
             </div>
         </div>
 
+        @if(request()->routeIs('apps.home'))
         <!-- Greeting & welcome card -->
         <div class="relative z-10 px-5 pb-5 pt-3">
-            <div class="glass rounded-sm p-4">
+            <div class="bg-white/80 backdrop-blur-md border border-white/60 shadow-sm rounded-2xl p-4">
                 <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-white/70 text-xs mb-1">Selamat datang kembali 👋</p>
-                        <h2 class="font-sora text-white font-semibold text-xl leading-tight">Lazuardi Mandegar</h2>
-                        <p class="text-white/60 text-xs mt-1">TP 2025/2026 &middot; Semester Genap</p>
+                    <div class="flex items-center gap-3">
+                        @if(Auth::user()->avatar)
+                            <img src="{{ Auth::user()->avatarUrl() }}" alt="Avatar" class="w-12 h-12 rounded-xl object-cover border border-primary-100 shrink-0">
+                        @else
+                            <div class="w-12 h-12 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center text-primary-700 font-sora font-bold text-lg shrink-0">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </div>
+                        @endif
+                        <div>
+                            <p class="text-slate-400 text-[10px] uppercase tracking-wider font-semibold">Selamat datang kembali 👋</p>
+                            <h2 class="font-sora text-slate-800 font-bold text-base leading-tight mt-0.5">{{ Auth::user()->name }}</h2>
+                            <p class="text-slate-500 text-[10px] mt-1 font-medium">Kelas XI &middot; Semester Genap &middot; TP 2025/2026</p>
+                        </div>
                     </div>
-                    <div class="flex flex-col items-end gap-1">
-                        <span class="text-[10px] bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full font-semibold">Aktif</span>
-                        <span class="text-[10px] text-white/50">Kelas XI</span>
+                    <div>
+                        <span class="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Aktif</span>
                     </div>
                 </div>
-
-                <!-- Quick stats row -->
-                {{-- <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/10">
-                    <div class="text-center">
-                        <p class="stat-value text-white">94<span class="text-xs font-normal text-white/60">%</span></p>
-                        <p class="text-[10px] text-white/50 mt-0.5">Kehadiran</p>
-                    </div>
-                    <div class="text-center border-x border-white/10">
-                        <p class="stat-value text-amber-400">8</p>
-                        <p class="text-[10px] text-white/50 mt-0.5">Tugas Aktif</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="stat-value text-emerald-400">3</p>
-                        <p class="text-[10px] text-white/50 mt-0.5">Pengumuman</p>
-                    </div>
-                </div> --}}
             </div>
         </div>
+        @endif
     </section>

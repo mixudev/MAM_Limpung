@@ -77,7 +77,7 @@ abstract class BaseMail extends Mailable
             'username' => $cfg['username'],
             'password' => $cfg['password'],
             'encryption' => $cfg['encryption'],
-            'timeout' => 30,
+            'timeout' => 3, // Dioptimalkan menjadi 3 detik
         ];
     }
 }

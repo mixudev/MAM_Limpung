@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
 
     <!-- SEO Meta Tags -->
     @php
@@ -121,6 +122,78 @@
 
         <!-- Footer -->
         @include('partials.footer')
+
+        <!-- Floating Mobile App Installer / Download Button -->
+        <div x-data="{ showDownloadModal: false }" class="relative">
+            <!-- Floating Action Button -->
+            <button @click="showDownloadModal = true"
+                    class="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#4f45b2] to-indigo-800 text-white rounded-full shadow-[0_8px_30px_rgb(79,69,178,0.4)] hover:shadow-[0_8px_30px_rgb(79,69,178,0.6)] active:scale-95 hover:scale-105 transition-all duration-300 group cursor-pointer"
+                    title="Unduh Aplikasi Mobile Portal Siswa">
+                <i class="fa-solid fa-mobile-screen text-xl group-hover:animate-bounce"></i>
+                <!-- Small notification dot -->
+                <span class="absolute top-0.5 right-0.5 flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                </span>
+            </button>
+
+            <!-- Elegant Download Modal -->
+            <div x-show="showDownloadModal" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                 style="display: none;">
+                 
+                <div @click.away="showDownloadModal = false" 
+                     class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 relative overflow-hidden animate-fade-in-up">
+                    
+                    <!-- Decorative background shapes -->
+                    <div class="absolute -top-12 -right-12 w-28 h-28 bg-indigo-50 rounded-full opacity-60"></div>
+                    
+                    <!-- Close button -->
+                    <button @click="showDownloadModal = false" 
+                            class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+
+                    <div class="text-center mt-3">
+                        <div class="w-14 h-14 bg-indigo-50 border border-indigo-100 text-[#4f45b2] rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-xs">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">Aplikasi Mobile Portal Siswa</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed font-medium">Nikmati kemudahan akses tugas, upload galeri kegiatan, dan tulis artikel langsung dari smartphone Anda!</p>
+                    </div>
+
+                    <!-- QR Code & Scanner Info -->
+                    <div class="my-6 p-4 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col items-center">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2.5">Pindai QR Code untuk Membuka</p>
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-100 shadow-xs">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode(route('apps.home')) }}" 
+                                 alt="Scan to Download App" class="w-32 h-32 object-contain">
+                        </div>
+                        <p class="text-[9px] text-slate-500 mt-2.5 text-center font-bold leading-relaxed">Buka kamera HP Anda, arahkan ke QR Code di atas, atau klik tombol di bawah ini:</p>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="space-y-2">
+                        <a href="{{ route('apps.home') }}" 
+                           class="block w-full py-3 bg-gradient-to-br from-[#4f45b2] to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg active:scale-98 transition-all text-center">
+                            <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Buka Portal Mobile
+                        </a>
+                        
+                        <div class="p-3 bg-indigo-50/50 border border-indigo-100/50 rounded-xl">
+                            <p class="text-[9.5px] text-slate-600 leading-relaxed font-semibold">
+                                <span class="text-amber-500 font-bold"><i class="fa-solid fa-star"></i> Tips PWA:</span> Setelah halaman mobile terbuka di smartphone Anda, pilih menu browser lalu klik <span class="font-bold">"Tambahkan ke Layar Utama" (Add to Home Screen)</span> untuk menginstalnya seperti aplikasi native!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- AOS JS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>

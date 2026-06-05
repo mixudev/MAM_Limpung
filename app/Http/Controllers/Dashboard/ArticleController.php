@@ -240,6 +240,22 @@ class ArticleController extends Controller
     }
 
     /**
+     * Approve the specified article (publish it).
+     */
+    public function approve(Article $article): RedirectResponse
+    {
+        Gate::authorize('update', $article);
+
+        $article->update([
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        return redirect()->route('admin.articles.index')
+            ->with('success', "Artikel '{$article->judul}' berhasil disetujui dan diterbitkan.");
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Article $article): RedirectResponse

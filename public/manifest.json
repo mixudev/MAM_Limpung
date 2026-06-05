@@ -1,0 +1,25 @@
+{
+  "name": "Portal Siswa MAM Limpung",
+  "short_name": "MAM Portal",
+  "description": "Portal Akademik Digital Madrasah Aliyah Muhammadiyah Limpung",
+  "scope": "/apps",
+  "start_url": "/apps",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f45b2",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/assets/img/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/img/logo-3d.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

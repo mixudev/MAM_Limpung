@@ -8,4 +8,40 @@
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sora: 'Sora', sans-serif;
+    --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+
+    --color-primary-50: #f0efff;
+    --color-primary-100: #e3e1ff;
+    --color-primary-200: #cbc7ff;
+    --color-primary-300: #a89fff;
+    --color-primary-400: #8272ff;
+    --color-primary-500: #6254ff;
+    --color-primary-600: #4f45b2;
+    --color-primary-700: #3d3491;
+    --color-primary-800: #2e2672;
+    --color-primary-900: #1e1850;
+    --color-primary: #4f45b2;
+
+    --color-amber: #f59e0b;
+
+    --animate-fade-in-up: fadeInUp 0.6s ease both;
+    --animate-pulse-slow: pulse 3s cubic-bezier(0.4,0,0.6,1) infinite;
+    --animate-float: float 4s ease-in-out infinite;
+    --animate-shimmer: shimmer 2s linear infinite;
+
+    --backdrop-blur-xs: 2px;
+
+    @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+    }
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
 }

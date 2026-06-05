@@ -352,6 +352,157 @@
         </div>
     </section>
 
+    <!-- Section Install Aplikasi (PWA) -->
+    <section class="py-24 bg-linear-to-br from-indigo-50/50 via-white to-slate-50/50 border-t border-gray-100 relative overflow-hidden">
+        <div class="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-50 rounded-full blur-[100px] opacity-40 -z-10"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                <!-- Teks Deskripsi (Left - 7 cols) -->
+                <div class="lg:col-span-7" data-aos="fade-right">
+                    <span class="inline-block text-blue-700 font-bold tracking-[0.3em] text-[10px] uppercase mb-4 pl-3 border-l-4 border-blue-700">
+                        Portal Mobile Siswa
+                    </span>
+                    <h2 class="text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] uppercase tracking-tighter mb-6">
+                        INSTALL APLIKASI <br/>
+                        <span class="text-blue-700">PORTAL SISWA MAM</span>
+                    </h2>
+                    <p class="text-gray-500 text-base leading-relaxed mb-8 font-medium">
+                        Pantau tugas sekolah, tulis artikel mading digital, bagikan momen kegiatan sekolah melalui galeri, dan akses info akademik penting secara real-time langsung dari smartphone kamu.
+                    </p>
+                    
+                    <!-- Steps Checklist -->
+                    <div class="space-y-4 mb-10">
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-sm uppercase tracking-wide">Buka Portal Siswa</h4>
+                                <p class="text-xs text-gray-500 mt-1">Akses halaman web portal dari browser HP/smartphone Anda.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-sm uppercase tracking-wide">Tambahkan ke Layar Utama</h4>
+                                <p class="text-xs text-gray-500 mt-1">Ketuk ikon menu browser (titik tiga atau tombol share), lalu pilih <strong>"Tambahkan ke Layar Utama"</strong> atau <strong>"Install Aplikasi"</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-sm uppercase tracking-wide">Siap Digunakan</h4>
+                                <p class="text-xs text-gray-500 mt-1">Aplikasi PWA akan terpasang di beranda HP Anda dan berjalan lancar tanpa menggunakan memori berlebih.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <a href="{{ route('apps.home') }}" class="w-full sm:w-auto bg-blue-900 text-white px-10 py-4.5 font-bold hover:bg-black transition-all duration-300 uppercase tracking-widest text-[11px] inline-flex items-center justify-center group shadow-xl shadow-blue-900/10">
+                            Buka Web App
+                            <i class="fa-solid fa-mobile-screen-button ml-3 transform group-hover:scale-110 transition-transform"></i>
+                        </a>
+                        <button id="pwa-homepage-install-btn" class="hidden w-full sm:w-auto bg-amber-500 text-white px-10 py-4.5 font-bold hover:bg-amber-600 transition-all duration-300 uppercase tracking-widest text-[11px] inline-flex items-center justify-center group shadow-xl shadow-amber-500/10 cursor-pointer">
+                            Install Aplikasi
+                            <i class="fa-solid fa-download ml-3 transform group-hover:scale-110 transition-transform"></i>
+                        </button>
+                        <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Mendukung Android & iOS</span>
+                    </div>
+
+                    <script>
+                        (function() {
+                            let deferredPrompt;
+                            const installBtn = document.getElementById('pwa-homepage-install-btn');
+
+                            window.addEventListener('beforeinstallprompt', (e) => {
+                                e.preventDefault();
+                                deferredPrompt = e;
+                                if (installBtn) {
+                                    installBtn.classList.remove('hidden');
+                                }
+                            });
+
+                            if (installBtn) {
+                                installBtn.addEventListener('click', async () => {
+                                    if (deferredPrompt) {
+                                        deferredPrompt.prompt();
+                                        const { outcome } = await deferredPrompt.userChoice;
+                                        console.log('Homepage PWA install choice:', outcome);
+                                        deferredPrompt = null;
+                                        installBtn.classList.add('hidden');
+                                    } else {
+                                        alert('Untuk memasang aplikasi di HP:\n- Android (Chrome): Ketuk titik tiga di pojok kanan atas, lalu pilih "Instal aplikasi".\n- iOS (Safari): Ketuk ikon "Bagikan" (Share) di bawah, lalu pilih "Tambahkan ke Layar Utama" (Add to Home Screen).');
+                                    }
+                                });
+                            }
+                        })();
+                    </script>
+                </div>
+
+                <!-- Phone Mockup & QR Code (Right - 5 cols) -->
+                <div class="lg:col-span-5 flex justify-center" data-aos="fade-left">
+                    <div class="relative">
+                        <!-- Outer Shadow / Glow -->
+                        <div class="absolute inset-0 bg-blue-900/10 rounded-[40px] blur-2xl"></div>
+
+                        <!-- Phone Frame Container -->
+                        <div class="relative w-[280px] h-[520px] bg-slate-900 rounded-[40px] p-3 shadow-2xl border-4 border-slate-800 flex flex-col overflow-hidden">
+                            <!-- Speaker / Camera Notch -->
+                            <div class="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-4 bg-slate-900 rounded-full z-30"></div>
+                            
+                            <!-- Phone Screen -->
+                            <div class="w-full h-full bg-slate-50 rounded-[30px] overflow-hidden flex flex-col p-4 relative z-20 border border-slate-950/10">
+                                <!-- App Header Mock -->
+                                <div class="flex items-center gap-2 mb-4 mt-2">
+                                    <img src="{{ asset('assets/img/logo.png') }}" class="w-6 h-6 object-contain" alt="Logo">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800 text-[10px] leading-tight font-sora">MAM <span class="text-amber-500">Limpung</span></h4>
+                                        <p class="text-[7px] text-gray-400 uppercase tracking-widest leading-none mt-0.5">Portal Siswa</p>
+                                    </div>
+                                </div>
+
+                                <!-- App Body Mock -->
+                                <div class="flex-1 flex flex-col justify-center items-center text-center p-3">
+                                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl mb-4 w-full flex flex-col items-center shadow-xs">
+                                        <!-- QR Code Icon Placeholder -->
+                                        <div class="w-20 h-20 bg-white border border-slate-100 p-1.5 shadow-sm rounded-xl mb-3 flex items-center justify-center relative group">
+                                            <!-- Simple CSS generated simulated QR code -->
+                                            <div class="w-full h-full bg-slate-800 opacity-90 rounded" style="background-image: radial-gradient(circle, #334155 20%, transparent 20%), radial-gradient(circle, transparent 20%, #334155 20%); background-size: 8px 8px; background-position: 0 0, 4px 4px;"></div>
+                                            <div class="absolute inset-0 bg-white/95 flex items-center justify-center p-2 rounded-xl text-[8px] font-bold text-blue-900 uppercase text-center leading-tight">
+                                                Scan to<br/>Install
+                                            </div>
+                                        </div>
+                                        <p class="text-[9px] text-slate-500 font-semibold leading-relaxed">Pindai QR ini atau akses langsung <span class="text-blue-700 font-bold">mamlimpung.sch.id/apps</span> di HP kamu.</p>
+                                    </div>
+
+                                    <!-- Mock App Dashboard Screen -->
+                                    <div class="w-full bg-white border border-slate-100 shadow-xs rounded-xl p-3 flex gap-2 items-center text-left">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-150 flex items-center justify-center text-amber-600 shrink-0">
+                                            <i class="fa-solid fa-list-check text-xs"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-[7px] bg-red-50 text-red-600 font-bold px-1.5 py-0.5 rounded">Tinggi</span>
+                                                <span class="text-[6px] text-slate-400 font-bold">2 Hari</span>
+                                            </div>
+                                            <h5 class="font-bold text-gray-800 text-[8px] truncate mt-1">Tugas Matematika</h5>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- App Nav Bar Mock -->
+                                <div class="border-t border-slate-100 pt-2 flex justify-around items-center mt-auto">
+                                    <div class="flex flex-col items-center text-blue-700"><i class="fa-solid fa-house text-[10px]"></i><span class="text-[6px] font-bold mt-0.5">Beranda</span></div>
+                                    <div class="flex flex-col items-center text-slate-300"><i class="fa-solid fa-images text-[10px]"></i><span class="text-[6px] font-bold mt-0.5">Galeri</span></div>
+                                    <div class="flex flex-col items-center text-slate-300"><i class="fa-solid fa-list text-[10px]"></i><span class="text-[6px] font-bold mt-0.5">Tugas</span></div>
+                                    <div class="flex flex-col items-center text-slate-300"><i class="fa-solid fa-user text-[10px]"></i><span class="text-[6px] font-bold mt-0.5">Profil</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Final CTA Banner: Bright Style -->
     <section class="py-24 bg-white border-t border-gray-100 relative overflow-hidden">
         <div class="container mx-auto px-6 relative z-10 text-center" data-aos="zoom-in">
