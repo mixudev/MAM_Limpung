@@ -19,15 +19,6 @@
         </div>
     </div>
 
-    <!-- Flash Alert -->
-    @if(session('success'))
-        <div class="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 p-4 text-emerald-800 dark:text-emerald-400 text-xs font-semibold rounded-none flex items-center justify-between">
-            <span>{{ session('success') }}</span>
-            <button class="text-emerald-600 hover:text-emerald-800 dark:hover:text-white font-bold" onclick="this.parentElement.remove()">
-                &times;
-            </button>
-        </div>
-    @endif
 
     <!-- SECTION 1: Popup Alert (Modal Dialog) -->
     <div class="space-y-3">

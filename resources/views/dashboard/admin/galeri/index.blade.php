@@ -151,11 +151,19 @@
                                 @endcan
 
                                 @can('delete', $gal)
-                                    <form action="{{ route('admin.galeri.destroy', $gal->uuid) }}" method="POST" class="inline" 
-                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus galeri ini?')">
+                                    <form action="{{ route('admin.galeri.destroy', $gal->uuid) }}" method="POST" class="inline" id="delete-form-{{ $gal->uuid }}" >
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="py-1 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 font-bold text-[10px] uppercase font-mono tracking-wider">
+                                        <button 
+                                        type="button" 
+                                        onclick="AppPopup.confirm({
+                                                            title: 'Hapus Galeri?',
+                                                            description: 'Aksi ini akan menghapus log pekerjaan gagal secara permanen.',
+                                                            confirmText: 'Ya, Hapus',
+                                                            cancelText: 'Batal',
+                                                            onConfirm: () => document.getElementById('delete-form-{{ $gal->uuid }}').submit()
+                                                        })"
+                                        class="py-1 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 font-bold text-[10px] uppercase font-mono tracking-wider">
                                             Hapus
                                         </button>
                                     </form>

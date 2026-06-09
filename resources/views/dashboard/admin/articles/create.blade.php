@@ -130,8 +130,10 @@
                             class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                             <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Simpan sebagai Draft</option>
                             <option value="pending" {{ old('status') === 'pending' ? 'selected' : '' }}>Menunggu Konfirmasi (Pending)</option>
-                            <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>Terbitkan Langsung</option>
-                            <option value="archived" {{ old('status') === 'archived' ? 'selected' : '' }}>Simpan sebagai Arsip</option>
+                            @if(!Auth::user()->hasRole('siswa'))
+                                <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>Terbitkan Langsung</option>
+                                <option value="archived" {{ old('status') === 'archived' ? 'selected' : '' }}>Simpan sebagai Arsip</option>
+                            @endif
                         </select>
                     </div>
 

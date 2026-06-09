@@ -216,23 +216,19 @@
 
                         this.selectedFiles.push(fileObj);
 
-                        // File reader to get preview URL
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            fileObj.dataUrl = e.target.result;
+                            const found = this.selectedFiles.find(f => f.id === id);
+                            if (found) {
+                                found.dataUrl = e.target.result;
+                                found.progress = 100;
+                                found.status = 'ready';
+                            }
+                            // Force Alpine reactivity
+                            this.selectedFiles = [...this.selectedFiles];
+                            this.syncInput();
                         };
                         reader.readAsDataURL(file);
-
-                        // Simulate upload progress bar animation
-                        let interval = setInterval(() => {
-                            if (fileObj.progress >= 100) {
-                                clearInterval(interval);
-                                fileObj.status = 'ready';
-                                this.syncInput();
-                            } else {
-                                fileObj.progress += 20;
-                            }
-                        }, 80);
                     });
                 },
 

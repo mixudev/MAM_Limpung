@@ -22,9 +22,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     // -------------------------------------------------------------------------
     //  Artikel CRUD (Admin, Super Admin, dan Guru)
     // -------------------------------------------------------------------------
-    Route::prefix('admin/articles')
+    Route::prefix('dashboard/articles')
         ->name('admin.articles.')
-        ->middleware('permission:access-admin-dashboard|access-super-admin-dashboard|access-guru-dashboard')
+        ->middleware('permission:access-admin-dashboard|access-super-admin-dashboard|access-guru-dashboard|access-siswa-dashboard')
         ->group(function () {
             Route::get('/', [ArticleController::class, 'index'])->name('index');
             Route::post('/upload-temp', [ArticleController::class, 'uploadTemp'])->name('upload-temp');

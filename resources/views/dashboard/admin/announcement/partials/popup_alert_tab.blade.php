@@ -102,10 +102,21 @@
                             <a href="{{ route('admin.announcements.alerts.edit', $alert) }}" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 font-bold text-[10px] uppercase font-mono tracking-wider">
                                 Edit Popup
                             </a>
-                            <form action="{{ route('admin.announcements.alerts.destroy', $alert) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus popup alert ini beserta semua gambarnya?')">
+                            <form action="{{ route('admin.announcements.alerts.destroy', $alert) }}" method="POST" class="inline" id="delete-form-{{ $alert->id }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="py-1.5 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 font-bold text-[10px] uppercase font-mono tracking-wider">
+                                <button 
+                                type="button" 
+                                onclick="AppPopup.confirm({
+                                                    title: 'Peringatan',
+                                                    description: 'Apakah Anda yakin ingin menghapus popup alert ini beserta semua gambarnya?',
+                                                    confirmText: 'Ya, Hapus',
+                                                    cancelText: 'Batal',
+                                                    onConfirm: function() {
+                                                        document.getElementById('delete-form-{{ $alert->id }}').submit();
+                                                    }
+                                                })" 
+                                class="py-1.5 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 font-bold text-[10px] uppercase font-mono tracking-wider">
                                     Hapus
                                 </button>
                             </form>

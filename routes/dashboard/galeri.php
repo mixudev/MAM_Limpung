@@ -8,7 +8,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // -------------------------------------------------------------------------
     //  Gallery Management & Approval Routes
     // -------------------------------------------------------------------------
-    Route::prefix('admin/galeri')
+    Route::prefix('dashboard/galeri')
         ->name('admin.galeri.')
         ->group(function () {
             // CRUD

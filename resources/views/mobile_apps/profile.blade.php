@@ -194,7 +194,7 @@
         function confirmResetPassword(event) {
             event.preventDefault();
             if (window.MobilePopup) {
-                window.MobilePopup.confirm({
+                window.MobilePopup.warning({
                     title: 'Kirim Link Ganti Sandi?',
                     description: 'Tautan untuk menyetel ulang kata sandi akan dikirim ke email terdaftar Anda (<strong>{{ $user->email }}</strong>). Lanjutkan?',
                     confirmText: 'Kirim Tautan',

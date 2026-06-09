@@ -76,6 +76,7 @@ class RoleSeeder extends Seeder
                 'view-own-grades',
                 'view-announcements',
                 'view-galeri', 'create-galeri', 'edit-galeri', 'delete-galeri',
+                'view-articles', 'create-articles', 'edit-articles', 'delete-articles',
             ],
         ],
     ];

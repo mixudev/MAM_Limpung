@@ -11,6 +11,7 @@ use App\Http\Controllers\Frontend\PpdbController;
 use App\Http\Controllers\Frontend\PrestasiController;
 use App\Http\Controllers\Frontend\ProfileController;
 use App\Http\Controllers\Frontend\SeoController;
+use App\Http\Controllers\Frontend\PegawaiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -67,6 +68,9 @@ Route::name('frontend.')->group(function () {
     Route::get('/galeri', [GaleriController::class, 'index'])->name('galeri');
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/kontak', [ContactController::class, 'index'])->name('contact');
+
+    Route::get('/pegawai', [PegawaiController::class, 'index'])->name('pegawai.index');
+    Route::get('/pegawai/{id}', [PegawaiController::class, 'show'])->name('pegawai.show');
 });
 
 Route::get('/link', function () {

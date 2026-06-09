@@ -2,15 +2,7 @@
 
 @section('content')
     <div class="px-5 pt-4 pb-20 relative">
-        <!-- Header & Back Button -->
-        <div class="flex items-center gap-3 mb-5">
-            <a href="{{ route('apps.home') }}" class="w-8 h-8 bg-white border border-slate-100 rounded-xl flex items-center justify-center text-slate-600 shadow-xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-            </a>
-            <h2 class="font-sora font-bold text-slate-800 text-base">Moment</h2>
-        </div>
+
 
 
 
@@ -28,52 +20,78 @@
             
             <div class="grid grid-cols-2 gap-3">
                 @forelse($galleries as $gallery)
-                    <div class="bg-white border border-slate-100 rounded-2xl p-2.5 shadow-xs flex flex-col justify-between relative">
-                        <div>
-                            <!-- Aspect ratio square cover image -->
-                            <div class="aspect-square w-full rounded-xl overflow-hidden bg-slate-50 relative shrink-0">
-                                <img src="{{ $gallery->coverUrl() }}" alt="Cover" class="w-full h-full object-cover">
-                                
-                                <!-- Status Badge on top of image -->
-                                <span class="absolute top-2 left-2 text-[7px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider text-white shadow-xs
-                                    {{ $gallery->status === 'approved' ? 'bg-emerald-500' : ($gallery->status === 'rejected' ? 'bg-rose-500' : 'bg-amber-500') }}">
-                                    {{ $gallery->status }}
-                                </span>
-                            </div>
-                            
-                            <div class="mt-2.5 px-1">
-                                <h4 class="font-sora font-bold text-slate-800 text-[10px] leading-tight truncate" title="{{ $gallery->judul }}">{{ $gallery->judul }}</h4>
-                                <p class="text-[8px] text-slate-400 font-semibold mt-0.5">{{ $gallery->kategori }} &middot; {{ $gallery->tahun }}</p>
-                                
-                                @if($gallery->status === 'rejected' && $gallery->rejected_reason)
-                                    <p class="text-[7px] text-rose-500 mt-1 font-medium italic truncate" title="{{ $gallery->rejected_reason }}">
-                                        {{ $gallery->rejected_reason }}
-                                    </p>
-                                @endif
-                            </div>
-                        </div>
+                <div class="bg-white border border-slate-100 overflow-hidden flex flex-col" style="border-radius: 8px;">
 
-                        <!-- Action Row -->
-                        <div class="flex gap-1.5 border-t border-slate-50 pt-2 mt-3 px-1">
-                            <a href="{{ route('apps.galeri.show', $gallery) }}" class="flex-1 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-[9px] font-bold text-center border border-slate-100 transition-colors">
-                                Lihat
-                            </a>
-                            <a href="{{ route('apps.galeri.edit', $gallery) }}" class="flex-1 py-1.5 bg-indigo-50/50 hover:bg-indigo-50 text-primary-600 rounded-lg text-[9px] font-bold text-center border border-indigo-50 transition-colors">
-                                Edit
-                            </a>
-                            <form id="delete-gallery-form-{{ $gallery->id }}" action="{{ route('apps.galeri.destroy', $gallery) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" onclick="confirmDeleteGallery({{ $gallery->id }}, '{{ addslashes($gallery->judul) }}')" class="py-1.5 px-2 bg-rose-50 hover:bg-rose-100/50 text-rose-600 rounded-lg text-[9px] font-bold text-center border border-rose-100/50 cursor-pointer transition-colors">
-                                    Hapus
-                                </button>
-                            </form>
-                        </div>
+                    {{-- Thumbnail --}}
+                    <div class="aspect-square w-full relative bg-slate-50 overflow-hidden">
+                        <img src="{{ $gallery->coverUrl() }}" alt="Cover" class="w-full h-full object-cover block">
+
+                        {{-- Status badge --}}
+                        <span class="absolute top-1.5 left-1.5 text-[9px] font-medium px-1.5 py-0.5 tracking-wide"
+                            style="border-radius: 3px;
+                            {{ $gallery->status === 'approved'
+                                ? 'background:#3B6D11; color:#EAF3DE;'
+                                : ($gallery->status === 'rejected'
+                                    ? 'background:#A32D2D; color:#FCEBEB;'
+                                    : 'background:#854F0B; color:#FAEEDA;') }}">
+                            {{ $gallery->status }}
+                        </span>
                     </div>
+
+                    {{-- Info --}}
+                    <div class="px-2.5 pt-2">
+                        <p class="font-sora font-medium text-slate-800 text-[11px] truncate leading-tight m-0">
+                            {{ $gallery->judul }}
+                        </p>
+                        <p class="text-[10px] text-slate-400 mt-0.5 m-0">
+                            {{ $gallery->kategori }} &middot; {{ $gallery->tahun }}
+                        </p>
+                        @if($gallery->status === 'rejected' && $gallery->rejected_reason)
+                            <p class="text-[10px] mt-1 truncate m-0" style="color:#A32D2D;" title="{{ $gallery->rejected_reason }}">
+                                {{ $gallery->rejected_reason }}
+                            </p>
+                        @endif
+                    </div>
+
+                    {{-- Actions --}}
+                    <div class="flex gap-1.5 mt-2 px-2.5 pb-2.5 pt-2 border-t border-slate-100">
+                        <a href="{{ route('apps.galeri.show', $gallery) }}"
+                        class="flex-1 py-1.5 text-center text-[10px] font-medium text-slate-600 bg-slate-50 border border-slate-200 transition-colors hover:bg-slate-100"
+                        style="border-radius: 4px;">
+                            Lihat
+                        </a>
+                        <a href="{{ route('apps.galeri.edit', $gallery) }}"
+                        class="flex-1 py-1.5 text-center text-[10px] font-medium transition-colors hover:opacity-80"
+                        style="border-radius: 4px; background:#EEEDFE; color:#534AB7; border:0.5px solid #AFA9EC;">
+                            Edit
+                        </a>
+                        <form id="delete-gallery-form-{{ $gallery->id }}" action="{{ route('apps.galeri.destroy', $gallery) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="button"
+                                    onclick="confirmDeleteGallery({{ $gallery->id }}, '{{ addslashes($gallery->judul) }}')"
+                                    class="py-1.5 px-2.5 transition-colors hover:opacity-80 cursor-pointer"
+                                    style="border-radius: 4px; background:#FCEBEB; color:#A32D2D; border:0.5px solid #F7C1C1; font-size:12px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 @empty
-                    <div class="col-span-2 bg-slate-50 border border-slate-100 rounded-2xl p-6 text-center">
-                        <p class="text-xs text-slate-400 font-medium">Belum ada riwayat usulan.</p>
+                <div class="col-span-2 flex flex-col items-center justify-center gap-2.5 py-10 text-center border border-dashed border-slate-200" style="border-radius: 8px;">
+                    <div class="w-11 h-11 flex items-center justify-center bg-slate-50" style="border-radius: 6px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/><line x1="2" y1="2" x2="22" y2="22"/>
+                        </svg>
                     </div>
+                    <div>
+                        <p class="text-[13px] font-medium text-slate-700 m-0">Belum ada galeri</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5 m-0">Foto yang kamu upload akan muncul di sini.</p>
+                    </div>
+                </div>
                 @endforelse
             </div>
         </div>
@@ -83,7 +101,7 @@
         // Mobile Delete Confirmation Alert
         function confirmDeleteGallery(id, title) {
             if (window.MobilePopup) {
-                window.MobilePopup.confirm({
+                window.MobilePopup.warning({
                     title: 'Hapus Galeri?',
                     description: `Apakah Anda yakin ingin menghapus galeri "<strong>${title}</strong>" beserta seluruh fotonya secara permanen dari server?`,
                     confirmText: 'Ya, Hapus',

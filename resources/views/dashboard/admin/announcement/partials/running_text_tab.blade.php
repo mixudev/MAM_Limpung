@@ -48,10 +48,21 @@
                             <a href="{{ route('admin.announcements.texts.edit', $text) }}" class="inline-block py-1 px-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 font-bold text-[10px] uppercase font-mono tracking-wider">
                                 Edit
                             </a>
-                            <form action="{{ route('admin.announcements.texts.destroy', $text) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus running text ini?')">
+                            <form action="{{ route('admin.announcements.texts.destroy', $text) }}" method="POST" class="inline" id="delete-form-{{ $text->id }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="py-1 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 font-bold text-[10px] uppercase font-mono tracking-wider">
+                                <button 
+                                type="button" 
+                                onclick="AppPopup.confirm({
+                                                    title: 'Peringatan',
+                                                    description: 'Apakah Anda yakin ingin menghapus running text ini?',
+                                                    confirmText: 'Ya, Hapus',
+                                                    cancelText: 'Batal',
+                                                    onConfirm: function() {
+                                                        document.getElementById('delete-form-{{ $text->id }}').submit();
+                                                    }
+                                                })" 
+                                class="py-1 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 font-bold text-[10px] uppercase font-mono tracking-wider">
                                     Hapus
                                 </button>
                             </form>

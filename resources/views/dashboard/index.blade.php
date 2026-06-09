@@ -257,7 +257,7 @@
             @endcan
 
             <!-- Profile Diri Link -->
-            <a href="{{ route('admin.profile.edit') }}" class="group bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 shadow-sm hover:border-[#4f45b2] dark:hover:border-indigo-500 transition-all flex flex-col justify-between">
+            <a href="{{ route('user.profile.edit') }}" class="group bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 shadow-sm hover:border-[#4f45b2] dark:hover:border-indigo-500 transition-all flex flex-col justify-between">
                 <div>
                     <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/20 text-[#4f45b2] dark:text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

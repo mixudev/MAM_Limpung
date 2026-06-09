@@ -86,19 +86,11 @@
     <!-- custom css -->
     <link rel="stylesheet" href="{{ asset('assets/css/layouts-front.css') }}">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <!-- Styles / Scripts -->
+    <!-- Fonts / Styles / Scripts bundled via Vite (Alpine, AOS, Turbo) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- AOS Animation -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <!-- Font Awesome CDN -->
-<script src="https://kit.fontawesome.com/fd9d533b12.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/fd9d533b12.js" crossorigin="anonymous"></script>
 </head>
     <body class="font-sans antialiased bg-white overflow-x-hidden"> 
         <!-- Google Tag Manager (noscript) -->
@@ -124,7 +116,7 @@
         @include('partials.footer')
 
         <!-- Floating Mobile App Installer / Download Button -->
-        <div x-data="{ showDownloadModal: false }" class="relative">
+        {{-- <div x-data="{ showDownloadModal: false }" class="relative">
             <!-- Floating Action Button -->
             <button @click="showDownloadModal = true"
                     class="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#4f45b2] to-indigo-800 text-white rounded-full shadow-[0_8px_30px_rgb(79,69,178,0.4)] hover:shadow-[0_8px_30px_rgb(79,69,178,0.6)] active:scale-95 hover:scale-105 transition-all duration-300 group cursor-pointer"
@@ -193,18 +185,8 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
-        <!-- AOS JS -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        AOS.init({
-            duration: 800,
-            offset: 100,
-            once: true,
-            easing: 'ease-in-out-sine',
-            anchorPlacement: 'top-bottom',
-        });
-    </script>
+        <!-- AOS initialized via app.js -->
 </body>
 </html>

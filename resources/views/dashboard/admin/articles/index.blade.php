@@ -25,15 +25,6 @@
         </a>
     </div>
 
-    <!-- Flash Messages -->
-    @if(session('success'))
-        <div class="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 p-4 text-emerald-800 dark:text-emerald-400 text-xs font-semibold rounded-none flex items-center justify-between">
-            <span>{{ session('success') }}</span>
-            <button class="text-emerald-600 hover:text-emerald-800 dark:hover:text-white font-bold" onclick="this.parentElement.remove()">
-                &times;
-            </button>
-        </div>
-    @endif
 
     <!-- Filters Section -->
     <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 shadow-sm">
@@ -95,16 +86,22 @@
                         <th class="py-3.5 px-4 w-40">Kategori</th>
                         <th class="py-3.5 px-4 w-32">Penulis</th>
                         <th class="py-3.5 px-4 w-28 text-center">Status</th>
-                        <th class="py-3.5 px-4 w-36">Dipublikasikan</th>
+                        {{-- <th class="py-3.5 px-4 w-36">Dipublikasikan</th> --}}
                         <th class="py-3.5 px-4 w-36 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
                     @forelse($articles as $art)
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                            <td class="py-3 px-4">
-                                <div class="w-12 h-9 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 overflow-hidden">
-                                    <img src="{{ $art->thumbnailUrl() }}" class="w-full h-full object-cover" alt="Thumb">
+                            <td class="py-3 px-4 justify-center items-center flex">
+                                <div class="w-12 h-9 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 overflow-hidden justify-center items-center flex">
+                                    @if($art->thumbnail)
+                                        <img src="{{ $art->thumbnailUrl() }}" class="w-full h-full object-cover" alt="Thumb">
+                                    @else
+                                        <svg class="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    @endif
                                 </div>
                             </td>
                             <td class="py-3 px-4">
@@ -136,15 +133,25 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-slate-500 dark:text-zinc-400 font-mono text-[10px]">
+                            {{-- <td class="py-3 px-4 text-slate-500 dark:text-zinc-400 font-mono text-[10px]">
                                 {{ $art->published_at ? $art->published_at->translatedFormat('d M Y H:i') : '-' }}
-                            </td>
+                            </td> --}}
                             <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
-                                @if($art->status === 'pending')
-                                    <form action="{{ route('admin.articles.approve', $art->slug) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Apakah Anda yakin ingin menyetujui dan menerbitkan artikel ini?')">
+                                @if($art->status === 'pending' && !Auth::user()->hasRole('siswa'))
+                                    <form action="{{ route('admin.articles.approve', $art->slug) }}" method="POST" class="inline" id="approve-form-{{ $art->slug }}">
                                         @csrf
-                                        <button type="submit" class="inline-block py-1 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase font-mono tracking-wider border border-emerald-600">
+                                        <button 
+                                        type="button" 
+                                        onclick="AppPopup.info({
+                                                    title: 'Peringatan',
+                                                    description: 'Apakah Anda yakin ingin menyetujui dan menerbitkan artikel ini?',
+                                                    confirmText: 'Ya, Setujui',
+                                                    cancelText: 'Batal',
+                                                    onConfirm: function() {
+                                                        document.getElementById('approve-form-{{ $art->slug }}').submit();
+                                                    }
+                                                })"
+                                        class="inline-block py-1 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase font-mono tracking-wider border border-emerald-600">
                                             Setujui
                                         </button>
                                     </form>
@@ -153,11 +160,21 @@
                                    class="inline-block py-1 px-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 font-bold text-[10px] uppercase font-mono tracking-wider">
                                      Edit
                                  </a>
-                                <form action="{{ route('admin.articles.destroy', $art->slug) }}" method="POST" class="inline" 
-                                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus artikel ini?')">
+                                <form action="{{ route('admin.articles.destroy', $art->slug) }}" method="POST" class="inline" id="delete-form-{{ $art->slug }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="py-1 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 font-bold text-[10px] uppercase font-mono tracking-wider">
+                                    <button 
+                                    type="button" 
+                                    onclick="AppPopup.confirm({
+                                                    title: 'Peringatan',
+                                                    description: 'Apakah Anda yakin ingin menghapus artikel ini?',
+                                                    confirmText: 'Ya, Hapus',
+                                                    cancelText: 'Batal',
+                                                    onConfirm: function() {
+                                                        document.getElementById('delete-form-{{ $art->slug }}').submit();
+                                                    }
+                                                })" 
+                                    class="py-1 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 font-bold text-[10px] uppercase font-mono tracking-wider">
                                         Hapus
                                     </button>
                                 </form>

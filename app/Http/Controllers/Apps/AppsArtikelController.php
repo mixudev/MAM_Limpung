@@ -201,7 +201,7 @@ class AppsArtikelController extends Controller
 
         // Update SEO metadata
         $article->seo()->updateOrCreate(
-            ['article_id' => $article->id],
+            [],
             [
                 'meta_title' => $request->judul,
                 'meta_description' => $request->ringkasan,

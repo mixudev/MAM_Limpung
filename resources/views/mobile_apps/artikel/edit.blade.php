@@ -53,10 +53,90 @@
                         @enderror
                     </div>
 
+                    <!-- Rich Text Editor Style Override -->
+                    <style>
+                        .editor-content ul {
+                            list-style-type: disc !important;
+                            padding-left: 1.25rem !important;
+                            margin-top: 0.5rem !important;
+                            margin-bottom: 0.5rem !important;
+                        }
+                        .editor-content ol {
+                            list-style-type: decimal !important;
+                            padding-left: 1.25rem !important;
+                            margin-top: 0.5rem !important;
+                            margin-bottom: 0.5rem !important;
+                        }
+                        .editor-content p {
+                            margin-bottom: 0.75rem !important;
+                        }
+                        .editor-content:empty:before {
+                            content: attr(placeholder);
+                            color: #94a3b8;
+                            font-weight: 500;
+                        }
+                    </style>
+
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Konten Artikel</label>
-                        <textarea name="konten" rows="8" required placeholder="Tulis isi tulisan lengkap Anda di sini..."
-                                  class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 transition-all font-semibold">{{ old('konten', $article->konten) }}</textarea>
+                        
+                        <!-- Rich Text Editor Box -->
+                        <div x-data="richTextEditor()" class="border border-slate-200/80 rounded-2xl overflow-hidden bg-slate-50 shadow-inner">
+                            <!-- Toolbar -->
+                            <div class="flex items-center gap-1.5 p-2 bg-slate-100/70 border-b border-slate-200/80 flex-wrap">
+                                <button type="button" @click="exec('bold')" 
+                                        :class="activeFormats.bold ? 'bg-indigo-500/10 text-indigo-600 border-indigo-200' : 'text-slate-600 hover:bg-slate-200 border-transparent'"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border transition-all cursor-pointer" title="Tebal (Bold)">
+                                    B
+                                </button>
+                                <button type="button" @click="exec('italic')"
+                                        :class="activeFormats.italic ? 'bg-indigo-500/10 text-indigo-600 border-indigo-200' : 'text-slate-600 hover:bg-slate-200 border-transparent'"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center italic text-xs border transition-all cursor-pointer" title="Miring (Italic)">
+                                    I
+                                </button>
+                                <button type="button" @click="exec('underline')"
+                                        :class="activeFormats.underline ? 'bg-indigo-500/10 text-indigo-600 border-indigo-200' : 'text-slate-600 hover:bg-slate-200 border-transparent'"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center underline text-xs border transition-all cursor-pointer" title="Garis Bawah (Underline)">
+                                    U
+                                </button>
+                                <div class="w-px h-5 bg-slate-200 mx-0.5"></div>
+                                <button type="button" @click="exec('insertUnorderedList')"
+                                        :class="activeFormats.listUl ? 'bg-indigo-500/10 text-indigo-600 border-indigo-200' : 'text-slate-600 hover:bg-slate-200 border-transparent'"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center border transition-all cursor-pointer" title="Daftar Bulat (Unordered List)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                    </svg>
+                                </button>
+                                <button type="button" @click="exec('insertOrderedList')"
+                                        :class="activeFormats.listOl ? 'bg-indigo-500/10 text-indigo-600 border-indigo-200' : 'text-slate-600 hover:bg-slate-200 border-transparent'"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center border transition-all cursor-pointer" title="Daftar Angka (Ordered List)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                    </svg>
+                                </button>
+                                <div class="w-px h-5 bg-slate-200 mx-0.5"></div>
+                                <button type="button" @click="exec('removeFormat')" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-all cursor-pointer" title="Hapus Format">
+                                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Editor Area -->
+                            <div x-ref="editor"
+                                 contenteditable="true"
+                                 @input="updateContent()"
+                                 @blur="updateContent()"
+                                 @keyup="checkActiveFormats()"
+                                 @click="checkActiveFormats()"
+                                 class="w-full bg-slate-50/50 px-4 py-3 text-xs text-slate-800 min-h-[220px] focus:outline-none transition-all font-medium overflow-y-auto outline-none editor-content"
+                                 placeholder="Tulis isi tulisan lengkap Anda di sini secara detail...">
+                                {!! old('konten', $article->konten) !!}
+                            </div>
+
+                            <!-- Hidden Form Input -->
+                            <input type="hidden" name="konten" :value="content">
+                        </div>
                         @error('konten')
                             <p class="text-rose-500 text-[10px] mt-1 font-semibold">{{ $message }}</p>
                         @enderror
@@ -235,18 +315,10 @@
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         this.selectedFile.dataUrl = e.target.result;
+                        this.selectedFile.progress = 100;
+                        this.selectedFile.status = 'ready';
                     };
                     reader.readAsDataURL(file);
-
-                    // Simulate upload animation
-                    let interval = setInterval(() => {
-                        if (this.selectedFile.progress >= 100) {
-                            clearInterval(interval);
-                            this.selectedFile.status = 'ready';
-                        } else {
-                            this.selectedFile.progress += 20;
-                        }
-                    }, 80);
                 },
 
                 removeFile() {
@@ -271,6 +343,44 @@
                     if (window.showGlobalLoader) {
                         window.showGlobalLoader('Menyimpan Perubahan...', 'Sedang memperbarui konten artikel Anda');
                     }
+                }
+            }
+        }
+
+        function richTextEditor() {
+            return {
+                content: '',
+                activeFormats: {
+                    bold: false,
+                    italic: false,
+                    underline: false,
+                    listUl: false,
+                    listOl: false
+                },
+                init() {
+                    this.updateContent();
+                    this.checkActiveFormats();
+                },
+                exec(cmd) {
+                    document.execCommand(cmd, false, null);
+                    this.updateContent();
+                    this.checkActiveFormats();
+                    this.$refs.editor.focus();
+                },
+                updateContent() {
+                    let html = this.$refs.editor.innerHTML;
+                    if (html === '<p><br></p>' || html === '<br>' || this.$refs.editor.textContent.trim() === '') {
+                        this.content = '';
+                    } else {
+                        this.content = html;
+                    }
+                },
+                checkActiveFormats() {
+                    this.activeFormats.bold = document.queryCommandState('bold');
+                    this.activeFormats.italic = document.queryCommandState('italic');
+                    this.activeFormats.underline = document.queryCommandState('underline');
+                    this.activeFormats.listUl = document.queryCommandState('insertUnorderedList');
+                    this.activeFormats.listOl = document.queryCommandState('insertOrderedList');
                 }
             }
         }

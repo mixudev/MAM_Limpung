@@ -1,5 +1,5 @@
 <!-- Tab Headers -->
-<div class="flex border-b border-slate-200 dark:border-zinc-850 bg-slate-50 dark:bg-zinc-950 overflow-x-auto">
+<div class="flex border-b border-slate-200 dark:border-zinc-800  bg-slate-50 dark:bg-zinc-950 overflow-x-auto">
     <button type="button" onclick="switchTab('tab-general'); return false;" id="btn-tab-general" 
             class="tab-btn cursor-pointer px-6 py-3.5 text-xs font-mono font-bold uppercase tracking-wider border-b-2 border-indigo-600 text-indigo-600 dark:text-white focus:outline-none whitespace-nowrap">
         Profil & SEO

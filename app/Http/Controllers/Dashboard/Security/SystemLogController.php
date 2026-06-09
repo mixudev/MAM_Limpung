@@ -183,7 +183,7 @@ class SystemLogController extends Controller
 
             return redirect()->back()->with(
                 'success',
-                'Pekerjaan Gagal Dihapus!|Log pekerjaan gagal dengan UUID '.$failedJob->uuid.' berhasil dihapus dari sistem.'
+                ' UUID '.$failedJob->uuid.' berhasil dihapus dari sistem.'
             );
         }
 

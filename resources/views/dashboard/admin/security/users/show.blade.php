@@ -88,9 +88,16 @@
                             Email Terverifikasi
                         </div>
                     @else
-                        <form method="POST" action="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.users.verify-email', $user) : route('admin.users.verify-email', $user) }}">
+                        <form id="verify-email-form" method="POST" action="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.users.verify-email', $user) : route('admin.users.verify-email', $user) }}">
                             @csrf
-                            <button type="submit"
+                            <button type="button"
+                                    onclick="AppPopup.warning({
+                                        title: 'Kirim Link Verifikasi Email?',
+                                        description: 'Aksi ini akan mengirimkan tautan verifikasi email resmi ke email <strong>{{ $user->email }}</strong> secara aman. Tautan verifikasi hanya berlaku sekali pakai.',
+                                        confirmText: 'Ya, Kirim Email',
+                                        cancelText: 'Batal',
+                                        onConfirm: () => document.getElementById('verify-email-form').submit()
+                                    })"
                                     class="w-full py-2.5 px-4 bg-[#4f45b2] hover:bg-[#6366f1] text-white border border-transparent font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -104,7 +111,7 @@
                     <form id="reset-password-form" method="POST" action="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.users.reset-password-link', $user) : route('admin.users.reset-password-link', $user) }}">
                         @csrf
                         <button type="button"
-                                onclick="AppPopup.confirm({
+                                onclick="AppPopup.warning({
                                     title: 'Kirim Link Reset Password?',
                                     description: 'Aksi ini akan mengirimkan tautan reset kata sandi resmi ke email <strong>{{ $user->email }}</strong> secara aman. Tautan verifikasi hanya berlaku sekali pakai.',
                                     confirmText: 'Ya, Kirim Email',
@@ -112,8 +119,9 @@
                                     onConfirm: () => document.getElementById('reset-password-form').submit()
                                 })"
                                 class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-white border border-transparent font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m-9 5a2 2 0 01-2-2m7-7a2 2 0 00-2-2m0 0a2 2 0 00-2 2m0 0V4a2 2 0 00-2-2H5a2 2 0 00-2 2v3a2 2 0 002 2h4a2 2 0 002-2v-1z" />
+                            <svg class="w-4 h-4" fill="currentColor" class="bi bi-key" viewBox="0 0 16 16">
+                                <path d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8m4-3a3 3 0 1 0 2.712 4.285A.5.5 0 0 1 7.163 9h.63l.853-.854a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.793-.793-1-1h-6.63a.5.5 0 0 1-.451-.285A3 3 0 0 0 4 5"/>
+                                <path d="M4 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
                             </svg>
                             Kirim Tautan Reset Sandi
                         </button>

@@ -173,13 +173,13 @@
                 </a>
                 
                 <!-- Telegram -->
-                <a href="https://telegram.me/share/url?url={{ urlencode(route('frontend.article.show', $article->slug)) }}&text={{ rawurlencode($article->judul) }}" 
+                {{-- <a href="https://telegram.me/share/url?url={{ urlencode(route('frontend.article.show', $article->slug)) }}&text={{ rawurlencode($article->judul) }}" 
                    target="_blank" 
                    rel="noopener noreferrer"
                    class="w-10 h-10 rounded-full bg-[#0088cc] hover:bg-[#0077b5] text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md"
                    title="Bagikan ke Telegram">
                     <i class="fa-brands fa-telegram text-base"></i>
-                </a>
+                </a> --}}
                 
                 <!-- LinkedIn -->
                 <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(route('frontend.article.show', $article->slug)) }}" 
@@ -192,13 +192,20 @@
                 
                 <!-- Copy Link -->
                 <button @click="navigator.clipboard.writeText('{{ route('frontend.article.show', $article->slug) }}'); copied = true; setTimeout(() => copied = false, 2000)"
-                        class="px-4 h-10 rounded-none border border-slate-350 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center gap-2 text-xs font-bold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-sm"
+                        class="w-10 h-10 rounded-full bg-[#0088cc] hover:bg-[#0077b5] text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md"
                         title="Salin Tautan">
-                    <i class="fa-solid" :class="copied ? 'fa-check text-emerald-600' : 'fa-link'"></i>
-                    <span x-text="copied ? 'Tersalin!' : 'Salin Link'"></span>
+                    <i class="fa-solid text-base" :class="copied ? 'fa-check text-emerald-600' : 'fa-link'"></i>
+                    {{-- <span x-text="copied ? 'Tersalin!' : 'Salin Link'"></span> --}}
                 </button>
             </div>
         </div>
+
+        <section class="mt-5">
+            {{-- back --}}
+            <a href="{{ route('frontend.article.index') }}" class="w-full h-10 rounded-sm bg-indigo-700 hover:bg-[#0077b5] text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md" title="Kembali">
+                <i class="fa-solid fa-arrow-left text-base mr-2"></i> Kembali
+            </a>
+        </section>
 
         <!-- Related Articles Recommendations -->
         @if($relatedArticles->isNotEmpty())

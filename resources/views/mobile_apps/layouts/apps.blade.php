@@ -15,14 +15,7 @@
     <!-- Compiled Assets via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-    <!-- Hotwire Turbo for SPA transitions without page refresh -->
-    <script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-umd.js" defer></script>
-
-    <!-- AlpineJS globally loaded -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Fonts & JS bundled via Vite (Alpine, Turbo, AOS, Sora, Plus Jakarta Sans) -->
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }

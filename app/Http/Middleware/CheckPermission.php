@@ -57,15 +57,23 @@ class CheckPermission
             }
         }
 
-        return $this->deny($request, 'Anda tidak memiliki izin untuk mengakses resource ini.');
+        return $this->deny(
+            $request,
+            403,
+            'Anda tidak memiliki izin untuk mengakses resource ini.'
+        );
     }
 
-    protected function deny(Request $request, string $message): Response
+    protected function deny(Request $request, int $status, string $message): Response
     {
         if ($request->expectsJson()) {
-            return response()->json(['message' => $message], 403);
+            return response()->json([
+                'status'  => $status,
+                'message' => $message,
+            ], $status);
         }
 
-        return redirect()->route('frontend.home')->with('error', $message);
+        // Jika request web
+        abort($status, $message);
     }
 }

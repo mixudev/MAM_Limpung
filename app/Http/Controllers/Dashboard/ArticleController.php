@@ -246,6 +246,10 @@ class ArticleController extends Controller
     {
         Gate::authorize('update', $article);
 
+        if (auth()->user()->hasRole('siswa')) {
+            abort(403, 'Siswa tidak dapat menyetujui artikel.');
+        }
+
         $article->update([
             'status' => 'published',
             'published_at' => now(),

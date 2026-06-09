@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth', 'active'])->group(function () {
-    Route::prefix('admin')
-        ->name('admin.')
+    Route::prefix('user')
+        ->name('user.')
         ->group(function () {
             Route::get('/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
             Route::put('/profile', [UserProfileController::class, 'update'])->name('profile.update');

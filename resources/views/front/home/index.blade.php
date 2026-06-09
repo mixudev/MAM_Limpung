@@ -353,7 +353,7 @@
     </section>
 
     <!-- Section Install Aplikasi (PWA) -->
-    <section class="py-24 bg-linear-to-br from-indigo-50/50 via-white to-slate-50/50 border-t border-gray-100 relative overflow-hidden">
+    {{-- <section class="py-24 bg-linear-to-br from-indigo-50/50 via-white to-slate-50/50 border-t border-gray-100 relative overflow-hidden">
         <div class="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-50 rounded-full blur-[100px] opacity-40 -z-10"></div>
         <div class="container mx-auto px-6 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
@@ -501,7 +501,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
 
     <!-- Final CTA Banner: Bright Style -->
     <section class="py-24 bg-white border-t border-gray-100 relative overflow-hidden">

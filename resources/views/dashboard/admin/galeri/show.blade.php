@@ -70,9 +70,20 @@
                 <button @click="showRejectModal = true" class="py-2 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-none transition-all tracking-wider font-mono">
                     TOLAK
                 </button>
-                <form action="{{ route('admin.galeri.approve', $galeri->uuid) }}" method="POST" class="inline">
+                <form action="{{ route('admin.galeri.approve', $galeri->uuid) }}" 
+                    method="POST" class="inline" 
+                    id="approve-form-{{ $galeri->uuid }}">
                     @csrf
-                    <button type="submit" class="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-none transition-all tracking-wider font-mono">
+                    <button 
+                    type="button"
+                    onclick="AppPopup.confirm({
+                                title: 'Setujui Galeri?',
+                                description: 'Aksi ini akan menyetujui dan mempublikasikan galeri ke publik.',
+                                confirmText: 'Ya, Setujui',
+                                cancelText: 'Batal',
+                                onConfirm: () => document.getElementById('approve-form-{{ $galeri->uuid }}').submit()
+                            })" 
+                    class="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-none transition-all tracking-wider font-mono">
                         SETUJUI & TAMPILKAN
                     </button>
                 </form>

@@ -6,11 +6,12 @@
     <div class="border-b border-white/10 dark:border-zinc-900 shrink-0">
         <div id="sidebar-logo-area" class="flex items-center gap-3">
             <div class="w-8 h-8">
-                <img src="{{ asset('assets/img/logo.png') }}" alt="">
+                <img src="{{ !empty($siteSettings->logo_path) ? asset('storage/' . $siteSettings->logo_path) : asset('assets/img/logo.png') }}" alt="Logo">
             </div>
             <div id="logo-text" class="overflow-hidden">
                 <div class="text-[15px] font-semibold tracking-tight text-white whitespace-nowrap">
-                    MAM LIMPUNG</div>
+                    {{ $siteSettings->school_name ?? 'MAM Limpung' }}
+                </div>
                 <div class="text-[10px] font-mono text-white/60 dark:text-zinc-500 uppercase tracking-widest whitespace-nowrap">
                     Admin Panel</div>
             </div>
