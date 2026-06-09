@@ -17,7 +17,7 @@
         @forelse($bannerAds as $ad)
             <div class="flex flex-col md:flex-row border border-slate-200 dark:border-zinc-800 p-5 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors gap-6 bg-slate-50/20 dark:bg-zinc-900/30">
                 <!-- Left: Image Preview -->
-                <div class="w-full md:w-56 flex-shrink-0">
+                <div class="w-full md:w-56 shrink-0">
                     @if($ad->image)
                         <div class="relative w-full aspect-video border border-slate-200 dark:border-zinc-800 overflow-hidden bg-slate-100 dark:bg-zinc-950 flex items-center justify-center">
                             <img src="{{ asset('storage/' . $ad->image) }}" class="w-full h-full object-cover">

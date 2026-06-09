@@ -32,7 +32,7 @@
     aria-modal="true"
     aria-labelledby="mob-popup-title"
     aria-describedby="mob-popup-desc"
-    class="fixed inset-0 z-[99999] hidden items-center justify-center p-6"
+    class="fixed inset-0 z-99999 hidden items-center justify-center p-6"
 >
     {{-- Backdrop --}}
     <div

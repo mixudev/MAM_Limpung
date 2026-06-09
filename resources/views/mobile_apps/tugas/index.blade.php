@@ -79,7 +79,7 @@
              x-transition:leave-end="opacity-0 translate-y-full"
              style="display: none;">
             
-            <div class="bg-white rounded-t-[2rem] w-full max-w-md p-6 border-t border-slate-100 shadow-2xl relative"
+            <div class="bg-white rounded-t-4xl w-full max-w-md p-6 border-t border-slate-100 shadow-2xl relative"
                  @click.away="activeTask = null">
                 <!-- Close handle -->
                 <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4 cursor-pointer" @click="activeTask = null"></div>

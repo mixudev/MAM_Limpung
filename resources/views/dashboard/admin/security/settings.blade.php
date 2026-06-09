@@ -10,7 +10,7 @@
 
 <div class="max-w-5xl space-y-6">
     {{-- Header --}}
-    <div class="bg-gradient-to-r from-[#4f45b2] via-[#6366f1] to-indigo-700 dark:from-zinc-900 dark:to-zinc-950 p-6 border-b-4 border-indigo-500 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 text-white">
+    <div class="bg-linear-to-r from-[#4f45b2] via-[#6366f1] to-indigo-700 dark:from-zinc-900 dark:to-zinc-950 p-6 border-b-4 border-indigo-500 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 text-white">
         <div>
             <h1 class="text-xl font-bold tracking-tight">Pusat Keamanan & Kredensial</h1>
             <p class="text-xs text-indigo-100 dark:text-zinc-400 mt-1">Kelola kredensial Google API dan konfigurasi SMTP email secara terpusat dan terenkripsi.</p>
@@ -25,15 +25,7 @@
     </div>
 
     {{-- Alerts --}}
-    @if(session('success'))
-    <div class="bg-emerald-50 dark:bg-emerald-950/20 border-l-4 border-emerald-500 p-4 flex items-center gap-3 shadow-sm">
-        <div class="p-1 bg-emerald-500 text-white rounded-full"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
-        <div>
-            <p class="text-xs font-bold text-emerald-800 dark:text-emerald-300">Berhasil!</p>
-            <p class="text-[11px] text-emerald-600 dark:text-emerald-400/90">{{ session('success') }}</p>
-        </div>
-    </div>
-    @endif
+
     @if($errors->any())
     <div class="bg-rose-50 dark:bg-rose-950/20 border-l-4 border-rose-500 p-4 shadow-sm space-y-1">
         <div class="flex items-center gap-3">

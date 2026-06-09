@@ -17,7 +17,7 @@
         @forelse($popupAlerts as $alert)
             <div class="flex flex-col md:flex-row border border-slate-200 dark:border-zinc-800 p-5 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors gap-6 bg-slate-50/20 dark:bg-zinc-900/30">
                 <!-- Left: Image Thumbnails / Mini Slider -->
-                <div class="w-full md:w-64 flex-shrink-0">
+                <div class="w-full md:w-64 shrink-0">
                     @if(is_array($alert->image) && count($alert->image) > 0)
                         <div class="relative w-full aspect-video border border-slate-200 dark:border-zinc-800 overflow-hidden bg-slate-100 dark:bg-zinc-950 flex items-center justify-center">
                             <!-- Display the first image -->
@@ -31,7 +31,7 @@
                         <!-- Extra thumbnails list -->
                         <div class="flex gap-1.5 mt-2 overflow-x-auto py-1">
                             @foreach($alert->image as $index => $imgPath)
-                                <div class="w-10 h-10 border border-slate-200 dark:border-zinc-800 overflow-hidden flex-shrink-0 bg-white">
+                                <div class="w-10 h-10 border border-slate-200 dark:border-zinc-800 overflow-hidden shrink-0 bg-white">
                                     <img src="{{ asset('storage/' . $imgPath) }}" class="w-full h-full object-cover">
                                 </div>
                             @endforeach

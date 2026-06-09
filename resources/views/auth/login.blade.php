@@ -24,8 +24,8 @@
         <img src="{{ asset('assets/img/school.png') }}" alt="Sekolah" class="absolute inset-0 w-full h-full object-cover">
         
         <!-- Soft & Elegant Gradient Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/80 to-blue-900/30 z-10 mix-blend-multiply"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-linear-to-tr from-slate-950 via-slate-900/80 to-blue-900/30 z-10 mix-blend-multiply"></div>
+        <div class="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/40 to-transparent z-10"></div>
         
         <div class="absolute bottom-10 left-10 z-20">
             <div class="w-8 h-1 bg-amber-500 mb-4 shadow-lg shadow-amber-500/20"></div>
@@ -129,7 +129,7 @@
             </div>
         </form>
 
-        <div class="mt-auto pt-4 text-center border-t border-slate-100 mt-6">
+        <div class=" pt-4 text-center border-t border-slate-100 mt-6">
             <a href="{{ url('/') }}" class="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-blue-900 transition-colors">
                 <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Kembali ke Beranda

@@ -94,7 +94,7 @@
                 <div class="space-y-6 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-800 lg:pl-6">
                     <!-- Kategori -->
                     <div>
-                        <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 font-mono">Kategori <span class="text-rose-500">*</span></label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 font-mono">Kategori <span class="text-rose-500">*</span></label>
                         <select name="category_id" required
                             class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                             <option value="" disabled>Pilih Kategori</option>
@@ -107,7 +107,7 @@
 
                     <!-- Status -->
                     <div>
-                        <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 font-mono">Status Publikasi <span class="text-rose-500">*</span></label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 font-mono">Status Publikasi <span class="text-rose-500">*</span></label>
                         <select name="status" id="status" required
                             class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                             <option value="draft" {{ old('status', $article->status) === 'draft' ? 'selected' : '' }}>Simpan sebagai Draft</option>

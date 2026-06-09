@@ -82,7 +82,7 @@
                     FILTER
                 </button>
                 @if(request()->anyFilled(['search', 'kategori', 'status']))
-                    <a href="{{ route('admin.galeri.index') }}" class="w-full py-2 text-center bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 font-bold text-xs rounded-none transition-all font-mono tracking-wider font-semibold">
+                    <a href="{{ route('admin.galeri.index') }}" class="w-full py-2 text-center bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 text-xs rounded-none transition-all font-mono tracking-wider font-semibold">
                         RESET
                     </a>
                 @endif
@@ -130,7 +130,8 @@
                             </td>
                             <td class="py-3 px-4 text-center">
                                 <span class="px-2.5 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase border
-                                    @if($gal->status === 'approved') bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-800/40
+                                    @if($gal->status === 'approved') 
+                                    bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-800/40
                                     @elseif($gal->status === 'pending') bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-800/40
                                     @else bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-800/40
                                     @endif">
