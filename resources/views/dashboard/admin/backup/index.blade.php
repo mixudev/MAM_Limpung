@@ -11,12 +11,12 @@
 
 <div class="max-w-6xl space-y-6">
     {{-- Header --}}
-    <div class="bg-linear-to-r from-slate-800 via-slate-700 to-slate-800 dark:from-zinc-900 dark:to-zinc-950 p-6 border-b-4 border-slate-600 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 text-white">
+    <div class="bg-linear-to-r from-slate-800 via-slate-700 to-slate-800 dark:from-zinc-900 dark:to-zinc-950 p-6 border-b-4 border-cyan-500 dark:border-slate-600 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 text-slate-700 dark:text-white">
         <div>
             <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
-                <i class="fa-solid fa-database text-slate-300"></i> Manajemen Backup Data
+                <i class="fa-solid fa-database text-cyan-500 dark:text-slate-300"></i> Manajemen Backup Data
             </h1>
-            <p class="text-xs text-slate-300 dark:text-zinc-400 mt-1">Atur jadwal backup, enkripsi AES-256, sinkronisasi Google Drive, dan verifikasi integritas berkas cadangan data Anda.</p>
+            <p class="text-xs text-slate-400 dark:text-zinc-400 mt-1">Atur jadwal backup, enkripsi AES-256, sinkronisasi Google Drive, dan verifikasi integritas berkas cadangan data Anda.</p>
         </div>
         <div class="flex items-center gap-2">
             <span class="flex h-3 w-3 relative">

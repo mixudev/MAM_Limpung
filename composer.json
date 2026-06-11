@@ -95,6 +95,7 @@
             "dont-discover": []
         },
         "google/apiclient-services": [
+            "Drive",
             "Sheets"
         ]
     },

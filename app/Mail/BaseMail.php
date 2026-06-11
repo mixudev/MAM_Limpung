@@ -2,67 +2,44 @@
 
 namespace App\Mail;
 
-use App\Models\SecuritySetting;
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Log;
 
 abstract class BaseMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
-     * Retrieve decrypted SMTP config from SecuritySetting.
+     * Retrieve SMTP config from Laravel's standard mail config (driven by .env).
      *
      * @return array<string, mixed>
      */
     public static function getSmtpConfig(): array
     {
-        $credentials = SecuritySetting::getValue('smtp_credentials', []);
-        $defaults = [
-            'host' => config('mail.mailers.smtp.host', 'smtp.gmail.com'),
-            'port' => config('mail.mailers.smtp.port', 587),
-            'username' => config('mail.from.address', ''),
-            'password' => '',
-            'encryption' => config('mail.mailers.smtp.encryption', 'tls'),
+        return [
+            'host' => config('mail.mailers.smtp.host', '127.0.0.1'),
+            'port' => (int) config('mail.mailers.smtp.port', 587),
+            'username' => config('mail.mailers.smtp.username'),
+            'password' => config('mail.mailers.smtp.password'),
+            'encryption' => config('mail.mailers.smtp.scheme', 'tls'),
             'from_address' => config('mail.from.address', ''),
             'from_name' => config('mail.from.name', config('app.name')),
         ];
-
-        if (empty($credentials)) {
-            return $defaults;
-        }
-
-        $decrypted = $credentials;
-
-        // Decrypt password if stored encrypted
-        if (! empty($credentials['password_encrypted'])) {
-            try {
-                $decrypted['password'] = Crypt::decryptString($credentials['password_encrypted']);
-            } catch (Exception $e) {
-                Log::warning('BaseMail: Gagal mendekripsi password SMTP: '.$e->getMessage());
-                $decrypted['password'] = '';
-            }
-        }
-
-        return array_merge($defaults, $decrypted);
     }
 
     /**
-     * Check whether SMTP has been configured by admin.
+     * Check whether SMTP has been configured via .env.
      */
     public static function isConfigured(): bool
     {
-        $credentials = SecuritySetting::getValue('smtp_credentials', []);
-
-        return ! empty($credentials['host']) && ! empty($credentials['username']);
+        return ! empty(config('mail.mailers.smtp.host'))
+            && config('mail.mailers.smtp.host') !== '127.0.0.1'
+            && ! empty(config('mail.mailers.smtp.username'));
     }
 
     /**
-     * Build a dynamic mailer transport config array for Mail::mailer()->send().
+     * Build a dynamic mailer transport config array for Mail::build()->send().
      *
      * @return array<string, mixed>
      */
@@ -73,11 +50,11 @@ abstract class BaseMail extends Mailable
         return [
             'transport' => 'smtp',
             'host' => $cfg['host'],
-            'port' => (int) $cfg['port'],
+            'port' => $cfg['port'],
             'username' => $cfg['username'],
             'password' => $cfg['password'],
             'encryption' => $cfg['encryption'],
-            'timeout' => 3, // Dioptimalkan menjadi 3 detik
+            'timeout' => 10,
         ];
     }
 }

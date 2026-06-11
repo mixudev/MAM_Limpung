@@ -9,8 +9,6 @@ Route::prefix('admin')
     ->group(function () {
         Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
         Route::post('/backup/settings', [BackupController::class, 'updateSettings'])->name('backup.settings');
-        Route::post('/backup/generate-key', [BackupController::class, 'generateKey'])->name('backup.generate-key');
-        Route::post('/backup/download-key', [BackupController::class, 'downloadKey'])->name('backup.download-key');
         Route::post('/backup/run', [BackupController::class, 'runBackup'])->name('backup.run');
         Route::get('/backup/download/{filename}', [BackupController::class, 'downloadBackup'])->name('backup.download');
         Route::delete('/backup/delete/{filename}', [BackupController::class, 'deleteBackup'])->name('backup.delete');

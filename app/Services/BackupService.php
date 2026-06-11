@@ -9,7 +9,6 @@ use App\Backup\GoogleDriveUploader;
 use App\Models\BackupLog;
 use App\Models\SecuritySetting;
 use Exception;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use ZipArchive;
 
@@ -50,15 +49,11 @@ class BackupService
 
         $decryptedPassphrase = '';
         if ($encryptEnabled) {
-            $encryptedPass = $backupSettings['passphrase'] ?? '';
-            if (empty($encryptedPass)) {
-                throw new Exception('Kata sandi/passphrase enkripsi backup kosong. Silakan setel terlebih dahulu di halaman Keamanan.');
+            $encryptionKey = config('backup.encryption_key');
+            if (empty($encryptionKey)) {
+                throw new Exception('BACKUP_ENCRYPTION_KEY belum diisi di file .env. Isi terlebih dahulu atau nonaktifkan enkripsi backup.');
             }
-            try {
-                $decryptedPassphrase = Crypt::decryptString($encryptedPass);
-            } catch (Exception $e) {
-                throw new Exception('Gagal mendekripsi passphrase enkripsi backup: '.$e->getMessage());
-            }
+            $decryptedPassphrase = $encryptionKey;
         }
 
         // 1. Create temp working directory

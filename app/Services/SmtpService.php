@@ -41,7 +41,7 @@ class SmtpService
     public function sendNow(Mailable $mailable, string $toEmail, ?string $toName = null): void
     {
         if (! BaseMail::isConfigured()) {
-            throw new Exception('Konfigurasi SMTP belum diatur. Silakan isi kredensial SMTP di halaman Keamanan.');
+            throw new Exception('Konfigurasi SMTP belum diatur. Silakan isi MAIL_HOST, MAIL_USERNAME, dan MAIL_PASSWORD di file .env server.');
         }
 
         $cfg = BaseMail::getSmtpConfig();

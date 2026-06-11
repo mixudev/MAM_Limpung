@@ -89,6 +89,7 @@ class SecurityHeaders
             "'self'",
             'https://ka-f.fontawesome.com',
             'https://cdn.jsdelivr.net',
+            'https://accounts.google.com',
         ];
         $imgSrc = [
             "'self'",
@@ -97,6 +98,10 @@ class SecurityHeaders
             'https://api.qrserver.com',
             'https://barcode.tec-it.com',
             'https://bwipjs-api.metafloor.com',
+        ];
+        $formAction = [
+            "'self'",
+            "https://accounts.google.com",
         ];
         $fontSrc = [
             "'self'",
@@ -115,6 +120,10 @@ class SecurityHeaders
                 'http://127.0.0.1:*',
                 'ws://127.0.0.1:*',
             ];
+            $formAction = array_merge($formAction, [
+                'http://localhost:*',
+                'http://127.0.0.1:*',
+            ]);
             $scriptSrc = array_merge($scriptSrc, $viteUrls);
             $styleSrc = array_merge($styleSrc, $viteUrls);
             $connectSrc = array_merge($connectSrc, $viteUrls);
@@ -131,7 +140,7 @@ class SecurityHeaders
             "frame-src 'self' https://www.youtube.com https://youtube.com https://*.youtube.com https://www.youtube-nocookie.com https://www.google.com https://*.google.com", // Tambah wildcard youtube & google maps
             "object-src 'none'",
             "base-uri 'self'",
-            "form-action 'self'",
+            'form-action '.implode(' ', $formAction),  // ← pakai variabelnya
         ];
 
         $response->headers->set('Content-Security-Policy', implode('; ', $csp));

@@ -11,11 +11,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BackupController extends Controller
 {
@@ -34,12 +32,24 @@ class BackupController extends Controller
             'google_drive_enabled' => false,
             'google_drive_folder_id' => '',
             'retention_days' => 30,
-            'passphrase' => '',
         ];
         $backupSettings = array_merge($defaults, SecuritySetting::getValue('backup_settings', []));
 
-        $hasPassphrase = ! empty($backupSettings['passphrase']);
-        $hasGoogleCredentials = ! empty(SecuritySetting::getValue('security_credentials', [])['google_service_account_json'] ?? '');
+        // Encryption key comes from .env only — never from DB
+        $hasEncryptionKey = ! empty(config('backup.encryption_key'));
+
+        $securityCredentials = SecuritySetting::getValue('security_credentials', []);
+        $hasServiceAccount = ! empty($securityCredentials['google_service_account_json'] ?? '');
+        $hasOAuth2 = false;
+        if (! empty($securityCredentials['google_oauth2_credentials'] ?? '')) {
+            try {
+                $oauth2Data = json_decode(Crypt::decryptString($securityCredentials['google_oauth2_credentials']), true);
+                $hasOAuth2 = ! empty($oauth2Data['refresh_token']);
+            } catch (Exception) {
+                // Silently ignore
+            }
+        }
+        $hasGoogleCredentials = $hasServiceAccount || $hasOAuth2;
 
         $backupHistory = BackupLog::orderBy('created_at', 'desc')->get();
         $storageDirs = $backupService->getStorageDirectories();
@@ -47,7 +57,7 @@ class BackupController extends Controller
 
         return view('dashboard.admin.backup.index', [
             'backupSettings' => $backupSettings,
-            'hasPassphrase' => $hasPassphrase,
+            'hasEncryptionKey' => $hasEncryptionKey,
             'hasGoogleCredentials' => $hasGoogleCredentials,
             'backupHistory' => $backupHistory,
             'storageDirs' => $storageDirs,
@@ -79,82 +89,18 @@ class BackupController extends Controller
             'backup_storage' => $request->has('backup_storage'),
             'storage_folders' => $request->has('backup_storage') ? ($request->input('storage_folders', [])) : [],
             'encryption_enabled' => $request->has('encryption_enabled'),
-            'passphrase' => $currentSettings['passphrase'] ?? '',
             'google_drive_enabled' => $request->has('google_drive_enabled'),
             'google_drive_folder_id' => $request->input('google_drive_folder_id'),
             'retention_days' => (int) $request->input('retention_days', 30),
         ];
 
-        if ($config['encryption_enabled'] && empty($config['passphrase'])) {
-            return back()->withErrors(['error' => 'Buat kunci enkripsi terlebih dahulu sebelum mengaktifkan enkripsi backup.'])->withInput();
+        if ($config['encryption_enabled'] && empty(config('backup.encryption_key'))) {
+            return back()->withErrors(['error' => 'Isi BACKUP_ENCRYPTION_KEY di file .env terlebih dahulu sebelum mengaktifkan enkripsi backup.'])->withInput();
         }
 
         SecuritySetting::setValue('backup_settings', $config);
 
         return back()->with('success', 'Konfigurasi backup berhasil diperbarui!');
-    }
-
-    /**
-     * Generate a new encryption key.
-     */
-    public function generateKey(Request $request): RedirectResponse
-    {
-        $request->validate(['confirm_password' => ['required', 'string']]);
-
-        if (! Hash::check($request->input('confirm_password'), $request->user()->password)) {
-            return back()->withErrors(['error' => 'Kata sandi konfirmasi salah.']);
-        }
-
-        $backupSettings = SecuritySetting::getValue('backup_settings', []);
-
-        try {
-            $randomKey = bin2hex(random_bytes(32));
-            $backupSettings['passphrase'] = Crypt::encryptString($randomKey);
-            SecuritySetting::setValue('backup_settings', $backupSettings);
-
-            return back()->with('success', 'Kunci enkripsi baru berhasil dibuat! Silakan unduh kunci Anda segera.');
-        } catch (Exception $e) {
-            Log::error('Backup: Gagal men-generate kunci: '.$e->getMessage());
-
-            return back()->withErrors(['error' => 'Gagal membuat kunci enkripsi: '.$e->getMessage()]);
-        }
-    }
-
-    /**
-     * Download encryption key as a text file.
-     */
-    public function downloadKey(Request $request): StreamedResponse|RedirectResponse
-    {
-        $request->validate(['confirm_password' => ['required', 'string']]);
-
-        if (! Hash::check($request->input('confirm_password'), $request->user()->password)) {
-            return back()->withErrors(['error' => 'Kata sandi konfirmasi salah.']);
-        }
-
-        $backupSettings = SecuritySetting::getValue('backup_settings', []);
-        $encryptedPass = $backupSettings['passphrase'] ?? '';
-
-        if (empty($encryptedPass)) {
-            return back()->withErrors(['error' => 'Kunci enkripsi belum dibuat.']);
-        }
-
-        try {
-            $decryptedPass = Crypt::decryptString($encryptedPass);
-        } catch (Exception $e) {
-            return back()->withErrors(['error' => 'Gagal mendekripsi kunci: '.$e->getMessage()]);
-        }
-
-        $filename = 'kunci_enkripsi_backup_'.date('Ymd').'.txt';
-        $content = "=== KUNCI ENKRIPSI BACKUP AMAN MAM LIMPUNG ===\n".
-                   'Tanggal Dibuat: '.date('Y-m-d H:i:s')."\n".
-                   'Kunci Dekripsi (Passphrase): '.$decryptedPass."\n\n".
-                   "PENTING: Simpan berkas ini di tempat yang aman.\n".
-                   "Cara mendekripsi via CLI:\n".
-                   "openssl enc -d -aes-256-cbc -pbkdf2 -iter 10000 -in [nama_file].enc -out [nama_file].zip -pass pass:{$decryptedPass}\n";
-
-        return response()->streamDownload(function () use ($content) {
-            echo $content;
-        }, $filename, ['Content-Type' => 'text/plain']);
     }
 
     /**
@@ -333,11 +279,22 @@ class BackupController extends Controller
                 return response()->json(['success' => false, 'message' => 'Detail log tidak ditemukan.'], 404);
             }
 
+            $backupSettings = SecuritySetting::getValue('backup_settings', []);
+            $scheduleLabel = match ($backupSettings['schedule'] ?? 'daily') {
+                'daily' => 'Harian (00:00)',
+                'weekly' => 'Mingguan (Minggu 00:00)',
+                'monthly' => 'Bulanan (Tgl 1 00:00)',
+                'custom' => 'Kustom: '.($backupSettings['cron_expression'] ?? '-'),
+                default => '-',
+            };
+
             return response()->json([
                 'success' => true,
                 'log' => $log,
                 'formatted_size' => $log->formatted_size,
-                'formatted_date' => $log->created_at->format('d-m-Y H:i:s'),
+                'formatted_date' => $log->created_at?->format('d-m-Y H:i:s') ?? '-',
+                'schedule_label' => $scheduleLabel,
+                'retention_days' => $backupSettings['retention_days'] ?? 30,
             ]);
         } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => 'Gagal memuat detail: '.$e->getMessage()], 500);

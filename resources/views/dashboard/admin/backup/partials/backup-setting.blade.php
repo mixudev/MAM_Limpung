@@ -4,7 +4,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {{-- Left Panel --}}
                         <div class="space-y-6">
-                            <div class="p-4 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 flex items-center justify-between">
+                            <div class="p-4 bg-slate-50 dark:bg-zinc-950 border border-blue-400 dark:border-zinc-800 flex items-center justify-between">
                                 <div class="space-y-1">
                                     <span class="text-xs font-mono font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wide">Backup Otomatis Terjadwal</span>
                                     <p class="text-[11px] text-slate-500 dark:text-zinc-400">Jalankan scheduler untuk backup data secara berkala otomatis.</p>
@@ -61,19 +61,65 @@
                             <div class="grid grid-cols-1 gap-4">
                                 <div>
                                     <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Interval Penjadwalan</label>
-                                    <select name="schedule" id="schedule-selector" onchange="toggleCronInput()"
+                                    <select name="schedule" id="schedule-selector" onchange="updateSchedulePreview()"
                                             class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-                                        <option value="daily" {{ $backupSettings['schedule'] === 'daily' ? 'selected' : '' }}>Harian (00:00)</option>
-                                        <option value="weekly" {{ $backupSettings['schedule'] === 'weekly' ? 'selected' : '' }}>Mingguan (Minggu 00:00)</option>
-                                        <option value="monthly" {{ $backupSettings['schedule'] === 'monthly' ? 'selected' : '' }}>Bulanan (Tgl 1 00:00)</option>
-                                        <option value="custom" {{ $backupSettings['schedule'] === 'custom' ? 'selected' : '' }}>Ekspresi Cron Kustom</option>
+                                        <option value="daily" {{ $backupSettings['schedule'] === 'daily' ? 'selected' : '' }}>Setiap Hari — tengah malam (00:00)</option>
+                                        <option value="weekly" {{ $backupSettings['schedule'] === 'weekly' ? 'selected' : '' }}>Setiap Minggu — Minggu 00:00</option>
+                                        <option value="monthly" {{ $backupSettings['schedule'] === 'monthly' ? 'selected' : '' }}>Setiap Bulan — Tgl 1 00:00</option>
+                                        <option value="custom" {{ $backupSettings['schedule'] === 'custom' ? 'selected' : '' }}>Kustom — Ekspresi Cron</option>
                                     </select>
                                 </div>
-                                <div id="cron-expression-wrapper" class="{{ $backupSettings['schedule'] === 'custom' ? '' : 'hidden' }}">
-                                    <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Ekspresi Cron <span class="text-rose-500">*</span></label>
-                                    <input type="text" name="cron_expression" value="{{ old('cron_expression', $backupSettings['cron_expression']) }}" placeholder="* * * * *"
-                                           class="w-full font-mono text-sm px-3 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"/>
+
+                                {{-- Cron custom input --}}
+                                <div id="cron-expression-wrapper" class="{{ $backupSettings['schedule'] === 'custom' ? '' : 'hidden' }} space-y-3">
+                                    <div>
+                                        <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Ekspresi Cron <span class="text-rose-500">*</span></label>
+                                        <input type="text" name="cron_expression" id="cron-input"
+                                               value="{{ old('cron_expression', $backupSettings['cron_expression']) }}"
+                                               placeholder="0 2 * * *"
+                                               oninput="updateCronPreview()"
+                                               class="w-full font-mono text-sm px-3 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"/>
+                                    </div>
+                                    {{-- Cron quick presets --}}
+                                    <div class="flex flex-wrap gap-1.5">
+                                        <span class="text-[10px] font-mono text-slate-400 dark:text-zinc-500 self-center">Preset:</span>
+                                        @foreach([
+                                            ['0 2 * * *', 'Tiap hari 02:00'],
+                                            ['0 1 * * 0', 'Tiap Minggu 01:00'],
+                                            ['0 0 1 * *', 'Tiap Tgl 1'],
+                                            ['0 */6 * * *', 'Tiap 6 jam'],
+                                            ['0 0 * * 1-5', 'Hari kerja 00:00'],
+                                        ] as [$expr, $label])
+                                        <button type="button"
+                                                onclick="setCronPreset('{{ $expr }}')"
+                                                class="px-2 py-1 text-[10px] font-mono bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all">
+                                            {{ $label }}
+                                        </button>
+                                        @endforeach
+                                    </div>
                                 </div>
+
+                                {{-- Schedule preview --}}
+                                <div id="schedule-preview" class="flex items-start gap-2.5 px-3 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800">
+                                    <i class="fa-regular fa-clock text-indigo-500 mt-0.5 shrink-0"></i>
+                                    <div>
+                                        <span class="text-[10px] font-mono font-bold uppercase text-slate-400 dark:text-zinc-500 block">Jadwal Aktif:</span>
+                                        <span id="schedule-preview-text" class="text-[11px] text-slate-700 dark:text-zinc-300 font-mono"></span>
+                                    </div>
+                                </div>
+
+                                {{-- Local dev note --}}
+                                <!-- <div class="flex items-start gap-2.5 px-3 py-2.5 bg-amber-500/10 border border-amber-500/25">
+                                    <i class="fa-solid fa-circle-info text-amber-500 mt-0.5 shrink-0 text-xs"></i>
+                                    <div class="space-y-1">
+                                        <span class="text-[10px] font-mono font-bold uppercase text-amber-700 dark:text-amber-400 block">Cara Mengaktifkan Scheduler</span>
+                                        <p class="text-[10px] text-slate-600 dark:text-zinc-400">Scheduler Laravel membutuhkan satu cron entry di server:</p>
+                                        <div class="bg-zinc-900 border border-zinc-700 p-2 font-mono text-[10px] text-emerald-400">
+                                            * * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 dark:text-zinc-500">Di <strong>lokal/Windows</strong>: scheduler tidak berjalan otomatis karena tidak ada cron daemon. Gunakan <span class="font-mono bg-slate-200 dark:bg-zinc-800 px-1">php artisan schedule:run</span> atau jalankan backup manual dari tab <strong>Riwayat & Manual Run</strong>.</p>
+                                    </div>
+                                </div> -->
                             </div>
                         </div>
 
@@ -86,44 +132,40 @@
                                         <p class="text-[10px] text-slate-500 dark:text-zinc-400">Enkripsi berkas menggunakan algoritma OpenSSL militer.</p>
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer select-none" style="display:inline-flex!important;margin-bottom:0!important;">
-                                        <input type="checkbox" name="encryption_enabled" id="encrypt-toggle" value="1" class="sr-only peer" {{ $backupSettings['encryption_enabled'] ? 'checked' : '' }}>
-                                        <div class="w-11 h-6 bg-slate-300 dark:bg-zinc-800 rounded-full peer peer-focus:ring-2 peer-focus:ring-indigo-500/20 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                        <input type="checkbox" name="encryption_enabled" id="encrypt-toggle" value="1" class="sr-only peer" {{ $backupSettings['encryption_enabled'] ? 'checked' : '' }} {{ !$hasEncryptionKey ? 'disabled' : '' }}>
+                                        <div class="w-11 h-6 bg-slate-300 dark:bg-zinc-800 rounded-full peer peer-focus:ring-2 peer-focus:ring-indigo-500/20 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed"></div>
                                     </label>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Kunci Enkripsi Backup</label>
-                                    @if($hasPassphrase)
-                                        <div class="p-3 bg-emerald-500/10 border border-emerald-500/25 space-y-3">
-                                            <div class="flex items-center gap-2">
-                                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                                <span class="text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase">Kunci Aktif & Terpasang</span>
-                                            </div>
-                                            <p class="text-[10px] text-slate-550 dark:text-zinc-400">Kunci enkripsi 64-karakter hex telah dibuat. Seluruh backup berikutnya akan dienkripsi dengan kunci ini.</p>
-                                            <div class="flex flex-wrap gap-2 pt-1">
-                                                <button type="button" onclick="confirmKeyDownload()" class="inline-flex items-center gap-2 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-[10px] uppercase tracking-wider transition-all shadow-sm">
-                                                    <i class="fa-solid fa-download"></i> Download Kunci
-                                                </button>
-                                                <button type="button" onclick="confirmKeyRotation()" class="inline-flex items-center gap-2 py-2 px-4 bg-amber-600 hover:bg-amber-700 text-white font-mono font-bold text-[10px] uppercase tracking-wider transition-all shadow-sm">
-                                                    <i class="fa-solid fa-rotate"></i> Rotasi Kunci
-                                                </button>
-                                            </div>
+
+                                {{-- Encryption key status --}}
+                                @if($hasEncryptionKey)
+                                    <div class="flex items-center px-3 py-2.5 bg-emerald-500/10 border border-emerald-500/25">
+                                        
+                                        <div>
+                                            <span class="text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase block">Kunci Aktif di .env</span>
+                                            <span class="text-[10px] text-slate-500 dark:text-zinc-500">BACKUP_ENCRYPTION_KEY sudah terpasang di server.</span>
                                         </div>
-                                    @else
-                                        <div class="p-3 bg-rose-500/10 border border-rose-500/25 space-y-3">
-                                            <div class="flex items-center gap-2">
-                                                <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                                                <span class="text-[11px] font-mono font-bold text-rose-700 dark:text-rose-400 uppercase">Kunci Belum Dibuat</span>
+                                    </div>
+                                @else
+                                    <div class="flex items-start gap-2 px-3 py-2.5 bg-rose-500/10 border border-rose-500/25">
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500 shrink-0 mt-0.5"></span>
+                                        <div class="space-y-1.5">
+                                            <span class="text-[11px] font-mono font-bold text-rose-700 dark:text-rose-400 uppercase block">Kunci Belum Ada di .env</span>
+                                            <p class="text-[10px] text-slate-500 dark:text-zinc-400">Generate kunci lalu isi di <span class="font-mono">.env</span> server:</p>
+                                            <div class="bg-zinc-900 border border-zinc-700 p-2 font-mono text-[10px] text-emerald-400 space-y-1">
+                                                <div class="text-zinc-500"># 1. Generate kunci (jalankan di server):</div>
+                                                <div>php artisan tinker --execute <span class="text-amber-300">"echo base64_encode(random_bytes(32));"</span></div>
+                                                <div class="text-zinc-500 mt-1"># 2. Isi hasil di .env:</div>
+                                                <div>BACKUP_ENCRYPTION_KEY=<span class="text-amber-300">hasil_dari_command</span></div>
+                                                <div class="text-zinc-500 mt-1"># 3. Clear config:</div>
+                                                <div>php artisan config:clear</div>
                                             </div>
-                                            <p class="text-[10px] text-slate-550 dark:text-zinc-400">Buat kunci enkripsi terlebih dahulu untuk menggunakan fitur enkripsi backup.</p>
-                                            <button type="button" onclick="submitGenerateKey()" class="inline-flex items-center gap-2 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-mono font-bold text-[10px] uppercase tracking-wider transition-all shadow-sm">
-                                                <i class="fa-solid fa-key"></i> Buat Kunci Enkripsi
-                                            </button>
+                                            <p class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                                                <i class="fa-solid fa-triangle-exclamation"></i> Simpan kunci di luar server (password manager). Kehilangan kunci = tidak bisa buka backup.
+                                            </p>
                                         </div>
-                                    @endif
-                                    <span class="text-[10px] text-rose-550/95 block mt-2 font-semibold leading-relaxed">
-                                        <i class="fa-solid fa-circle-exclamation"></i> PENTING: Unduh dan simpan kunci. Berkas .enc tidak dapat dipulihkan tanpa kunci ini.
-                                    </span>
-                                </div>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="p-4 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 space-y-4">

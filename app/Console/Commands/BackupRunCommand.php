@@ -47,9 +47,9 @@ class BackupRunCommand extends Command
             if ($result['drive_uploaded']) {
                 $this->info("Google Drive: Berhasil diunggah (ID Berkas: {$result['drive_file_id']})");
             } else {
-                $backupSettings = \App\Models\PpdbSetting::getValue('backup_settings', []);
-                if (!empty($backupSettings['google_drive_enabled'])) {
-                    $this->warn("Google Drive: Gagal diunggah! Eror: " . ($result['drive_error'] ?? 'kredensial salah'));
+                $backupSettings = \App\Models\SecuritySetting::getValue('backup_settings', []);
+                if (! empty($backupSettings['google_drive_enabled'])) {
+                    $this->warn('Google Drive: Gagal diunggah! Eror: '.($result['drive_error'] ?? 'kredensial salah'));
                 }
             }
 

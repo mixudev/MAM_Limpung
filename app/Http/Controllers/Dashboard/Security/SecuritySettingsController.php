@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard\Security;
 
 use App\Http\Controllers\Controller;
+use App\Mail\BaseMail;
 use App\Models\SecuritySetting;
 use App\Services\SmtpService;
 use Exception;
@@ -16,23 +17,20 @@ use Illuminate\View\View;
 class SecuritySettingsController extends Controller
 {
     /**
-     * Show the Security settings page (Credentials only).
+     * Show the Security settings page.
      */
     public function index(): View
     {
-        // Google Credentials
-        $credentials = array_merge(
-            ['google_service_account_json' => ''],
-            SecuritySetting::getValue('security_credentials', [])
-        );
+        $securityCredentials = SecuritySetting::getValue('security_credentials', []);
 
-        $hasGoogleCredentials = ! empty($credentials['google_service_account_json']);
+        // Google Service Account (Workspace)
+        $hasGoogleCredentials = ! empty($securityCredentials['google_service_account_json']);
         $maskedGoogleJson = $hasGoogleCredentials ? '[Kredensial Google Service Account Tersimpan Secara Aman]' : '';
 
         $clientEmail = '-';
         if ($hasGoogleCredentials) {
             try {
-                $decryptedJson = Crypt::decryptString($credentials['google_service_account_json']);
+                $decryptedJson = Crypt::decryptString($securityCredentials['google_service_account_json']);
                 $credObj = json_decode($decryptedJson, true);
                 $clientEmail = $credObj['client_email'] ?? '-';
             } catch (Exception) {
@@ -40,25 +38,34 @@ class SecuritySettingsController extends Controller
             }
         }
 
-        // SMTP Credentials
-        $smtpDefaults = [
-            'host' => '',
-            'port' => 587,
-            'username' => '',
-            'password_encrypted' => '',
-            'encryption' => 'tls',
-            'from_address' => '',
-            'from_name' => config('app.name', 'MAM Limpung'),
-        ];
-        $smtpCredentials = array_merge($smtpDefaults, SecuritySetting::getValue('smtp_credentials', []));
-        $hasSmtpCredentials = ! empty($smtpCredentials['host']) && ! empty($smtpCredentials['username']);
+        // Google OAuth2 (personal Drive)
+        $hasOAuth2Credentials = false;
+        $encryptedOAuth2 = $securityCredentials['google_oauth2_credentials'] ?? '';
+
+        if (! empty($encryptedOAuth2)) {
+            try {
+                $tokenData = json_decode(Crypt::decryptString($encryptedOAuth2), true);
+                $hasOAuth2Credentials = ! empty($tokenData['refresh_token']);
+            } catch (Exception) {
+                // Silently ignore decryption errors; treat as not configured
+            }
+        }
+
+        $hasOAuth2EnvCredentials = ! empty(config('services.google_drive_oauth2.client_id'))
+            && ! empty(config('services.google_drive_oauth2.client_secret'));
+
+        // SMTP — read from config (driven by .env), never from DB
+        $hasSmtpCredentials = BaseMail::isConfigured();
+        $smtpConfig = BaseMail::getSmtpConfig();
 
         return view('dashboard.admin.security.settings', [
             'hasGoogleCredentials' => $hasGoogleCredentials,
             'maskedGoogleJson' => $maskedGoogleJson,
             'clientEmail' => $clientEmail,
-            'smtpCredentials' => $smtpCredentials,
+            'hasOAuth2Credentials' => $hasOAuth2Credentials,
+            'hasOAuth2EnvCredentials' => $hasOAuth2EnvCredentials,
             'hasSmtpCredentials' => $hasSmtpCredentials,
+            'smtpConfig' => $smtpConfig,
         ]);
     }
 
@@ -76,8 +83,7 @@ class SecuritySettingsController extends Controller
         $encryptedJson = $currentCredentials['google_service_account_json'] ?? '';
 
         if (! empty($newJsonInput) && ! str_contains($newJsonInput, 'Kredensial Google Service Account')) {
-            $decoded = json_decode($newJsonInput, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
+            if (json_decode($newJsonInput, true) === null || json_last_error() !== JSON_ERROR_NONE) {
                 return back()->withErrors(['google_service_account_json' => 'Format JSON tidak valid.'])->withInput();
             }
 
@@ -98,49 +104,7 @@ class SecuritySettingsController extends Controller
     }
 
     /**
-     * Update SMTP Credentials.
-     */
-    public function updateSmtpCredentials(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'host' => ['required', 'string', 'max:255'],
-            'port' => ['required', 'integer', 'min:1', 'max:65535'],
-            'username' => ['required', 'string', 'max:255'],
-            'password' => ['nullable', 'string'],
-            'encryption' => ['required', 'string', 'in:tls,ssl,none'],
-            'from_address' => ['required', 'email', 'max:255'],
-            'from_name' => ['required', 'string', 'max:255'],
-        ]);
-
-        $currentSmtp = SecuritySetting::getValue('smtp_credentials', []);
-
-        // Only update password if a new one is provided
-        $newPassword = $request->input('password');
-        $encryptedPassword = $currentSmtp['password_encrypted'] ?? '';
-
-        if (! empty($newPassword) && $newPassword !== '••••••••') {
-            try {
-                $encryptedPassword = Crypt::encryptString($newPassword);
-            } catch (Exception $e) {
-                return back()->withErrors(['password' => 'Gagal mengamankan password SMTP.'])->withInput();
-            }
-        }
-
-        SecuritySetting::setValue('smtp_credentials', [
-            'host' => $request->input('host'),
-            'port' => (int) $request->input('port'),
-            'username' => $request->input('username'),
-            'password_encrypted' => $encryptedPassword,
-            'encryption' => $request->input('encryption'),
-            'from_address' => $request->input('from_address'),
-            'from_name' => $request->input('from_name'),
-        ]);
-
-        return back()->with('success', 'Konfigurasi SMTP berhasil disimpan!');
-    }
-
-    /**
-     * Test SMTP Connection — sends a test email to the logged-in admin.
+     * Test SMTP Connection — sends a test email to verify .env SMTP config.
      */
     public function testSmtpConnection(Request $request, SmtpService $smtpService): JsonResponse
     {

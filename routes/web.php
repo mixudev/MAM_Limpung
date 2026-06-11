@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dashboard\Security\GoogleDriveOAuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,6 +17,11 @@ use Illuminate\Support\Facades\Route;
 |   3. dashboard.php — panel semua role (butuh auth)
 |
 */
+
+// Google Drive OAuth2 callback — intentionally outside auth middleware.
+// Google redirects here after consent; identity is verified via state token in session.
+Route::get('/admin/security/google-drive/callback', [GoogleDriveOAuthController::class, 'handleCallback'])
+    ->name('admin.security.google-drive.callback');
 
 require __DIR__.'/front.php';
 require __DIR__.'/auth.php';

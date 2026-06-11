@@ -13,6 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/img/logo.png" />
 
     <!-- Compiled Assets via Vite -->
+    <script>window.TURBO_ENABLED = true;</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Fonts & JS bundled via Vite (Alpine, Turbo, AOS, Sora, Plus Jakarta Sans) -->

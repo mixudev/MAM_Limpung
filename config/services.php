@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'google_drive_oauth2' => [
+        'client_id' => env('GOOGLE_DRIVE_OAUTH2_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_DRIVE_OAUTH2_CLIENT_SECRET'),
+    ],
+
 ];

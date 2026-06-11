@@ -33,7 +33,7 @@
             </button>
             <button type="button" onclick="switchTab('tab-permissions')" id="btn-tab-permissions" 
                     class="tab-btn px-6 py-3.5 text-xs font-mono font-bold uppercase tracking-wider border-b-2 border-transparent text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300 transition-all focus:outline-none">
-                Daftar Permissions (Read-only)
+                Daftar Permissions
             </button>
         </div>
 

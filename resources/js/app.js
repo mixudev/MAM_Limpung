@@ -9,6 +9,12 @@ window.Alpine = Alpine;
 // Start Alpine
 Alpine.start();
 
+// Turbo Drive is disabled globally — only enabled for mobile apps pages
+// (see mobile_apps/layouts/apps.blade.php which sets window.TURBO_ENABLED = true)
+if (!window.TURBO_ENABLED) {
+    Turbo.session.drive = false;
+}
+
 // AOS — reinitialize on Turbo navigations so animations replay after page transitions
 function initAOS() {
     AOS.init({

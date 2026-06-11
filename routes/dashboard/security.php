@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dashboard\Security\GoogleDriveOAuthController;
 use App\Http\Controllers\Dashboard\Security\RolePermissionController;
 use App\Http\Controllers\Dashboard\Security\SecuritySettingsController;
 use App\Http\Controllers\Dashboard\Security\SystemLogController;
@@ -29,8 +30,11 @@ Route::prefix('admin')
         // Security — Credentials only
         Route::get('/security', [SecuritySettingsController::class, 'index'])->name('security.index');
         Route::post('/security/credentials', [SecuritySettingsController::class, 'updateCredentials'])->name('security.credentials.update');
-        Route::post('/security/smtp', [SecuritySettingsController::class, 'updateSmtpCredentials'])->name('security.smtp.update');
         Route::post('/security/smtp/test', [SecuritySettingsController::class, 'testSmtpConnection'])->name('security.smtp.test');
+
+        // Google Drive OAuth2
+        Route::post('/security/google-drive/authorize', [GoogleDriveOAuthController::class, 'authorize'])->name('security.google-drive.authorize');
+        Route::post('/security/google-drive/revoke', [GoogleDriveOAuthController::class, 'revoke'])->name('security.google-drive.revoke');
 
         // System Logs
         Route::get('/logs', [SystemLogController::class, 'index'])->name('logs.index');

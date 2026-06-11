@@ -11,10 +11,52 @@
         activeBtn.classList.add('border-indigo-600', 'text-indigo-600', 'dark:text-white');
     }
 
-    function toggleCronInput() {
+    function updateSchedulePreview() {
         const schedule = document.getElementById('schedule-selector').value;
-        document.getElementById('cron-expression-wrapper').classList.toggle('hidden', schedule !== 'custom');
+        const cronWrapper = document.getElementById('cron-expression-wrapper');
+        const previewText = document.getElementById('schedule-preview-text');
+
+        cronWrapper.classList.toggle('hidden', schedule !== 'custom');
+
+        const presets = {
+            daily:   'Setiap hari pukul 00:00 (tengah malam)',
+            weekly:  'Setiap hari Minggu pukul 00:00',
+            monthly: 'Setiap tanggal 1 pukul 00:00',
+        };
+
+        if (schedule !== 'custom') {
+            previewText.textContent = presets[schedule] || '-';
+        } else {
+            updateCronPreview();
+        }
     }
+
+    function updateCronPreview() {
+        const expr = (document.getElementById('cron-input')?.value || '').trim();
+        const previewText = document.getElementById('schedule-preview-text');
+        previewText.textContent = expr ? parseCronHuman(expr) : '—';
+    }
+
+    function setCronPreset(expr) {
+        const input = document.getElementById('cron-input');
+        if (input) { input.value = expr; updateCronPreview(); }
+    }
+
+    function parseCronHuman(expr) {
+        const known = {
+            '0 0 * * *':   'Setiap hari pukul 00:00',
+            '0 2 * * *':   'Setiap hari pukul 02:00',
+            '0 1 * * 0':   'Setiap Minggu pukul 01:00',
+            '0 0 1 * *':   'Setiap tanggal 1 pukul 00:00',
+            '0 */6 * * *': 'Setiap 6 jam sekali',
+            '0 0 * * 1-5': 'Hari kerja (Senin–Jumat) pukul 00:00',
+            '* * * * *':   'Setiap menit (tidak disarankan untuk backup)',
+        };
+        return known[expr] || 'Ekspresi kustom: ' + expr;
+    }
+
+    // Init preview on page load
+    document.addEventListener('DOMContentLoaded', () => updateSchedulePreview());
 
     function toggleStorageFolders() {
         const checkbox = document.getElementById('backup-storage-checkbox');
@@ -181,6 +223,7 @@
         .then(data => {
             if (!data.success) return;
             const log = data.log;
+
             const statusBadge = log.status === 'success'
                 ? '<span class="inline-block text-[10px] font-bold px-2 py-0.5 bg-emerald-500 text-white">SUKSES</span>'
                 : '<span class="inline-block text-[10px] font-bold px-2 py-0.5 bg-rose-500 text-white">GAGAL</span>';
@@ -190,16 +233,17 @@
             const driveBadge = log.drive_uploaded
                 ? '<span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 border border-emerald-500/15"><i class="fa-brands fa-google-drive"></i> Terunggah</span>'
                 : '<span class="text-[10px] text-slate-400">Tidak</span>';
+            const ext = log.filename?.endsWith('.enc') ? '.enc (terenkripsi)' : '.zip';
 
             const rows = [
-                ['Nama Berkas', `<span class="font-mono text-[11px] break-all">${log.filename}</span>`],
-                ['Status', statusBadge],
-                ['Tanggal', log.created_at || '-'],
-                ['Tipe Backup', log.type || '-'],
-                ['Ukuran', data.formatted_size || '-'],
-                ['Durasi Proses', log.duration ? `${log.duration}s` : '-'],
-                ['Enkripsi', encBadge],
-                ['Google Drive', driveBadge],
+                ['Nama File',       `<span class="font-mono text-[11px] break-all">${log.filename}</span>`],
+                ['Status',          statusBadge],
+                ['Waktu Backup',    data.formatted_date],
+                ['Tipe Backup',     log.type || '-'],
+                ['Ukuran File',     data.formatted_size],
+                ['Durasi Proses',   log.duration ? `${log.duration} detik` : '-'],
+                ['Enkripsi',        encBadge],
+                ['Google Drive',    driveBadge],
             ];
 
             document.getElementById('backup-log-detail-grid').innerHTML = rows.map(([label, val]) =>
@@ -213,36 +257,26 @@
             const errBlock = document.getElementById('backup-log-error-block');
             if (log.error_message) {
                 errBlock.classList.remove('hidden');
-                errBlock.innerHTML = `<span class="font-bold block mb-1 text-rose-700"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Pesan Error:</span>${log.error_message}`;
-            } else { errBlock.classList.add('hidden'); }
+                errBlock.innerHTML = `<span class="font-bold block mb-1 text-rose-700 dark:text-rose-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Pesan Error:</span><span class="break-all">${log.error_message}</span>`;
+            } else {
+                errBlock.classList.add('hidden');
+            }
 
-            // Drive block
+            // Drive error block
             const driveBlock = document.getElementById('backup-log-drive-block');
             if (log.drive_file_id) {
                 driveBlock.classList.remove('hidden');
                 document.getElementById('backup-log-drive-id').textContent = log.drive_file_id;
-            } else { driveBlock.classList.add('hidden'); }
+            } else if (log.drive_error) {
+                driveBlock.classList.remove('hidden');
+                driveBlock.innerHTML = `<span class="block text-[9px] font-mono font-bold uppercase tracking-wider text-rose-500 mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Google Drive Error</span><span class="text-xs font-mono text-rose-600 dark:text-rose-400 break-all">${log.drive_error}</span>`;
+            } else {
+                driveBlock.classList.add('hidden');
+            }
 
             AppModal.open('backupLogDetailModal');
         })
         .catch(() => AppPopup.show({ type: 'error', title: 'Gagal', description: 'Tidak dapat memuat detail log.' }));
     }
 
-    function submitGenerateKey() { openPasswordConfirmModal('rotate'); }
-    function confirmKeyDownload() {
-        AppPopup.show({ type: 'custom', title: 'Unduh Kunci Enkripsi?', description: 'Kunci ini sangat rahasia. Simpan dengan aman!', confirmText: 'Unduh', cancelText: 'Batal',
-            onConfirm: () => openPasswordConfirmModal('download') });
-    }
-    function confirmKeyRotation() {
-        AppPopup.show({ type: 'warning', title: 'Rotasi Kunci?', description: 'Backup lama yang terenkripsi tidak bisa dibuka dengan kunci baru. Lanjutkan?', confirmText: 'Ya, Lanjutkan', cancelText: 'Batal',
-            onConfirm: () => openPasswordConfirmModal('rotate') });
-    }
-    function openPasswordConfirmModal(type) {
-        const form = document.getElementById('password-confirm-form');
-        document.getElementById('confirm_password_input').value = '';
-        form.action = type === 'download'
-            ? "{{ route('admin.backup.download-key') }}"
-            : "{{ route('admin.backup.generate-key') }}";
-        AppModal.open('passwordConfirmModal');
-    }
 </script>
