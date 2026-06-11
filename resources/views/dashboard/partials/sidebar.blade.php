@@ -105,7 +105,7 @@
             </ul>
         </div>
 
-                <div>
+        <div>
             <p
                 class="sidebar-section-title px-3 mb-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-white/50 dark:text-zinc-500">
                 Information</p>
@@ -210,12 +210,13 @@
             </ul>
         </div>
 
+        @hasrole('super-admin')
         <div>
+            
             <p
                 class="sidebar-section-title px-3 mb-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-white/50 dark:text-zinc-500">
                 Security</p>
             <ul class="space-y-0.5">
-                @if(Auth::user()->hasAnyPermission(['access-admin-dashboard', 'access-super-admin-dashboard']))
                 <li>
                     <a href="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.logs.index') : route('admin.logs.index') }}" data-page="audit" class="sidebar-link {{ Route::is('*.logs.*') ? 'active' : '' }}" aria-label="Log Sistem">
                         <span class="sidebar-icon w-5 h-5 shrink-0 flex items-center justify-center">
@@ -229,8 +230,7 @@
                         <span class="sidebar-tooltip">Log Sistem</span>
                     </a>
                 </li>
-                @endif
-                @hasrole('super-admin')
+
                 <li>
                     <a href="{{ route('super-admin.roles-permissions.index') }}" data-page="roles-permission" class="sidebar-link {{ Route::is('super-admin.roles-permissions.*') ? 'active' : '' }}" aria-label="Roles-Permission">
                         <span class="sidebar-icon w-5 h-5 shrink-0 flex items-center justify-center">
@@ -244,8 +244,7 @@
                         <span class="sidebar-tooltip">Roles & Permission</span>
                     </a>
                 </li>
-                @endhasrole
-                @can('view-users')
+
                 <li>
                     <a href="{{ Auth::user()->hasRole('super-admin') ? route('super-admin.users.index') : route('admin.users.index') }}" data-page="users" class="sidebar-link {{ Route::is('*.users.index') ? 'active' : '' }}" aria-label="User Accounts">
                         <span class="sidebar-icon w-5 h-5 shrink-0 flex items-center justify-center">
@@ -259,8 +258,7 @@
                         <span class="sidebar-tooltip">User Accounts</span>
                     </a>
                 </li>
-                @endcan
-                @if(Auth::user()->hasAnyPermission(['access-admin-dashboard', 'access-super-admin-dashboard']))
+
                 <li>
                     <a href="{{ route('admin.security.index') }}" data-page="security" class="sidebar-link {{ Route::is('admin.security.*') ? 'active' : '' }}" aria-label="Security">
                         <span class="sidebar-icon w-5 h-5 shrink-0 flex items-center justify-center">
@@ -287,7 +285,7 @@
                         <span class="sidebar-tooltip">Backup Data</span>
                     </a>
                 </li>
-                @endif
+                
 
                 <li>
                     <a href="#" data-page="apikeys" class="sidebar-link disabled" aria-label="API Keys">
@@ -303,6 +301,28 @@
                         <span class="sidebar-tooltip">API Keys</span>
                     </a>
                 </li>
+            </ul>
+        </div>
+        @endhasrole
+
+        <div>
+            <p
+                class="sidebar-section-title px-3 mb-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-white/50 dark:text-zinc-500">
+                Pengaturan 
+            </p>
+            <ul class="space-y-0.5">
+                <li>
+                    <a href="{{ route('user.profile.edit') }}" data-page="user.profile.edit" class="sidebar-link {{ Route::is('user.profile.edit') ? 'active' : '' }}" aria-label="Dashboard">
+                        <span class="sidebar-icon w-5 h-5 shrink-0 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+                            </svg>
+                        </span>
+                        <span class="sidebar-label">Profile</span>
+                        <span class="sidebar-tooltip">Profile</span>
+                    </a>
+                </li>
+                
             </ul>
         </div>
 

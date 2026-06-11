@@ -23,9 +23,9 @@ Route::prefix('super-admin')
         Route::delete('/logs/failed-job/{id}', [SystemLogController::class, 'deleteFailedJob'])->name('logs.failed-job.destroy');
     });
 
-Route::prefix('admin')
+Route::prefix('super-admin')
     ->name('admin.')
-    ->middleware(['auth', 'active', 'permission:access-admin-dashboard'])
+    ->middleware(['auth', 'active', 'permission:access-super-admin-dashboard'])
     ->group(function () {
         // Security — Credentials only
         Route::get('/security', [SecuritySettingsController::class, 'index'])->name('security.index');
@@ -36,10 +36,4 @@ Route::prefix('admin')
         Route::post('/security/google-drive/authorize', [GoogleDriveOAuthController::class, 'authorize'])->name('security.google-drive.authorize');
         Route::post('/security/google-drive/revoke', [GoogleDriveOAuthController::class, 'revoke'])->name('security.google-drive.revoke');
 
-        // System Logs
-        Route::get('/logs', [SystemLogController::class, 'index'])->name('logs.index');
-        Route::get('/logs/activity/{systemLog}', [SystemLogController::class, 'showActivity'])->name('logs.activity.show');
-        Route::get('/logs/failed-job/{id}', [SystemLogController::class, 'showFailedJob'])->name('logs.failed-job.show');
-        Route::post('/logs/failed-job/{id}/retry', [SystemLogController::class, 'retryFailedJob'])->name('logs.failed-job.retry');
-        Route::delete('/logs/failed-job/{id}', [SystemLogController::class, 'deleteFailedJob'])->name('logs.failed-job.destroy');
     });
