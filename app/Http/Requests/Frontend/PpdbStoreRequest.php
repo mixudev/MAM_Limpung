@@ -54,6 +54,13 @@ class PpdbStoreRequest extends FormRequest
 
         $formFields = PpdbSetting::getValue('form_fields', []);
         foreach ($formFields as $field) {
+            // Sanitasi field ID dari database — hanya izinkan karakter aman
+            // Mencegah injection ke validation rules via field ID berbahaya
+            $fieldId = preg_replace('/[^a-zA-Z0-9_]/', '', $field['id'] ?? '');
+            if (empty($fieldId)) {
+                continue;
+            }
+
             $fieldRules = [];
             $fieldRules[] = $field['required'] ? 'required' : 'nullable';
 
@@ -63,13 +70,23 @@ class PpdbStoreRequest extends FormRequest
                 $fieldRules[] = 'date';
             } else {
                 $fieldRules[] = 'string';
+                $fieldRules[] = 'max:500';
             }
 
             if ($field['type'] === 'select' && ! empty($field['options'])) {
-                $fieldRules[] = 'in:'.implode(',', $field['options']);
+                // Sanitasi options — hapus karakter yang bisa memanipulasi validation rules
+                $cleanOptions = array_filter(
+                    array_map(
+                        fn ($o) => preg_replace('/[,|\\\\]/', '', (string) $o),
+                        (array) $field['options']
+                    )
+                );
+                if (! empty($cleanOptions)) {
+                    $fieldRules[] = 'in:'.implode(',', $cleanOptions);
+                }
             }
 
-            $rules[$field['id']] = $fieldRules;
+            $rules[$fieldId] = $fieldRules;
         }
 
         return $rules;

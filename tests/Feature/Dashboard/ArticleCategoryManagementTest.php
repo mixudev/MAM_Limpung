@@ -27,18 +27,17 @@ test('unauthorized siswa cannot access article categories page', function () {
 
     $this->actingAs($siswa)
         ->get(route('admin.article-categories.index'))
-        ->assertStatus(302)
-        ->assertRedirect(route('frontend.home'));
+        ->assertStatus(403);
 });
 
 test('unauthorized guru cannot access article categories management', function () {
     $guru = User::factory()->create();
     $guru->assignRole('guru');
 
-    // Guru does not have access-admin-dashboard, so they are redirected
+    // Guru does not have access-admin-dashboard, so they are forbidden (403)
     $this->actingAs($guru)
         ->get(route('admin.article-categories.index'))
-        ->assertStatus(302);
+        ->assertStatus(403);
 });
 
 test('authorized admin can view article categories index page', function () {

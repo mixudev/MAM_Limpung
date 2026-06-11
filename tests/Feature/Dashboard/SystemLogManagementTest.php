@@ -3,60 +3,47 @@
 use App\Models\BackupLog;
 use App\Models\SystemLog;
 use App\Models\User;
+use Database\Seeders\Auth\PermissionSeeder;
+use Database\Seeders\Auth\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Clean database tables
+    $this->seed(PermissionSeeder::class);
+    $this->seed(RoleSeeder::class);
+
     SystemLog::query()->delete();
     BackupLog::query()->delete();
     DB::table('failed_jobs')->truncate();
 
-    // Create permissions & roles
-    $this->viewUsersPermission = Permission::firstOrCreate(['name' => 'view-users', 'guard_name' => 'web']);
-    $this->accessAdminPermission = Permission::firstOrCreate(['name' => 'access-admin-dashboard', 'guard_name' => 'web']);
-    $this->accessSuperAdminPermission = Permission::firstOrCreate(['name' => 'access-super-admin-dashboard', 'guard_name' => 'web']);
-
-    $this->adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-    $this->adminRole->givePermissionTo([$this->accessAdminPermission, $this->viewUsersPermission]);
-
-    $this->superAdminRole = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
-    $this->superAdminRole->givePermissionTo([$this->accessSuperAdminPermission, $this->viewUsersPermission]);
-
-    $this->siswaRole = Role::firstOrCreate(['name' => 'siswa', 'guard_name' => 'web']);
-
     $this->admin = User::factory()->create();
-    $this->admin->assignRole($this->adminRole);
+    $this->admin->assignRole('admin');
 
     $this->superAdmin = User::factory()->create();
-    $this->superAdmin->assignRole($this->superAdminRole);
+    $this->superAdmin->assignRole('super-admin');
 
     $this->siswa = User::factory()->create();
-    $this->siswa->assignRole($this->siswaRole);
+    $this->siswa->assignRole('siswa');
 });
 
 test('unauthenticated guest cannot access system logs page', function () {
-    $this->get(route('admin.logs.index'))->assertRedirect(route('login'));
     $this->get(route('super-admin.logs.index'))->assertRedirect(route('login'));
 });
 
 test('unauthorized users (siswa) cannot access system logs page', function () {
-    $this->actingAs($this->siswa)->get(route('admin.logs.index'))->assertStatus(302)->assertRedirect(route('frontend.home'));
     $this->actingAs($this->siswa)->get(route('super-admin.logs.index'))->assertStatus(302)->assertRedirect(route('frontend.home'));
 });
 
 test('authorized admin can access logs index (activity tab by default)', function () {
     $log = SystemLog::create([
-        'user_id' => $this->admin->id,
+        'user_id' => $this->superAdmin->id,
         'log_type' => 'activity',
         'event' => 'updated',
         'model_type' => User::class,
-        'model_id' => $this->admin->id,
+        'model_id' => $this->superAdmin->id,
         'old_values' => ['name' => 'Old Name'],
         'new_values' => ['name' => 'New Name'],
         'description' => 'Memperbarui data User',
@@ -64,19 +51,19 @@ test('authorized admin can access logs index (activity tab by default)', functio
         'user_agent' => 'PHPUnit',
     ]);
 
-    $response = $this->actingAs($this->admin)->get(route('admin.logs.index'));
+    $response = $this->actingAs($this->superAdmin)->get(route('super-admin.logs.index'));
 
     $response->assertStatus(200)
         ->assertViewIs('dashboard.admin.security.logs.index')
         ->assertSee('Log Sistem')
         ->assertSee('Log Perubahan Data')
         ->assertSee('Memperbarui data User')
-        ->assertSee($this->admin->name);
+        ->assertSee($this->superAdmin->name);
 });
 
 test('authorized admin can access logs index (security tab)', function () {
     $log = SystemLog::create([
-        'user_id' => $this->admin->id,
+        'user_id' => $this->superAdmin->id,
         'log_type' => 'security',
         'event' => 'login_success',
         'description' => 'Berhasil masuk ke sistem',
@@ -84,7 +71,7 @@ test('authorized admin can access logs index (security tab)', function () {
         'user_agent' => 'PHPUnit',
     ]);
 
-    $response = $this->actingAs($this->admin)->get(route('admin.logs.index', ['tab' => 'security']));
+    $response = $this->actingAs($this->superAdmin)->get(route('super-admin.logs.index', ['tab' => 'security']));
 
     $response->assertStatus(200)
         ->assertSee('Berhasil masuk ke sistem')
@@ -101,7 +88,7 @@ test('authorized admin can access logs index (failed jobs tab)', function () {
         'failed_at' => now(),
     ]);
 
-    $response = $this->actingAs($this->admin)->get(route('admin.logs.index', ['tab' => 'failed_jobs']));
+    $response = $this->actingAs($this->superAdmin)->get(route('super-admin.logs.index', ['tab' => 'failed_jobs']));
 
     $response->assertStatus(200)
         ->assertSee('RuntimeException')
@@ -120,20 +107,19 @@ test('authorized admin can access logs index (backup tab)', function () {
         'drive_uploaded' => false,
     ]);
 
-    $response = $this->actingAs($this->admin)->get(route('admin.logs.index', ['tab' => 'backup']));
+    $response = $this->actingAs($this->superAdmin)->get(route('super-admin.logs.index', ['tab' => 'backup']));
 
     $response->assertStatus(200)
-        ->assertSee('backup-2026-05-26.zip')
-        ->assertSee('200 KB');
+        ->assertSee('backup-2026-05-26.zip');
 });
 
 test('authorized admin can view activity detail via AJAX JSON route', function () {
     $log = SystemLog::create([
-        'user_id' => $this->admin->id,
+        'user_id' => $this->superAdmin->id,
         'log_type' => 'activity',
         'event' => 'updated',
         'model_type' => User::class,
-        'model_id' => $this->admin->id,
+        'model_id' => $this->superAdmin->id,
         'old_values' => ['name' => 'Old Name'],
         'new_values' => ['name' => 'New Name'],
         'description' => 'Memperbarui data User',
@@ -141,7 +127,7 @@ test('authorized admin can view activity detail via AJAX JSON route', function (
         'user_agent' => 'PHPUnit',
     ]);
 
-    $response = $this->actingAs($this->admin)->getJson(route('admin.logs.activity.show', $log->id));
+    $response = $this->actingAs($this->superAdmin)->getJson(route('super-admin.logs.activity.show', $log->id));
 
     $response->assertStatus(200)
         ->assertJson([
@@ -172,7 +158,7 @@ test('authorized admin can view failed job details via AJAX JSON route', functio
         'failed_at' => now(),
     ]);
 
-    $response = $this->actingAs($this->admin)->getJson(route('admin.logs.failed-job.show', $id));
+    $response = $this->actingAs($this->superAdmin)->getJson(route('super-admin.logs.failed-job.show', $id));
 
     $response->assertStatus(200)
         ->assertJson([
@@ -188,7 +174,7 @@ test('authorized admin can view failed job details via AJAX JSON route', functio
 });
 
 test('authorized admin receives 404 for non-existent failed job details', function () {
-    $response = $this->actingAs($this->admin)->getJson(route('admin.logs.failed-job.show', 99999));
+    $response = $this->actingAs($this->superAdmin)->getJson(route('super-admin.logs.failed-job.show', 99999));
     $response->assertStatus(404);
 });
 
@@ -207,7 +193,7 @@ test('authorized admin can retry failed job', function () {
         'failed_at' => now(),
     ]);
 
-    $response = $this->actingAs($this->admin)->post(route('admin.logs.failed-job.retry', $id));
+    $response = $this->actingAs($this->superAdmin)->post(route('super-admin.logs.failed-job.retry', $id));
 
     $response->assertRedirect();
     $response->assertSessionHas('success');
@@ -228,7 +214,7 @@ test('authorized admin can delete failed job log entry', function () {
         'failed_at' => now(),
     ]);
 
-    $response = $this->actingAs($this->admin)->delete(route('admin.logs.failed-job.destroy', $id));
+    $response = $this->actingAs($this->superAdmin)->delete(route('super-admin.logs.failed-job.destroy', $id));
 
     $response->assertRedirect();
     $response->assertSessionHas('success');

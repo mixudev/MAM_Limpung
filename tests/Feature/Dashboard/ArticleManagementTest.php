@@ -26,14 +26,12 @@ test('unauthenticated guest cannot access articles dashboard', function () {
     $this->post(route('admin.articles.store'), [])->assertRedirect(route('login'));
 });
 
-test('unauthorized siswa is blocked from articles dashboard', function () {
-    $siswa = User::factory()->create();
-    $siswa->assignRole('siswa');
+test('unauthorized user without access-dashboard permission is blocked from articles dashboard', function () {
+    $user = User::factory()->create(); // No roles assigned
 
-    $this->actingAs($siswa)
+    $this->actingAs($user)
         ->get(route('admin.articles.index'))
-        ->assertStatus(302)
-        ->assertRedirect(route('frontend.home'));
+        ->assertStatus(403);
 });
 
 test('authorized admin can view articles index page', function () {
@@ -227,11 +225,11 @@ test('HtmlSanitizer strips javascript: URI from href attributes', function () {
     expect($clean)->toContain('Klik sini');
 });
 
-test('HtmlSanitizer strips iframe and embed tags', function () {
+test('HtmlSanitizer strips unsafe iframe and embed tags', function () {
     $dirty = '<p>Konten aman</p><iframe src="https://evil.com"></iframe><embed src="bad.swf">';
     $clean = HtmlSanitizer::clean($dirty);
 
-    expect($clean)->not->toContain('<iframe');
+    expect($clean)->not->toContain('src="https://evil.com"');
     expect($clean)->not->toContain('<embed');
     expect($clean)->toContain('Konten aman');
 });

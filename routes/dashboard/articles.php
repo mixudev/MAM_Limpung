@@ -20,7 +20,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         });
 
     // -------------------------------------------------------------------------
-    //  Artikel CRUD (Admin, Super Admin, dan Guru)
+    //  Artikel CRUD (Admin, Super Admin, Guru, dan Siswa)
     // -------------------------------------------------------------------------
     Route::prefix('dashboard/articles')
         ->name('admin.articles.')
@@ -33,6 +33,13 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::get('/{article}/edit', [ArticleController::class, 'edit'])->name('edit');
             Route::put('/{article}', [ArticleController::class, 'update'])->name('update');
             Route::delete('/{article}', [ArticleController::class, 'destroy'])->name('destroy');
+        });
+
+    // Approve artikel — hanya Admin, Super Admin, dan Guru (BUKAN Siswa)
+    Route::prefix('dashboard/articles')
+        ->name('admin.articles.')
+        ->middleware('permission:access-admin-dashboard|access-super-admin-dashboard|access-guru-dashboard')
+        ->group(function () {
             Route::post('/{article}/approve', [ArticleController::class, 'approve'])->name('approve');
         });
 

@@ -20,11 +20,17 @@ use Illuminate\Support\Facades\Route;
 
 // Google Drive OAuth2 callback — intentionally outside auth middleware.
 // Google redirects here after consent; identity is verified via state token in session.
+// Throttle ditambahkan untuk mencegah brute force state token.
 Route::get('/admin/security/google-drive/callback', [GoogleDriveOAuthController::class, 'handleCallback'])
-    ->name('admin.security.google-drive.callback');
+    ->name('admin.security.google-drive.callback')
+    ->middleware('throttle:10,1');
 
 require __DIR__.'/front.php';
 require __DIR__.'/auth.php';
 require __DIR__.'/dashboard.php';
-require __DIR__.'/test.php';
 require __DIR__.'/mobile_apps.php';
+
+// Test routes — hanya aktif di lingkungan local
+if (app()->environment('local')) {
+    require __DIR__.'/test.php';
+}

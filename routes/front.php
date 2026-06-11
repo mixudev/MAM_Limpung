@@ -7,12 +7,14 @@ use App\Http\Controllers\Frontend\GaleriController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\JurusanController;
 use App\Http\Controllers\Frontend\KurikulumController;
+use App\Http\Controllers\Frontend\PegawaiController;
 use App\Http\Controllers\Frontend\PpdbController;
 use App\Http\Controllers\Frontend\PrestasiController;
 use App\Http\Controllers\Frontend\ProfileController;
 use App\Http\Controllers\Frontend\SeoController;
-use App\Http\Controllers\Frontend\PegawaiController;
+use App\Support\PpdbTempUploadManager;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +29,28 @@ use Illuminate\Support\Facades\Route;
 // Dynamic SEO Routes
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('frontend.seo.sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('frontend.seo.robots');
+
+// PPDB Temp File Preview — hanya bisa diakses oleh session yang sama (session-gated)
+// File disimpan di private disk; route ini menjadi satu-satunya cara preview
+Route::get('/ppdb/temp-preview/{field}', function (string $field) {
+    // Sanitasi field name
+    $field = preg_replace('/[^a-zA-Z0-9_]/', '', $field);
+
+    if (! PpdbTempUploadManager::has($field)) {
+        abort(404);
+    }
+
+    $path = PpdbTempUploadManager::path($field);
+    $allMeta = PpdbTempUploadManager::all();
+    $mime = $allMeta[$field]['mime'] ?? 'application/octet-stream';
+
+    $contents = Storage::disk('local')->get($path);
+    if ($contents === null) {
+        abort(404);
+    }
+
+    return response($contents, 200)->header('Content-Type', $mime);
+})->name('ppdb.temp.preview');
 
 Route::name('frontend.')->group(function () {
 

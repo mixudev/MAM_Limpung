@@ -210,26 +210,25 @@ class PpdbController extends Controller
     public function checkStatus(Request $request): View|RedirectResponse
     {
         $request->validate([
-            'nomor_registrasi' => ['required', 'string'],
-            'nisn' => ['required', 'string', 'digits:10'],
+            'keyword' => ['required', 'string', 'min:3', 'max:100'],
         ], [
-            'nomor_registrasi.required' => 'Nomor pendaftaran wajib diisi.',
-            'nisn.required' => 'NISN wajib diisi.',
-            'nisn.digits' => 'NISN harus berupa 10 digit angka.',
+            'keyword.required' => 'Kata kunci pencarian wajib diisi.',
+            'keyword.min' => 'Kata kunci minimal 3 karakter.',
         ]);
 
-        $nomorRegistrasi = strtoupper(trim($request->input('nomor_registrasi')));
-        $nisn = trim($request->input('nisn'));
+        $keyword = trim($request->input('keyword'));
+        $keywordUpper = strtoupper($keyword);
 
-        // Cocokkan Nomor Registrasi DAN NISN secara presisi untuk keamanan penuh
-        $ppdbSiswa = PpdbSiswa::where('nomor_registrasi', $nomorRegistrasi)
-            ->where('nisn', $nisn)
+        // Cari berdasarkan nomor registrasi, NISN, atau nama lengkap
+        $ppdbSiswa = PpdbSiswa::where('nomor_registrasi', $keywordUpper)
+            ->orWhere('nisn', $keyword)
+            ->orWhere('nama_lengkap', 'like', '%'.$keyword.'%')
             ->first();
 
         if (! $ppdbSiswa) {
             return back()
                 ->withInput()
-                ->withErrors(['error' => 'Nomor pendaftaran atau NISN tidak cocok / tidak ditemukan di sistem kami. Silakan periksa kembali data Anda.']);
+                ->withErrors(['error' => 'Data tidak ditemukan. Coba masukkan nomor pendaftaran, NISN, atau nama lengkap Anda.']);
         }
 
         // Hasilkan signed URL untuk cetak kartu pendaftaran dinamis

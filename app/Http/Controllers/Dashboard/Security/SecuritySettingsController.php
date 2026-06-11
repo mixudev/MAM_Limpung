@@ -104,20 +104,28 @@ class SecuritySettingsController extends Controller
     }
 
     /**
-     * Test SMTP Connection — sends a test email to verify .env SMTP config.
+     * Test SMTP Connection — mengirim email uji ke alamat email yang ditentukan.
+     *
+     * Keamanan: dibatasi hanya super-admin (middleware) dan rate-limited.
+     * Email tujuan divalidasi format-nya saja — super-admin dipercaya untuk tes ke email lain.
      */
     public function testSmtpConnection(Request $request, SmtpService $smtpService): JsonResponse
     {
         $request->validate([
-            'test_email' => ['required', 'email'],
+            'test_email' => ['required', 'email:rfc,dns'],
+        ], [
+            'test_email.required' => 'Alamat email tujuan uji coba wajib diisi.',
+            'test_email.email' => 'Format alamat email tidak valid.',
         ]);
 
+        $targetEmail = $request->input('test_email');
+
         try {
-            $smtpService->testConnection($request->input('test_email'));
+            $smtpService->testConnection($targetEmail);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Email uji coba berhasil dikirim ke '.$request->input('test_email').'. Silakan cek inbox Anda.',
+                'message' => 'Email uji coba berhasil dikirim ke '.$targetEmail.'. Silakan cek inbox.',
             ]);
         } catch (Exception $e) {
             Log::error('SMTP Test Failed: '.$e->getMessage());

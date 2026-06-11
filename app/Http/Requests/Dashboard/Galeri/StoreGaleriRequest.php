@@ -30,7 +30,13 @@ class StoreGaleriRequest extends FormRequest
             'photos' => ['nullable', 'array'],
             'photos.*' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'links' => ['nullable', 'array'],
-            'links.*' => ['nullable', 'url'],
+            'links.*' => [
+                'nullable',
+                'url',
+                // Whitelist domain yang diizinkan untuk link foto eksternal
+                // Mencegah SSRF, internal network access, dan konten berbahaya
+                'regex:/^https:\/\/(drive\.google\.com|photos\.google\.com|lh[0-9]+\.googleusercontent\.com|res\.cloudinary\.com|i\.imgur\.com|imgur\.com|ibb\.co|i\.ibb\.co|postimg\.cc|i\.postimg\.cc|dropbox\.com|dl\.dropboxusercontent\.com|onedrive\.live\.com|1drv\.ms)\//i',
+            ],
             'cover_type' => ['required', 'string', 'in:file,link'],
             'cover_index' => ['required', 'integer'],
         ];

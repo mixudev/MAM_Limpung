@@ -21,7 +21,7 @@ use Spatie\Permission\Models\Role;
 // ============================================================================
 
 Route::prefix('auth')->name('api.auth.')->group(function () {
-    Route::post('/login', [ApiAuthController::class, 'login'])->name('login')->middleware('throttle:5,1');
+    Route::post('/login', [ApiAuthController::class, 'login'])->name('login')->middleware('throttle:api-login');
 });
 
 // ============================================================================

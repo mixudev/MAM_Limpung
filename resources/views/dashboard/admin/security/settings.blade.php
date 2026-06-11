@@ -282,6 +282,7 @@
                             <input type="email" id="smtp-test-email" value="{{ auth()->user()->email }}"
                                 placeholder="Email penerima uji coba"
                                 class="w-full font-mono text-xs px-3 py-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                            <p class="text-[10px] text-slate-400 dark:text-zinc-500">Isi email tujuan. Default email akun Anda sendiri.</p>
                             <button type="button" onclick="testSmtpConnection()"
                                     id="smtp-test-btn"
                                     class="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-[10px] uppercase tracking-wider transition-all shadow-sm flex items-center justify-center gap-2">
@@ -370,10 +371,19 @@
 
         fetch("{{ route('admin.security.smtp.test') }}", {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
             body: JSON.stringify({ test_email: email })
         })
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok && r.headers.get('content-type')?.includes('text/html')) {
+                throw new Error('Sesi habis atau tidak diizinkan. Silakan refresh halaman dan coba lagi.');
+            }
+            return r.json();
+        })
         .then(data => {
             btn.disabled = false;
             icon.className = 'fa-solid fa-paper-plane';

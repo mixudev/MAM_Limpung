@@ -8,6 +8,16 @@
                 breadcrumb.textContent = 'Edit Profil Diri';
             }
         });
+
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatar-preview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
     </script>
 
     <div class="max-w-6xl space-y-6">
@@ -41,7 +51,10 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
             <!-- Left: Profile Summary Avatar Card -->
             <div
@@ -52,26 +65,22 @@
                 </span>
 
                 <div class="flex flex-col items-center py-4">
-                    <div class="relative group">
-                        @if (auth()->user()->avatar)
-                            <img 
-                                src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://ui-avatars.com/api/?name=' . auth()->user()->name }}"
-                                alt="{{ $user->name }}"
-                                class="w-28 h-28 border-4 border-indigo-50 dark:border-zinc-800 shadow-sm transition-all group-hover:scale-105 duration-300 object-cover">
-                        @else
-                            <div class="flex justify-center border border-slate-200 dark:border-zinc-800 rounded-lg p-4">
-                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path
-                                        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
-                                </svg>
-                                </svg>
-                            </div>
-                        @endif
+                    <div class="relative group cursor-pointer w-28 h-28 mx-auto" onclick="document.getElementById('avatar-input').click()">
+                        <img id="avatar-preview" 
+                            src="{{ auth()->user()->avatarUrl() }}"
+                            alt="{{ $user->name }}"
+                            class="w-28 h-28 border-4 border-indigo-50 dark:border-zinc-800 shadow-sm transition-all group-hover:scale-105 duration-300 object-cover">
                         <div
-                            class="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity font-mono cursor-default">
+                            class="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity font-mono cursor-pointer">
                             Ganti Avatar
                         </div>
                     </div>
+                    
+                    <input type="file" id="avatar-input" name="avatar" class="hidden" accept="image/*" onchange="previewAvatar(this)">
+                    
+                    @error('avatar')
+                        <span class="text-[10px] text-rose-500 block mt-2 text-center">{{ $message }}</span>
+                    @enderror
 
                     <h2 class="text-base font-extrabold text-slate-800 dark:text-white mt-4 tracking-tight leading-tight">
                         {{ $user->name }}
@@ -106,9 +115,7 @@
             <!-- Right: Edit Form Card -->
             <div
                 class="lg:col-span-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 shadow-sm space-y-6">
-                <form action="{{ route('user.profile.update') }}" method="POST" class="space-y-6">
-                    @csrf
-                    @method('PUT')
+                <div class="space-y-6">
 
                     <!-- Section 1: Personal Data -->
                     <div>
@@ -202,8 +209,9 @@
                             Simpan Perubahan Profil
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
+            </form>
         </div>
     </div>
 @endsection

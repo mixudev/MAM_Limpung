@@ -29,9 +29,9 @@ test('unauthorized user cannot access announcements index or sub-resource action
     $siswa = User::factory()->create();
     $siswa->assignRole('siswa');
 
-    $this->actingAs($siswa)->get(route('admin.announcements.index'))->assertStatus(302)->assertRedirect(route('frontend.home'));
-    $this->actingAs($siswa)->get(route('admin.announcements.texts.create'))->assertStatus(302)->assertRedirect(route('frontend.home'));
-    $this->actingAs($siswa)->post(route('admin.announcements.texts.store'), [])->assertStatus(302)->assertRedirect(route('frontend.home'));
+    $this->actingAs($siswa)->get(route('admin.announcements.index'))->assertStatus(403);
+    $this->actingAs($siswa)->get(route('admin.announcements.texts.create'))->assertStatus(403);
+    $this->actingAs($siswa)->post(route('admin.announcements.texts.store'), [])->assertStatus(403);
 });
 
 test('authorized admin can load announcements index aggregator page with three sections', function () {

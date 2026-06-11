@@ -55,13 +55,30 @@ class UserAccountController extends Controller
 
     public function store(StoreUserRequest $request): RedirectResponse
     {
+        // Explicit authorization check (StoreUserRequest::authorize() sudah cek 'create-users',
+        // tapi kita tambahkan Gate check eksplisit sebagai defense-in-depth)
+        Gate::authorize('create-users', User::class);
+
         $data = $request->validated();
         $data['password'] = Hash::make($data['password']);
         $data['is_active'] = true;
 
         /** @var User $user */
         $user = User::create($data);
-        $user->syncRoles($request->input('roles'));
+
+        // Proteksi privilege escalation:
+        // Admin tidak boleh assign role yang level-nya lebih tinggi dari role mereka sendiri
+        $requestedRoles = $request->input('roles', []);
+        $allowedRoles = $this->getAssignableRoles($request->user());
+        $filteredRoles = array_values(array_intersect($requestedRoles, $allowedRoles));
+
+        $user->syncRoles($filteredRoles);
+
+        SystemLogService::logSecurity(
+            'user_created',
+            "Akun baru dibuat untuk '{$user->name}' ({$user->email}) dengan role: ".implode(', ', $filteredRoles),
+            $request->user()
+        );
 
         return redirect()->back()
             ->with('success', "Akun untuk '{$user->name}' berhasil ditambahkan.");
@@ -100,7 +117,13 @@ class UserAccountController extends Controller
 
         $data['is_active'] = $request->boolean('is_active');
         $user->update($data);
-        $user->syncRoles($request->input('roles'));
+
+        // Proteksi privilege escalation saat update role
+        $requestedRoles = $request->input('roles', []);
+        $allowedRoles = $this->getAssignableRoles($request->user());
+        $filteredRoles = array_values(array_intersect($requestedRoles, $allowedRoles));
+        $user->syncRoles($filteredRoles);
+
         $user->syncPermissions($request->input('permissions', []));
 
         return redirect()->back()
@@ -133,7 +156,7 @@ class UserAccountController extends Controller
         $verificationUrl = URL::temporarySignedRoute(
             'verification.verify',
             now()->addDays(3),
-            ['id' => $user->id, 'hash' => sha1($user->email)]
+            ['id' => $user->id, 'hash' => hash('sha256', $user->email)]
         );
 
         $sent = app(SmtpService::class)->sendQuiet(
@@ -158,6 +181,32 @@ class UserAccountController extends Controller
     }
 
     /**
+     * Dapatkan daftar role yang boleh di-assign oleh user yang sedang login.
+     *
+     * Aturan privilege escalation prevention:
+     * - super-admin: boleh assign semua role
+     * - admin: hanya boleh assign guru dan siswa (tidak bisa assign admin/super-admin)
+     * - role lain: tidak bisa assign role apapun (tidak akan sampai sini karena middleware)
+     *
+     * @return array<string>
+     */
+    private function getAssignableRoles(User $actor): array
+    {
+        if ($actor->hasRole('super-admin')) {
+            // Super admin bisa assign role apapun
+            return Role::pluck('name')->toArray();
+        }
+
+        if ($actor->hasRole('admin')) {
+            // Admin hanya bisa assign role di bawahnya
+            return ['guru', 'siswa'];
+        }
+
+        // Role lain tidak bisa assign role
+        return [];
+    }
+
+    /**
      * Generate secure password reset link for user.
      */
     public function generateResetPasswordLink(Request $request, User $user): RedirectResponse
@@ -177,7 +226,7 @@ class UserAccountController extends Controller
         $resetUrl = URL::temporarySignedRoute(
             'password.reset.direct',
             now()->addHours(2),
-            ['id' => $user->id, 'token' => $token]
+            ['uuid' => $user->uuid, 'token' => $token]
         );
 
         $sent = app(SmtpService::class)->sendQuiet(

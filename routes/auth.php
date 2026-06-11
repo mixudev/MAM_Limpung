@@ -41,10 +41,10 @@ Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->name('verification.verify')
     ->middleware('signed');
 
-Route::get('/reset-password-direct/{id}/{token}', [AuthController::class, 'showDirectResetPassword'])
+Route::get('/reset-password-direct/{uuid}/{token}', [AuthController::class, 'showDirectResetPassword'])
     ->name('password.reset.direct')
     ->middleware('signed');
 
-Route::post('/reset-password-direct/{id}/{token}', [AuthController::class, 'handleDirectResetPassword'])
+Route::post('/reset-password-direct/{uuid}/{token}', [AuthController::class, 'handleDirectResetPassword'])
     ->name('password.update.direct')
     ->middleware('signed');

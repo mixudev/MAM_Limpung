@@ -77,18 +77,19 @@ class ApiAuthController extends Controller
     }
 
     /**
-     * Resolve Sanctum token abilities from the user's roles.
-     * This prevents clients from self-escalating their own token permissions.
+     * Resolve Sanctum token abilities dari role user.
+     * Mencegah client self-escalate permission token mereka.
+     * Tidak menggunakan wildcard ['*'] karena token bisa bocor.
      *
      * @return array<string>
      */
     protected function resolveAbilities(User $user): array
     {
         $roleAbilities = [
-            'super-admin' => ['*'],
+            'super-admin' => ['read', 'write', 'manage-users', 'manage-system', 'manage-backup', 'manage-security'],
             'admin' => ['read', 'write', 'manage-users'],
-            'guru' => ['read', 'write:courses', 'write:grades'],
-            'siswa' => ['read'],
+            'guru' => ['read', 'write:articles', 'write:galeri', 'write:prestasi'],
+            'siswa' => ['read', 'write:own-articles', 'write:own-galeri'],
         ];
 
         foreach ($roleAbilities as $role => $abilities) {
@@ -97,7 +98,7 @@ class ApiAuthController extends Controller
             }
         }
 
-        // Default: read-only for unrecognised roles.
+        // Default: read-only untuk role tidak dikenal.
         return ['read'];
     }
 

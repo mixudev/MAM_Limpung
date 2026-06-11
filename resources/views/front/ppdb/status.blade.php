@@ -163,57 +163,38 @@
                             </div>
                         @endif
 
-                        <!-- Nomor Registrasi Input -->
+                        <!-- Single Search Input -->
                         <div class="space-y-1.5">
-                            <label for="nomor_registrasi" class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">Nomor Pendaftaran / Registrasi</label>
+                            <label for="keyword" class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">
+                                Nomor Pendaftaran / NISN / Nama Lengkap
+                            </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                                    <i class="fa-solid fa-receipt text-sm"></i>
+                                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
                                 </div>
-                                <input type="text" 
-                                       name="nomor_registrasi" 
-                                       id="nomor_registrasi" 
-                                       value="{{ old('nomor_registrasi') }}" 
-                                       placeholder="Contoh: PPDB-2026-X8F3D" 
-                                       class="block w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:border-blue-900 text-sm font-semibold rounded-none uppercase tracking-wide @error('nomor_registrasi') border-red-500 @enderror"
-                                       required>
+                                <input type="text"
+                                       name="keyword"
+                                       id="keyword"
+                                       value="{{ old('keyword') }}"
+                                       placeholder="Contoh: PPDB-2026-XXXXX atau 0123456789 atau Budi Santoso"
+                                       autocomplete="off"
+                                       class="block w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:border-blue-900 text-sm font-semibold rounded-none tracking-wide @error('keyword') border-red-500 @enderror">
                             </div>
-                            @error('nomor_registrasi')
+                            @error('keyword')
                                 <p class="text-[10px] font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <!-- NISN Input -->
-                        <div class="space-y-1.5">
-                            <label for="nisn" class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">NISN (10 Digit Angka)</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                                    <i class="fa-solid fa-id-card text-sm"></i>
-                                </div>
-                                <input type="text" 
-                                       name="nisn" 
-                                       id="nisn" 
-                                       maxlength="10" 
-                                       value="{{ old('nisn') }}" 
-                                       placeholder="Masukkan 10 digit NISN Anda" 
-                                       class="block w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:border-blue-900 text-sm font-semibold rounded-none tracking-wider @error('nisn') border-red-500 @enderror"
-                                       required>
-                            </div>
-                            @error('nisn')
-                                <p class="text-[10px] font-semibold text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Info Alert Security -->
+                        <!-- Info -->
                         <div class="bg-blue-50/50 border border-blue-100 p-3.5 text-blue-950 flex items-start gap-3">
-                            <i class="fa-solid fa-shield-halved mt-0.5 text-blue-800 text-sm"></i>
+                            <i class="fa-solid fa-circle-info mt-0.5 text-blue-800 text-sm"></i>
                             <p class="text-[10px] text-blue-850 font-medium leading-relaxed">
-                                **Keamanan Terjamin**: Data pendaftaran Anda dilindungi sistem enkripsi. Pencarian membutuhkan **Nomor Registrasi + NISN** resmi yang terdaftar untuk mencegah kebocoran informasi.
+                                Masukkan salah satu dari: <strong>Nomor Pendaftaran</strong> (contoh: PPDB-2026-XXXXX), <strong>NISN</strong> (10 digit), atau <strong>Nama Lengkap</strong>.
                             </p>
                         </div>
 
-                        <!-- Action Submit Button -->
-                        <button type="submit" 
+                        <!-- Submit -->
+                        <button type="submit"
                                 class="w-full bg-blue-900 text-white py-4 px-6 font-bold hover:bg-black transition-all duration-300 uppercase tracking-widest text-xs inline-flex items-center justify-center gap-2.5 shadow-xl shadow-blue-900/10 rounded-none">
                             <i class="fa-solid fa-magnifying-glass text-xs"></i>
                             Cari Status Pendaftaran

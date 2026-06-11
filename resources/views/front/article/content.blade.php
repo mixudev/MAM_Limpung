@@ -173,13 +173,13 @@
                 </a>
                 
                 <!-- Telegram -->
-                {{-- <a href="https://telegram.me/share/url?url={{ urlencode(route('frontend.article.show', $article->slug)) }}&text={{ rawurlencode($article->judul) }}" 
+                <a href="https://telegram.me/share/url?url={{ urlencode(route('frontend.article.show', $article->slug)) }}&text={{ rawurlencode($article->judul) }}" 
                    target="_blank" 
                    rel="noopener noreferrer"
                    class="w-10 h-10 rounded-full bg-[#0088cc] hover:bg-[#0077b5] text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md"
                    title="Bagikan ke Telegram">
                     <i class="fa-brands fa-telegram text-base"></i>
-                </a> --}}
+                </a>
                 
                 <!-- LinkedIn -->
                 <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(route('frontend.article.show', $article->slug)) }}" 

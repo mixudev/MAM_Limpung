@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,6 +40,16 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('ppdb-submit', function (Request $request) {
             return Limit::perMinute(5)
                 ->by($request->input('nisn') ?: $request->ip());
+        });
+
+        // API Login rate limiter — dua lapisan:
+        //   1. Per IP + email  → mencegah single-source brute force
+        //   2. Per email saja  → mencegah distributed botnet attack
+        RateLimiter::for('api-login', function (Request $request) {
+            return [
+                Limit::perMinute(5)->by($request->ip().'|'.Str::lower($request->input('email', ''))),
+                Limit::perMinute(15)->by('api-email|'.Str::lower($request->input('email', ''))),
+            ];
         });
 
         // Share site settings dynamically with caching

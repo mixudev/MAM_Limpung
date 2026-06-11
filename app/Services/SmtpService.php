@@ -46,15 +46,41 @@ class SmtpService
 
         $cfg = BaseMail::getSmtpConfig();
 
-        $mailer = Mail::build([
+        $transportConfig = [
             'transport' => 'smtp',
             'host' => $cfg['host'],
             'port' => (int) $cfg['port'],
             'username' => $cfg['username'],
             'password' => $cfg['password'],
             'encryption' => $cfg['encryption'],
-            'timeout' => 3, // Dioptimalkan menjadi 3 detik agar tidak memblokir proses terlalu lama jika gagal
-        ]);
+            'timeout' => 10,
+        ];
+
+        // -----------------------------------------------------------------------
+        //  SSL CA bundle — di Windows PHP sering tidak punya CA bundle bawaan,
+        //  menyebabkan "SSL certificate verify failed". Gunakan cacert.pem lokal
+        //  atau curl.cainfo dari php.ini jika tersedia.
+        // -----------------------------------------------------------------------
+        $cacertPath = storage_path('app/cacert.pem');
+        if (file_exists($cacertPath)) {
+            $transportConfig['stream'] = [
+                'ssl' => [
+                    'cafile' => $cacertPath,
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                ],
+            ];
+        } elseif (! empty(ini_get('curl.cainfo')) && file_exists(ini_get('curl.cainfo'))) {
+            $transportConfig['stream'] = [
+                'ssl' => [
+                    'cafile' => ini_get('curl.cainfo'),
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                ],
+            ];
+        }
+
+        $mailer = Mail::build($transportConfig);
 
         $mailable->from($cfg['from_address'], $cfg['from_name']);
 

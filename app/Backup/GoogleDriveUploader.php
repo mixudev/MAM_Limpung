@@ -23,10 +23,6 @@ class GoogleDriveUploader
     {
         $client = $this->buildAuthenticatedClient();
 
-        if (app()->environment('local')) {
-            $client->setHttpClient(new GuzzleClient(['verify' => false]));
-        }
-
         $driveService = new GoogleDrive($client);
 
         $backupSettings = SecuritySetting::getValue('backup_settings', []);
@@ -67,6 +63,19 @@ class GoogleDriveUploader
     {
         $client = new GoogleClient;
         $client->addScope(GoogleDrive::DRIVE_FILE);
+
+        // -----------------------------------------------------------------------
+        //  SSL CA bundle — di Windows, PHP sering tidak punya CA bundle bawaan.
+        //  Gunakan cacert.pem yang disimpan di storage/app jika ada,
+        //  lalu fallback ke curl.cainfo dari php.ini.
+        //  Jangan pernah set verify=false di production.
+        // -----------------------------------------------------------------------
+        $cacertPath = storage_path('app/cacert.pem');
+        if (file_exists($cacertPath)) {
+            $client->setHttpClient(new GuzzleClient(['verify' => $cacertPath]));
+        } elseif (! empty(ini_get('curl.cainfo')) && file_exists(ini_get('curl.cainfo'))) {
+            $client->setHttpClient(new GuzzleClient(['verify' => ini_get('curl.cainfo')]));
+        }
 
         // Try OAuth2 first (works with personal Gmail / Google Drive)
         $oauth2Credentials = $this->getOAuth2Credentials();

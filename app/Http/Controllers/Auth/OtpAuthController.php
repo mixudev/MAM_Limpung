@@ -99,15 +99,23 @@ class OtpAuthController extends Controller
 
         if (now()->gt($record->expires_at)) {
             DB::table('otp_codes')->where('email', $request->email)->delete();
+
             return redirect()->route('login.otp')->with('error', 'Kode OTP telah kedaluwarsa. Silakan minta kode baru.');
         }
 
-        // Increment attempts first (OWASP Top 10: Rate Limiting & Attempt Capping)
+        // Increment attempts secara atomik menggunakan lockForUpdate()
+        // Mencegah race condition saat dua request concurrent masuk bersamaan
         DB::table('otp_codes')->where('email', $request->email)->increment('attempts');
-        $currentAttempts = $record->attempts + 1;
+        $updatedRecord = DB::table('otp_codes')
+            ->where('email', $request->email)
+            ->lockForUpdate()
+            ->first();
+
+        $currentAttempts = $updatedRecord ? $updatedRecord->attempts : 3;
 
         if ($currentAttempts >= 3) {
             DB::table('otp_codes')->where('email', $request->email)->delete();
+
             return redirect()->route('login.otp')->with('error', 'Terlalu banyak kegagalan verifikasi. Kode OTP dinonaktifkan demi alasan keamanan.');
         }
 
@@ -140,6 +148,7 @@ class OtpAuthController extends Controller
         }
 
         $remaining = 3 - $currentAttempts;
+
         return redirect()->back()
             ->withInput()
             ->with('error', "Kode OTP salah. Sisa percobaan: {$remaining} kali.");

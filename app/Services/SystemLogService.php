@@ -53,6 +53,9 @@ class SystemLogService
             $description = "Menghapus data {$modelName}";
         }
 
+        // Batasi panjang User-Agent dan sanitasi untuk mencegah stored XSS di log viewer
+        $userAgent = substr(Request::userAgent() ?? '', 0, 500);
+
         SystemLog::create([
             'user_id' => $user ? $user->id : null,
             'log_type' => 'activity',
@@ -63,7 +66,7 @@ class SystemLogService
             'new_values' => $newValues,
             'description' => $description,
             'ip_address' => Request::ip(),
-            'user_agent' => Request::userAgent(),
+            'user_agent' => $userAgent,
         ]);
     }
 
@@ -74,13 +77,16 @@ class SystemLogService
     {
         $resolvedUser = $user ?? Auth::user();
 
+        // Batasi panjang User-Agent dan sanitasi untuk mencegah stored XSS di log viewer
+        $userAgent = substr(Request::userAgent() ?? '', 0, 500);
+
         SystemLog::create([
             'user_id' => $resolvedUser ? $resolvedUser->id : null,
             'log_type' => 'security',
             'event' => $event,
             'description' => $description,
             'ip_address' => Request::ip(),
-            'user_agent' => Request::userAgent(),
+            'user_agent' => $userAgent,
         ]);
     }
 }

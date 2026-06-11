@@ -95,7 +95,7 @@ class AuthController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (! hash_equals((string) $hash, sha1($user->email))) {
+        if (! hash_equals((string) $hash, hash('sha256', $user->email))) {
             abort(403, 'Tanda tangan hash tidak valid.');
         }
 
@@ -112,9 +112,9 @@ class AuthController extends Controller
     /**
      * Show direct password reset form.
      */
-    public function showDirectResetPassword(Request $request, $id, $token): View
+    public function showDirectResetPassword(Request $request, $uuid, $token): View
     {
-        $user = User::findOrFail($id);
+        $user = User::where('uuid', $uuid)->firstOrFail();
 
         // Check if token exists and is valid in database
         $record = DB::table('password_reset_tokens')
@@ -126,7 +126,7 @@ class AuthController extends Controller
         }
 
         return view('auth.reset-password-direct', [
-            'id' => $id,
+            'uuid' => $uuid,
             'token' => $token,
             'email' => $user->email,
         ]);
@@ -135,7 +135,7 @@ class AuthController extends Controller
     /**
      * Handle direct password reset form submission.
      */
-    public function handleDirectResetPassword(Request $request, $id, $token): RedirectResponse
+    public function handleDirectResetPassword(Request $request, $uuid, $token): RedirectResponse
     {
         $request->validate([
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -145,7 +145,7 @@ class AuthController extends Controller
             'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
         ]);
 
-        $user = User::findOrFail($id);
+        $user = User::where('uuid', $uuid)->firstOrFail();
 
         $record = DB::table('password_reset_tokens')
             ->where('email', $user->email)

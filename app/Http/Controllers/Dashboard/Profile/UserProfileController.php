@@ -9,6 +9,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -35,6 +37,7 @@ class UserProfileController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ];
 
         // If new password is provided, validate password and current password
@@ -43,7 +46,11 @@ class UserProfileController extends Controller
             $rules['new_password'] = ['required', 'string', Password::defaults(), 'confirmed'];
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+            'avatar.image' => 'File avatar harus berupa gambar.',
+            'avatar.mimes' => 'Format file avatar harus jpeg, png, jpg, atau webp.',
+            'avatar.max' => 'Ukuran gambar avatar maksimal 2MB.',
+        ]);
 
         // Verify current password if changing password
         if ($request->filled('new_password')) {
@@ -54,6 +61,22 @@ class UserProfileController extends Controller
             }
 
             $user->password = Hash::make($validated['new_password']);
+        }
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+
+            // Hapus berkas avatar lama jika ada
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Nama berkas acak yang aman
+            $safeName = Str::random(40).'.'.$file->guessExtension();
+            $path = $file->storeAs('avatars', $safeName, 'public');
+
+            $user->avatar = $path;
         }
 
         $user->name = $validated['name'];

@@ -3,22 +3,19 @@
 use App\Models\PpdbSetting;
 use App\Models\SecuritySetting;
 use App\Models\User;
+use Database\Seeders\Auth\PermissionSeeder;
+use Database\Seeders\Auth\RoleSeeder;
 use Illuminate\Support\Facades\Crypt;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
-    // Clear Google Sheets and Security settings before each test
+    $this->seed(PermissionSeeder::class);
+    $this->seed(RoleSeeder::class);
+
     PpdbSetting::where('key', 'google_sheets')->delete();
     SecuritySetting::query()->delete();
 
-    // Create admin user and permissions if they don't exist
-    $this->permission = Permission::firstOrCreate(['name' => 'access-admin-dashboard', 'guard_name' => 'web']);
-    $this->role = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-    $this->role->givePermissionTo($this->permission);
-
     $this->admin = User::factory()->create();
-    $this->admin->assignRole($this->role);
+    $this->admin->assignRole('admin');
 
     $this->user = User::factory()->create();
 });

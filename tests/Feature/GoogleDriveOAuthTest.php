@@ -2,23 +2,23 @@
 
 use App\Models\SecuritySetting;
 use App\Models\User;
+use Database\Seeders\Auth\PermissionSeeder;
+use Database\Seeders\Auth\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    $this->seed(PermissionSeeder::class);
+    $this->seed(RoleSeeder::class);
+
     SecuritySetting::query()->delete();
 
-    $permission = Permission::firstOrCreate(['name' => 'access-admin-dashboard', 'guard_name' => 'web']);
-    $role = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-    $role->givePermissionTo($permission);
-
+    // Routes security & backup require access-super-admin-dashboard permission
     $this->admin = User::factory()->create();
-    $this->admin->assignRole($role);
+    $this->admin->assignRole('super-admin');
 });
 
 test('security settings page shows google drive oauth2 tab', function () {

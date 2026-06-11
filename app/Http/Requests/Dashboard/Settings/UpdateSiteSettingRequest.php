@@ -9,7 +9,8 @@ class UpdateSiteSettingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // Hanya user yang punya permission access-admin-dashboard yang boleh update pengaturan situs
+        return $this->user()?->can('access-admin-dashboard') ?? false;
     }
 
     /**
@@ -27,7 +28,14 @@ class UpdateSiteSettingRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:50'],
             'whatsapp' => ['nullable', 'string', 'max:50'],
             'address' => ['nullable', 'string', 'max:1000'],
-            'google_maps_iframe' => ['nullable', 'string', 'max:5000'],
+            'google_maps_iframe' => [
+                'nullable',
+                'string',
+                'max:5000',
+                // Hanya izinkan embed iframe Google Maps yang sah
+                // Mencegah Stored XSS via arbitrary iframe/script injection
+                'regex:/^<iframe[^>]*\ssrc="https:\/\/(www\.)?google\.com\/maps\/embed/i',
+            ],
             'facebook_url' => ['nullable', 'url', 'max:255'],
             'instagram_url' => ['nullable', 'url', 'max:255'],
             'youtube_url' => ['nullable', 'url', 'max:255'],

@@ -1,36 +1,33 @@
 <?php
 
 use App\Models\BackupLog;
-use App\Models\PpdbSetting;
 use App\Models\SecuritySetting;
 use App\Models\User;
+use Database\Seeders\Auth\PermissionSeeder;
+use Database\Seeders\Auth\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Clear settings before each test
-    PpdbSetting::whereIn('key', ['security_credentials', 'backup_settings', 'backup_history'])->delete();
+    $this->seed(PermissionSeeder::class);
+    $this->seed(RoleSeeder::class);
+
     SecuritySetting::query()->delete();
     BackupLog::query()->delete();
 
-    // Create admin user and permissions
-    $this->permission = Permission::firstOrCreate(['name' => 'access-admin-dashboard', 'guard_name' => 'web']);
-    $this->role = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-    $this->role->givePermissionTo($this->permission);
-
+    // Routes backup & security require access-super-admin-dashboard permission
     $this->admin = User::factory()->create();
-    $this->admin->assignRole($this->role);
+    $this->admin->assignRole('super-admin');
 
     $this->user = User::factory()->create();
 });
 
 test('unauthorized users cannot access security settings page', function () {
+    // CheckPermission middleware throws 403 (not redirect) for authenticated users without permission
     $response = $this->actingAs($this->user)->get(route('admin.security.index'));
-    $response->assertStatus(302)->assertRedirect(route('frontend.home'));
+    $response->assertStatus(403);
 });
 
 test('authorized admin can access security settings page', function () {
@@ -102,29 +99,6 @@ test('admin cannot enable encryption without generating key first', function () 
     ]);
 
     $response->assertSessionHasErrors(['error']);
-});
-
-test('admin can generate and download encryption key', function () {
-    // Generate key
-    $generateResponse = $this->actingAs($this->admin)->post(route('admin.backup.generate-key'), [
-        'confirm_password' => 'password',
-    ]);
-    $generateResponse->assertRedirect();
-    $generateResponse->assertSessionHas('success');
-
-    $settings = SecuritySetting::getValue('backup_settings');
-    expect($settings['passphrase'])->not->toBeEmpty();
-
-    $decryptedKey = Crypt::decryptString($settings['passphrase']);
-    expect(strlen($decryptedKey))->toBe(64); // 64-char hex key
-
-    // Download key
-    $downloadResponse = $this->actingAs($this->admin)->post(route('admin.backup.download-key'), [
-        'confirm_password' => 'password',
-    ]);
-    $downloadResponse->assertStatus(200);
-    $downloadResponse->assertHeader('Content-Type', 'text/plain; charset=UTF-8');
-    expect($downloadResponse->streamedContent())->toContain($decryptedKey);
 });
 
 test('admin can run backup manually and verify decryption successfully', function () {

@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -145,14 +146,31 @@ class BackupController extends Controller
 
     /**
      * Download a specific backup file.
+     *
+     * Keamanan:
+     * - basename() mencegah path traversal
+     * - Regex pattern memastikan hanya file backup sah yang bisa didownload
+     * - Verifikasi ke BackupLog memastikan file terdaftar di sistem
      */
     public function downloadBackup(string $filename): BinaryFileResponse|RedirectResponse
     {
         $safeFilename = basename($filename);
+
+        // Validasi nama file — hanya izinkan pola backup yang dikenal
+        // Mencegah download file sembarang di direktori backups
+        if (! preg_match('/^backup_[\w\-]+\.(zip|enc)$/', $safeFilename)) {
+            abort(403, 'Nama file backup tidak valid.');
+        }
+
+        // Verifikasi file ada di database log — bukan file arbitrary
+        if (! BackupLog::where('filename', $safeFilename)->exists()) {
+            abort(404, 'Backup tidak ditemukan di catatan sistem.');
+        }
+
         $filePath = storage_path('app/backups/'.$safeFilename);
 
         if (! file_exists($filePath)) {
-            return back()->withErrors(['error' => 'Berkas backup tidak ditemukan.']);
+            return back()->withErrors(['error' => 'Berkas backup tidak ditemukan di penyimpanan.']);
         }
 
         return response()->download($filePath);
@@ -160,11 +178,24 @@ class BackupController extends Controller
 
     /**
      * Delete a specific backup file and its log.
+     *
+     * Keamanan: validasi pattern + cek database sebelum hapus.
      */
     public function deleteBackup(string $filename): JsonResponse
     {
         try {
             $safeFilename = basename($filename);
+
+            // Validasi pola nama file backup yang sah
+            if (! preg_match('/^backup_[\w\-]+\.(zip|enc)$/', $safeFilename)) {
+                return response()->json(['success' => false, 'message' => 'Nama file backup tidak valid.'], 403);
+            }
+
+            // Pastikan ada di database log
+            if (! BackupLog::where('filename', $safeFilename)->exists()) {
+                return response()->json(['success' => false, 'message' => 'Backup tidak ditemukan di catatan sistem.'], 404);
+            }
+
             $filePath = storage_path('app/backups/'.$safeFilename);
 
             if (file_exists($filePath)) {
@@ -181,6 +212,11 @@ class BackupController extends Controller
 
     /**
      * Verify and test-decrypt an encrypted backup file.
+     *
+     * Keamanan:
+     * - Nama temp file menggunakan random string (bukan time()) — mencegah race condition
+     * - File temp menggunakan prefix dot (.) agar tidak bisa didownload via downloadBackup
+     * - Block finally memastikan temp file selalu dihapus meski terjadi exception
      */
     public function verifyBackup(Request $request, BackupService $backupService): JsonResponse
     {
@@ -190,6 +226,12 @@ class BackupController extends Controller
         ]);
 
         $safeFilename = basename($request->input('filename'));
+
+        // Validasi pola nama file backup yang sah
+        if (! preg_match('/^backup_[\w\-]+\.(zip|enc)$/', $safeFilename)) {
+            return response()->json(['success' => false, 'message' => 'Nama file backup tidak valid.'], 403);
+        }
+
         $filePath = storage_path('app/backups/'.$safeFilename);
         $passphrase = $request->input('passphrase');
 
@@ -197,7 +239,9 @@ class BackupController extends Controller
             return response()->json(['success' => false, 'message' => 'Berkas backup tidak ditemukan.'], 404);
         }
 
-        $tempDecryptedFile = storage_path('app/backups/temp_verify_'.time().'.zip');
+        // Gunakan random string (bukan time()) untuk mencegah predictable filename + race condition
+        // Prefix dot (.) agar tidak match regex download/delete yang mewajibkan "backup_" prefix
+        $tempDecryptedFile = storage_path('app/backups/.tmp_verify_'.Str::random(32).'.zip');
 
         try {
             $backupService->decryptFile($filePath, $tempDecryptedFile, $passphrase);
@@ -214,6 +258,7 @@ class BackupController extends Controller
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $stat = $zip->statIndex($i);
                 $filesReport[] = ['name' => $stat['name'], 'size' => $stat['size']];
+
                 if ($stat['name'] === 'database_dump.sql') {
                     $hasDbDump = true;
                 }
@@ -223,10 +268,6 @@ class BackupController extends Controller
             }
 
             $zip->close();
-
-            if (file_exists($tempDecryptedFile)) {
-                unlink($tempDecryptedFile);
-            }
 
             return response()->json([
                 'success' => true,
@@ -240,11 +281,12 @@ class BackupController extends Controller
                 ],
             ]);
         } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Dekripsi gagal: '.$e->getMessage()], 400);
+        } finally {
+            // Selalu hapus file temp — meskipun terjadi exception
             if (file_exists($tempDecryptedFile)) {
                 unlink($tempDecryptedFile);
             }
-
-            return response()->json(['success' => false, 'message' => 'Dekripsi gagal: '.$e->getMessage()], 400);
         }
     }
 

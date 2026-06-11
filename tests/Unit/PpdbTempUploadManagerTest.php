@@ -8,6 +8,7 @@ use Tests\TestCase;
 uses(TestCase::class);
 
 beforeEach(function () {
+    Storage::fake('local');
     Storage::fake('public');
     session()->flush();
 });
@@ -15,7 +16,7 @@ beforeEach(function () {
 test('temp upload manager stores and retrieves file metadata in session', function () {
     $file = UploadedFile::fake()->create('foto.jpg', 100, 'image/jpeg');
 
-    $path = $file->store('ppdb/temp/test', 'public');
+    $path = $file->store('ppdb/temp/test', 'local');
 
     session([
         PpdbTempUploadManager::SESSION_KEY => [
@@ -38,7 +39,7 @@ test('file rules require upload only when no temp file exists', function () {
     session([
         PpdbTempUploadManager::SESSION_KEY => [
             'foto_siswa' => [
-                'path' => UploadedFile::fake()->create('f.jpg', 100, 'image/jpeg')->store('ppdb/temp/x', 'public'),
+                'path' => UploadedFile::fake()->create('f.jpg', 100, 'image/jpeg')->store('ppdb/temp/x', 'local'),
                 'original_name' => 'f.jpg',
                 'mime' => 'image/jpeg',
             ],
@@ -51,7 +52,7 @@ test('file rules require upload only when no temp file exists', function () {
 
 test('take moves temp file to destination and removes from session', function () {
     $file = UploadedFile::fake()->create('doc.jpg', 100, 'image/jpeg');
-    $path = $file->store('ppdb/temp/test', 'public');
+    $path = $file->store('ppdb/temp/test', 'local');
 
     session([
         PpdbTempUploadManager::SESSION_KEY => [

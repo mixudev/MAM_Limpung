@@ -40,6 +40,18 @@ class PpdbSiswa extends Model
     ];
 
     /**
+     * Sembunyikan field sensitif dari serialisasi JSON/array.
+     * Mencegah data pribadi terekspos secara tidak sengaja via API atau response.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'ttd_digital',    // Token tanda tangan digital — jangan ekspos ke publik
+        'catatan_admin',  // Catatan internal admin — bukan untuk publik
+        'additional_fields', // Bisa mengandung path file dokumen sensitif
+    ];
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
