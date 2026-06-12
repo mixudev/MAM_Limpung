@@ -10,14 +10,11 @@
 
 <div class="space-y-5">
 
-    {{-- ══════════ PAGE HEADER ══════════ --}}
-    <div class="bg-white dark:bg-zinc-900 p-6 border border-slate-200 dark:border-zinc-800 shadow-sm">
-        <h1 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="fa-solid fa-robot text-[#4f45b2]"></i>
-            Konfigurasi AI Chatbot
-        </h1>
-        <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">Kelola API Key, basis pengetahuan, FAQ, dan pantau riwayat percakapan. Klik tab <strong>Panduan</strong> untuk melihat cara penggunaan lengkap.</p>
-    </div>
+    {{-- Header --}}
+    @include('dashboard.admin.chatbot.partials._header', [
+        'title' => 'Konfigurasi',
+        'subtitle' => 'Kelola API Key, basis pengetahuan, FAQ, dan pantau riwayat percakapan.'
+    ])
 
     {{-- Flash / Errors --}}
     @if(session('success'))
@@ -31,53 +28,6 @@
         <ul class="list-disc list-inside space-y-0.5 text-xs">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
     </div>
     @endif
-
-    {{-- ══════════ TAB BOX GRID ══════════ --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="chatbot-tab-grid">
-
-        <button type="button" onclick="chatbotTab('analytics')" id="tab-btn-analytics"
-            class="chatbot-tab-btn border p-4 text-left transition-all cursor-pointer bg-[#4f45b2] border-[#4f45b2] text-white shadow-md">
-            <div class="text-lg mb-2 opacity-80"><i class="fa-solid fa-chart-line"></i></div>
-            <div class="font-bold text-xs font-mono uppercase tracking-wider">Analitik</div>
-            <div class="text-[10px] mt-0.5 opacity-70">Statistik & Trafik</div>
-        </button>
-
-        <button type="button" onclick="chatbotTab('apikeys')" id="tab-btn-apikeys"
-            class="chatbot-tab-btn border p-4 text-left transition-all cursor-pointer bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:border-[#4f45b2] hover:text-[#4f45b2]">
-            <div class="text-lg mb-2 text-amber-500"><i class="fa-solid fa-key"></i></div>
-            <div class="font-bold text-xs font-mono uppercase tracking-wider">Kunci API</div>
-            <div class="text-[10px] mt-0.5 text-slate-400 dark:text-zinc-500">{{ $apiKeys->count() }} key</div>
-        </button>
-
-        <button type="button" onclick="chatbotTab('knowledge')" id="tab-btn-knowledge"
-            class="chatbot-tab-btn border p-4 text-left transition-all cursor-pointer bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:border-[#4f45b2] hover:text-[#4f45b2]">
-            <div class="text-lg mb-2 text-indigo-500"><i class="fa-solid fa-book-open"></i></div>
-            <div class="font-bold text-xs font-mono uppercase tracking-wider">Pengetahuan</div>
-            <div class="text-[10px] mt-0.5 text-slate-400 dark:text-zinc-500">{{ $knowledgeBases->count() }} entri</div>
-        </button>
-
-        <button type="button" onclick="chatbotTab('faqs')" id="tab-btn-faqs"
-            class="chatbot-tab-btn border p-4 text-left transition-all cursor-pointer bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:border-[#4f45b2] hover:text-[#4f45b2]">
-            <div class="text-lg mb-2 text-cyan-500"><i class="fa-solid fa-circle-question"></i></div>
-            <div class="font-bold text-xs font-mono uppercase tracking-wider">FAQ Cepat</div>
-            <div class="text-[10px] mt-0.5 text-slate-400 dark:text-zinc-500">{{ $faqs->count() }} pertanyaan</div>
-        </button>
-
-        <button type="button" onclick="chatbotTab('history')" id="tab-btn-history"
-            class="chatbot-tab-btn border p-4 text-left transition-all cursor-pointer bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:border-[#4f45b2] hover:text-[#4f45b2]">
-            <div class="text-lg mb-2 text-emerald-500"><i class="fa-solid fa-comments"></i></div>
-            <div class="font-bold text-xs font-mono uppercase tracking-wider">Riwayat</div>
-            <div class="text-[10px] mt-0.5 text-slate-400 dark:text-zinc-500">{{ $sessions->total() }} sesi</div>
-        </button>
-
-        <button type="button" onclick="chatbotTab('guide')" id="tab-btn-guide"
-            class="chatbot-tab-btn border p-4 text-left transition-all cursor-pointer bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:border-[#4f45b2] hover:text-[#4f45b2] col-span-2 sm:col-span-3 lg:col-span-1">
-            <div class="text-lg mb-2 text-[#4f45b2]"><i class="fa-solid fa-book"></i></div>
-            <div class="font-bold text-xs font-mono uppercase tracking-wider">Panduan</div>
-            <div class="text-[10px] mt-0.5 text-slate-400 dark:text-zinc-500">Cara penggunaan</div>
-        </button>
-
-    </div>
 
     {{-- ══════════ TAB PANELS ══════════ --}}
     <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-sm">
@@ -102,6 +52,10 @@
             @include('dashboard.admin.chatbot.partials._history')
         </div>
 
+        <div id="panel-logs" style="display:none">
+            @include('dashboard.admin.chatbot.partials._logs')
+        </div>
+
         <div id="panel-guide" style="display:none">
             @include('dashboard.admin.chatbot.partials._guide')
         </div>
@@ -115,24 +69,17 @@
 {{-- ══════════ SCRIPTS ══════════ --}}
 <script>
 // ─── TAB SWITCHING ────────────────────────────────────────────────────────────
-const TABS = ['analytics', 'apikeys', 'knowledge', 'faqs', 'history', 'guide'];
+const TABS = ['analytics', 'apikeys', 'knowledge', 'faqs', 'history', 'logs', 'guide'];
 
 function chatbotTab(name) {
     TABS.forEach(function(t) {
         const panel = document.getElementById('panel-' + t);
-        const btn   = document.getElementById('tab-btn-' + t);
-        if (!panel || !btn) return;
+        if (!panel) return;
 
         if (t === name) {
             panel.style.display = '';
-            btn.className = 'chatbot-tab-btn border p-4 text-left transition-all cursor-pointer bg-[#4f45b2] border-[#4f45b2] text-white shadow-md';
-            if (t === 'apikeys') btn.querySelector('.fa-key').parentElement.className = 'text-lg mb-2 opacity-80';
-            if (t === 'knowledge') btn.querySelector('.fa-book-open').parentElement.className = 'text-lg mb-2 opacity-80';
-            if (t === 'faqs') btn.querySelector('.fa-circle-question').parentElement.className = 'text-lg mb-2 opacity-80';
-            if (t === 'history') btn.querySelector('.fa-comments').parentElement.className = 'text-lg mb-2 opacity-80';
         } else {
             panel.style.display = 'none';
-            btn.className = 'chatbot-tab-btn border p-4 text-left transition-all cursor-pointer bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:border-[#4f45b2] hover:text-[#4f45b2]' + (t === 'history' ? ' col-span-2 sm:col-span-1' : '');
         }
     });
 }
@@ -171,7 +118,7 @@ function openKeyModal(editMode, data) {
         submitBtn.textContent = 'Tambah API Key';
         if (titleEl) titleEl.textContent = 'Tambah API Key';
         document.getElementById('keyProvider').value = 'gemini';
-        document.getElementById('keyModelName').value = 'gemini-1.5-flash';
+        document.getElementById('keyModelName').value = 'gemini-2.5-flash';
     }
     AppModal.open('keyModal');
 }
@@ -295,6 +242,32 @@ function escHtml(str) {
         .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 
+// PAYLOAD MODAL
+function openPayloadModal(payload) {
+    var codeEl = document.getElementById('payloadCode');
+    if (codeEl) {
+        if (payload && payload.fallback_sequence && payload.fallback_sequence.length > 0) {
+            var html = '<div class="space-y-4 text-left">';
+            html += '<h3 class="text-rose-500 font-bold mb-2 uppercase tracking-wider text-xs flex items-center gap-1.5"><i class="fa-solid fa-circle-exclamation"></i> Rantai / Urutan Percobaan API Fallback:</h3>';
+            payload.fallback_sequence.forEach(function(attempt, index) {
+                html += '<div class="p-3.5 bg-rose-50/40 dark:bg-rose-950/10 border border-rose-200 dark:border-rose-900/40 font-mono text-[11px] leading-relaxed rounded">';
+                html += '<div class="font-bold text-rose-700 dark:text-rose-400 flex justify-between"><span>Percobaan #' + (index + 1) + ' · API Key ID: ' + attempt.api_key_id + ' (' + String(attempt.provider).toUpperCase() + ')</span><span class="text-[10px] text-slate-400">' + new Date(attempt.occurred_at).toLocaleTimeString("id-ID") + '</span></div>';
+                html += '<div class="mt-1.5"><span class="text-slate-400 font-semibold">Model Name:</span> <span class="text-slate-700 dark:text-zinc-300 font-semibold">' + attempt.model_name + '</span></div>';
+                html += '<div class="mt-1"><span class="text-slate-400 font-semibold">Tipe Error:</span> <span class="px-1.5 py-0.5 bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 font-bold uppercase rounded text-[9px]">' + attempt.error_type + '</span></div>';
+                html += '<div class="mt-1.5 text-rose-600 dark:text-rose-300 break-words"><span class="text-slate-400 font-semibold">Pesan:</span> ' + escHtml(attempt.error_message) + '</div>';
+                html += '</div>';
+            });
+            html += '<div class="mt-4 pt-3 border-t border-slate-200 dark:border-zinc-800"><span class="font-bold text-slate-500 dark:text-zinc-400 font-mono uppercase text-[10px] tracking-wider">Payload Lengkap:</span></div>';
+            html += '<pre class="mt-1 p-3 bg-slate-900 dark:bg-black border border-slate-200 dark:border-zinc-800 text-[10px] text-emerald-400 whitespace-pre-wrap overflow-x-auto rounded">' + escHtml(JSON.stringify(payload, null, 2)) + '</pre>';
+            html += '</div>';
+            codeEl.innerHTML = html;
+        } else {
+            codeEl.innerHTML = '<pre class="whitespace-pre-wrap overflow-x-auto text-[11px] text-slate-700 dark:text-zinc-300">' + escHtml(JSON.stringify(payload, null, 2)) + '</pre>';
+        }
+    }
+    AppModal.open('payloadModal');
+}
+
 // Show/hide API key password
 function toggleKeyVisibility() {
     var inp  = document.getElementById('keyApiInput');
@@ -310,6 +283,18 @@ function toggleKeyVisibility() {
 
 // ─── CHARTS ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
+    // Auto-activate tab from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    let tab = urlParams.get('tab');
+    if (urlParams.has('logs_page')) {
+        tab = 'logs';
+    } else if (urlParams.has('page')) {
+        tab = 'history';
+    }
+    if (tab && TABS.includes(tab)) {
+        chatbotTab(tab);
+    }
+
     var trafficCtx = document.getElementById('trafficChart');
     if (trafficCtx) {
         new Chart(trafficCtx, {

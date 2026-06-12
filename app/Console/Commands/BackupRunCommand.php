@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\SecuritySetting;
 use App\Services\BackupService;
 use Exception;
 use Illuminate\Console\Command;
@@ -36,30 +37,32 @@ class BackupRunCommand extends Command
 
         try {
             $result = $backupService->runBackup();
-            
+
             $sizeInMb = round($result['size'] / (1024 * 1024), 2);
             $msg = "Backup sukses dibuat: {$result['filename']} | Ukuran: {$sizeInMb} MB | Durasi: {$result['duration']} detik.";
-            
+
             $this->info($msg);
             if ($result['encrypted']) {
-                $this->info("Status Keamanan: Terenkripsi AES-256 (OpenSSL kompatibel)");
+                $this->info('Status Keamanan: Terenkripsi AES-256 (OpenSSL kompatibel)');
             }
             if ($result['drive_uploaded']) {
                 $this->info("Google Drive: Berhasil diunggah (ID Berkas: {$result['drive_file_id']})");
             } else {
-                $backupSettings = \App\Models\SecuritySetting::getValue('backup_settings', []);
+                $backupSettings = SecuritySetting::getValue('backup_settings', []);
                 if (! empty($backupSettings['google_drive_enabled'])) {
                     $this->warn('Google Drive: Gagal diunggah! Eror: '.($result['drive_error'] ?? 'kredensial salah'));
                 }
             }
 
-            Log::info("Backup: " . $msg);
+            Log::info('Backup: '.$msg);
+
             return Command::SUCCESS;
 
         } catch (Exception $e) {
-            $errMsg = "Backup gagal dijalankan: " . $e->getMessage();
+            $errMsg = 'Backup gagal dijalankan: '.$e->getMessage();
             $this->error($errMsg);
-            Log::error("Backup Eror: " . $errMsg);
+            Log::error('Backup Eror: '.$errMsg);
+
             return Command::FAILURE;
         }
     }

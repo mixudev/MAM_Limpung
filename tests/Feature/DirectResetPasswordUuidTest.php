@@ -28,12 +28,12 @@ test('admin can generate direct reset password link using uuid', function () {
 
     $response->assertRedirect();
     $response->assertSessionHas('success');
-    
+
     // Check session variable for URL contains the user uuid and NOT the ID
     $resetUrl = session('reset_url');
     expect($resetUrl)->not->toBeNull();
-    expect($resetUrl)->toContain('/reset-password-direct/' . $user->uuid);
-    expect($resetUrl)->not->toContain('/reset-password-direct/' . $user->id . '/');
+    expect($resetUrl)->toContain('/reset-password-direct/'.$user->uuid);
+    expect($resetUrl)->not->toContain('/reset-password-direct/'.$user->id.'/');
 });
 
 test('user can view direct reset password form with valid uuid signed URL', function () {

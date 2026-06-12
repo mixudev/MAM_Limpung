@@ -72,4 +72,3 @@ test('test connection returns connection failed status when settings are unconfi
     expect($data['success'])->toBeFalse();
     expect($data['message'])->toContain('Google Sheets');
 });
-

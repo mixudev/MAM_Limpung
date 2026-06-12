@@ -68,7 +68,7 @@ class CheckPermission
     {
         if ($request->expectsJson()) {
             return response()->json([
-                'status'  => $status,
+                'status' => $status,
                 'message' => $message,
             ], $status);
         }

@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
@@ -55,7 +54,7 @@ test('akses halaman verifikasi dengan email mengembalikan status 200', function 
 
 test('verifikasi OTP yang salah meningkatkan hitungan attempts dan menyisakan percobaan', function () {
     $user = User::factory()->create(['email' => 'user@example.com']);
-    
+
     DB::table('otp_codes')->insert([
         'email' => 'user@example.com',
         'otp_code' => hash('sha256', '123456'),
@@ -71,14 +70,14 @@ test('verifikasi OTP yang salah meningkatkan hitungan attempts dan menyisakan pe
 
     $response->assertRedirect();
     $response->assertSessionHas('error');
-    
+
     $otpRecord = DB::table('otp_codes')->where('email', 'user@example.com')->first();
     $this->assertEquals(1, $otpRecord->attempts);
 });
 
 test('verifikasi OTP salah sebanyak 3 kali menghapus record OTP secara otomatis', function () {
     $user = User::factory()->create(['email' => 'user@example.com']);
-    
+
     DB::table('otp_codes')->insert([
         'email' => 'user@example.com',
         'otp_code' => hash('sha256', '123456'),
@@ -101,7 +100,7 @@ test('verifikasi OTP salah sebanyak 3 kali menghapus record OTP secara otomatis'
 
 test('verifikasi OTP yang kedaluwarsa dibatalkan', function () {
     $user = User::factory()->create(['email' => 'user@example.com']);
-    
+
     DB::table('otp_codes')->insert([
         'email' => 'user@example.com',
         'otp_code' => hash('sha256', '123456'),
@@ -121,7 +120,7 @@ test('verifikasi OTP yang kedaluwarsa dibatalkan', function () {
 
 test('verifikasi OTP yang benar melakukan login pengguna dan menghapus record', function () {
     $user = User::factory()->create(['email' => 'user@example.com']);
-    
+
     DB::table('otp_codes')->insert([
         'email' => 'user@example.com',
         'otp_code' => hash('sha256', '123456'),
@@ -137,10 +136,10 @@ test('verifikasi OTP yang benar melakukan login pengguna dan menghapus record', 
 
     $response->assertRedirect(route($user->dashboardRoute()));
     $response->assertSessionHas('success');
-    
+
     $this->assertDatabaseMissing('otp_codes', [
         'email' => 'user@example.com',
     ]);
-    
+
     $this->assertAuthenticatedAs($user);
 });

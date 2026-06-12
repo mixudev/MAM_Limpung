@@ -12,16 +12,18 @@
         <div class="space-y-4">
             <div>
                 <label for="keyProvider">Provider</label>
-                <select id="keyProvider" name="provider">
+                <select id="keyProvider" name="provider" onchange="handleProviderChange()">
                     <option value="gemini">Google Gemini</option>
-                    <option value="openai">OpenAI</option>
+                    <option value="groq">Groq AI</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="openrouter">OpenRouter</option>
                 </select>
             </div>
 
             <div>
                 <label for="keyModelName">Nama Model</label>
                 <input id="keyModelName" type="text" name="model_name" required
-                    placeholder="Contoh: gemini-1.5-flash">
+                    placeholder="Contoh: gemini-2.5-flash">
             </div>
 
             <div>
@@ -186,5 +188,43 @@
     </x-slot>
 </x-app-modal>
 
+{{-- ═══════════════════════════════════════════
+     MODAL: PAYLOAD DETAIL
+═══════════════════════════════════════════ --}}
+<x-app-modal id="payloadModal" maxWidth="xl"
+    title="Detail Payload & Exception"
+    description="Detail data payload JSON atau stack trace error dari aktifitas chatbot.">
+
+    <div class="font-mono text-xs leading-relaxed">
+        <pre id="payloadCode" class="bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-4 text-[10px] text-slate-700 dark:text-zinc-300 overflow-x-auto whitespace-pre-wrap break-all"></pre>
+    </div>
+
+    <x-slot name="footer">
+        <button type="button" onclick="AppModal.close('payloadModal')" class="modal-btn-cancel">Tutup</button>
+    </x-slot>
+</x-app-modal>
+
 {{-- Spinner keyframe --}}
 <style>@keyframes spin { to { transform: rotate(360deg) } }</style>
+
+<script>
+function handleProviderChange() {
+    var provider = document.getElementById('keyProvider').value;
+    var modelInput = document.getElementById('keyModelName');
+    if (!modelInput) return;
+    
+    if (provider === 'gemini') {
+        modelInput.value = 'gemini-2.5-flash';
+        modelInput.placeholder = 'Contoh: gemini-2.5-flash';
+    } else if (provider === 'groq') {
+        modelInput.value = 'llama-3.3-70b-versatile';
+        modelInput.placeholder = 'Contoh: llama-3.3-70b-versatile';
+    } else if (provider === 'deepseek') {
+        modelInput.value = 'deepseek-chat';
+        modelInput.placeholder = 'Contoh: deepseek-chat';
+    } else if (provider === 'openrouter') {
+        modelInput.value = 'google/gemini-2.5-flash';
+        modelInput.placeholder = 'Contoh: google/gemini-2.5-flash';
+    }
+}
+</script>

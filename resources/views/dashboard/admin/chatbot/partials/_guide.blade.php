@@ -36,7 +36,7 @@
     </div>
 
     {{-- ════════════════════════════════════════
-         LANGKAH 1 — DAPATKAN API KEY GEMINI
+         LANGKAH 1 — DAPATKAN API KEY PROVIDER
     ════════════════════════════════════════ --}}
     <div id="guide-step1" class="scroll-mt-4">
         {{-- Step header --}}
@@ -44,79 +44,89 @@
             <span class="w-9 h-9 bg-[#4f45b2] text-white font-bold text-base flex items-center justify-center shrink-0">1</span>
             <div>
                 <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
-                    <i class="fa-solid fa-key text-amber-500"></i> Mendapatkan Google Gemini API Key
+                    <i class="fa-solid fa-key text-amber-500"></i> Mendapatkan API Key AI (Gemini, Groq, DeepSeek, OpenRouter)
                 </h3>
-                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">API Key adalah kunci akses ke model AI Google Gemini. Tersedia <strong>gratis</strong> tanpa kartu kredit.</p>
+                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Sistem chatbot mendukung beberapa provider AI terbaik secara fleksibel.</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="space-y-4">
+            <div class="space-y-6">
                 {{-- Sub-steps --}}
-                @foreach([
-                    ['1', 'Buka Google AI Studio', 'Kunjungi <a href="https://aistudio.google.com" target="_blank" class="text-[#4f45b2] underline font-semibold">aistudio.google.com</a> di browser Anda. Login menggunakan akun Google — bisa akun pribadi maupun akun sekolah.'],
-                    ['2', 'Klik menu "Get API Key"', 'Di sidebar kiri Google AI Studio, cari dan klik menu <strong>Get API Key</strong>. Halaman daftar API Key akan terbuka.'],
-                    ['3', 'Klik "Create API key"', 'Klik tombol <strong>Create API key in new project</strong>. Google akan otomatis membuat project baru dan menggenerate API Key untuk Anda dalam beberapa detik.'],
-                    ['4', 'Salin API Key', 'Setelah API Key muncul, klik ikon <strong>Copy</strong> di sebelah kanan. API Key berbentuk string panjang yang diawali huruf <code class="bg-slate-100 dark:bg-zinc-800 px-1 font-mono">AIza…</code>. Simpan di tempat aman.'],
-                ] as [$n, $title, $desc])
                 <div class="flex gap-4">
-                    <div class="w-6 h-6 bg-[#4f45b2] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">{{ $n }}</div>
+                    <div class="w-6 h-6 bg-[#4f45b2] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">A</div>
                     <div>
-                        <p class="text-sm font-semibold text-slate-800 dark:text-zinc-200">{{ $title }}</p>
-                        <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1 leading-relaxed">{!! $desc !!}</p>
+                        <p class="text-sm font-semibold text-slate-800 dark:text-zinc-200">Google Gemini API Key</p>
+                        <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                            Kunjungi <a href="https://aistudio.google.com" target="_blank" class="text-[#4f45b2] underline font-semibold">aistudio.google.com</a>. Login dengan Akun Google, lalu klik <strong>Get API Key</strong> dan buat kunci baru di project baru.
+                        </p>
                     </div>
                 </div>
-                @endforeach
+                
+                <div class="flex gap-4">
+                    <div class="w-6 h-6 bg-[#4f45b2] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">B</div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800 dark:text-zinc-200">Groq AI API Key</p>
+                        <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                            Buka <a href="https://console.groq.com" target="_blank" class="text-[#4f45b2] underline font-semibold">console.groq.com</a>. Daftar/login, masuk ke menu <strong>API Keys</strong>, lalu klik <strong>Create API Key</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="w-6 h-6 bg-[#4f45b2] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">C</div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800 dark:text-zinc-200">DeepSeek API Key</p>
+                        <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                            Buka <a href="https://platform.deepseek.com" target="_blank" class="text-[#4f45b2] underline font-semibold">platform.deepseek.com</a>. Login, buka menu <strong>API Keys</strong>, klik <strong>Create API Key</strong> (sangat murah dan performa cerdas).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="w-6 h-6 bg-[#4f45b2] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">D</div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800 dark:text-zinc-200">OpenRouter API Key</p>
+                        <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                            Kunjungi <a href="https://openrouter.ai" target="_blank" class="text-[#4f45b2] underline font-semibold">openrouter.ai</a>. Memberikan akses ke ratusan model AI open-source (termasuk model gratis) dengan satu saldo.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <div class="space-y-4">
-                {{-- Contoh API Key --}}
-                <div class="border border-slate-200 dark:border-zinc-700">
-                    <div class="px-4 py-2.5 bg-slate-50 dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-700">
-                        <p class="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-500 dark:text-zinc-400">Contoh tampilan API Key</p>
-                    </div>
-                    <div class="p-4 bg-slate-900 overflow-x-auto">
-                        <code class="text-emerald-400 text-xs font-mono">AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code>
-                    </div>
-                </div>
-
                 {{-- Model rekomendasi --}}
                 <div class="border border-blue-200 dark:border-blue-800/50">
                     <div class="px-4 py-2.5 bg-blue-50 dark:bg-blue-950/20 border-b border-blue-200 dark:border-blue-800/50">
                         <p class="text-[10px] font-bold font-mono uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-star"></i> Rekomendasi Model
+                            <i class="fa-solid fa-star"></i> Rekomendasi Model per Provider
                         </p>
                     </div>
-                    <div class="divide-y divide-blue-100 dark:divide-blue-900/30">
-                        <div class="px-4 py-3 flex items-start gap-3">
-                            <span class="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold font-mono shrink-0">REKOMENDASI</span>
-                            <div>
-                                <code class="text-sm font-mono font-bold text-slate-800 dark:text-zinc-200">gemini-1.5-flash</code>
-                                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Cepat, hemat kuota, cocok untuk chatbot sekolah. Tersedia gratis.</p>
-                            </div>
+                    <div class="divide-y divide-blue-100 dark:divide-blue-900/30 text-xs">
+                        <div class="px-4 py-2.5">
+                            <span class="font-bold text-slate-700 dark:text-zinc-300">Google Gemini:</span>
+                            <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 text-[#4f45b2] text-[10px] font-bold ml-1">gemini-2.5-flash</code> atau <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 text-[10px] ml-1">gemini-1.5-flash</code>
                         </div>
-                        <div class="px-4 py-3 flex items-start gap-3">
-                            <span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold font-mono shrink-0">ALTERNATIF</span>
-                            <div>
-                                <code class="text-sm font-mono font-bold text-slate-800 dark:text-zinc-200">gemini-1.5-pro</code>
-                                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Lebih detail dan akurat, tapi lebih lambat. Cocok untuk pertanyaan kompleks.</p>
-                            </div>
+                        <div class="px-4 py-2.5">
+                            <span class="font-bold text-slate-700 dark:text-zinc-300">Groq AI:</span>
+                            <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 text-[#4f45b2] text-[10px] font-bold ml-1">llama-3.3-70b-versatile</code>
                         </div>
-                        <div class="px-4 py-3 flex items-start gap-3">
-                            <span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold font-mono shrink-0">TERBARU</span>
-                            <div>
-                                <code class="text-sm font-mono font-bold text-slate-800 dark:text-zinc-200">gemini-2.0-flash</code>
-                                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Versi terbaru 2025, lebih pintar dari 1.5-flash. Tersedia gratis.</p>
-                            </div>
+                        <div class="px-4 py-2.5">
+                            <span class="font-bold text-slate-700 dark:text-zinc-300">DeepSeek:</span>
+                            <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 text-[#4f45b2] text-[10px] font-bold ml-1">deepseek-chat</code>
+                        </div>
+                        <div class="px-4 py-2.5">
+                            <span class="font-bold text-slate-700 dark:text-zinc-300">OpenRouter:</span>
+                            <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 text-[#4f45b2] text-[10px] font-bold ml-1">google/gemini-2.5-flash</code> atau model gratis
                         </div>
                     </div>
                 </div>
 
                 {{-- Batas gratis --}}
                 <div class="flex gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-700 dark:text-amber-400">
-                    <i class="fa-solid fa-triangle-exclamation shrink-0 mt-0.5"></i>
+                    <i class="fa-solid fa-circle-info shrink-0 mt-0.5"></i>
                     <div>
-                        <strong>Batas Gratis (Free Tier):</strong> ~15 request/menit dan ~1 juta token/hari. Lebih dari cukup untuk penggunaan chatbot sekolah normal.
+                        <strong>Token Saving:</strong> Sistem telah dioptimalkan secara otomatis menggunakan penyaringan kata kunci (keyword matching) sehingga asisten AI hanya memuat informasi penting. Histori obrolan juga dipotong menjadi 6 pesan terakhir untuk menghemat token Anda hingga 80%.
                     </div>
                 </div>
             </div>
@@ -133,19 +143,19 @@
             <span class="w-9 h-9 bg-[#4f45b2] text-white font-bold text-base flex items-center justify-center shrink-0">2</span>
             <div>
                 <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
-                    <i class="fa-solid fa-circle-plus text-indigo-500"></i> Mendaftarkan API Key ke Sistem
+                    <i class="fa-solid fa-circle-plus text-indigo-500"></i> Pendaftaran & Rotasi API Key (Failover)
                 </h3>
-                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Setelah mendapat API Key, daftarkan ke halaman ini agar chatbot bisa berkomunikasi dengan AI.</p>
+                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Daftarkan beberapa kunci API untuk memastikan chatbot tetap menyala meskipun satu provider sedang limit.</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="space-y-4">
                 @foreach([
-                    ['1', 'Klik tab "Kunci API"', 'Di deretan kotak tab di atas halaman ini, klik kotak <strong>Kunci API</strong>. Halaman akan menampilkan daftar key yang sudah terdaftar.'],
-                    ['2', 'Klik "TAMBAH API KEY"', 'Klik tombol ungu <strong>TAMBAH API KEY</strong> di pojok kanan. Form isian akan muncul.'],
-                    ['3', 'Isi form dengan benar', 'Pilih provider <strong>Google Gemini</strong>, isi nama model (misalnya <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1">gemini-1.5-flash</code>), lalu paste API Key dari Google AI Studio.'],
-                    ['4', 'Aktifkan key', 'Setelah tersimpan, pastikan status key menampilkan badge hijau <strong>AKTIF</strong>. Klik badge untuk toggle aktif/nonaktif.'],
+                    ['1', 'Buka halaman "Kunci API"', 'Klik tombol <strong>TAMBAH API KEY</strong> di halaman kelola Kunci API.'],
+                    ['2', 'Pilih Provider & Model', 'Pilih provider yang Anda inginkan (misal: Groq AI). Sistem akan otomatis mengisi placeholder dan nama model default seperti <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1">llama-3.3-70b-versatile</code>.'],
+                    ['3', 'Tempel API Key & Simpan', 'Masukkan API Key yang Anda dapatkan dari konsol provider bersangkutan, lalu klik tombol Simpan.'],
+                    ['4', 'Rotasi Kunci Otomatis', 'Disarankan mendaftarkan minimal 2 API Key. Jika API Key pertama terkena rate limit (Error 429) atau mengalami downtime, sistem secara otomatis melakukan <strong>rollback (failover)</strong> mencoba API Key berikutnya.'],
                 ] as [$n, $title, $desc])
                 <div class="flex gap-4">
                     <div class="w-6 h-6 bg-[#4f45b2] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">{{ $n }}</div>
@@ -158,38 +168,14 @@
             </div>
 
             <div class="space-y-4">
-                {{-- Panduan isi form --}}
-                <div class="border border-slate-200 dark:border-zinc-700">
-                    <div class="px-4 py-2.5 bg-slate-50 dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-700">
-                        <p class="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-500 dark:text-zinc-400">Panduan Isi Form API Key</p>
-                    </div>
-                    <div class="divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
-                        <div class="px-4 py-3 flex gap-3">
-                            <span class="font-bold text-slate-600 dark:text-zinc-400 w-28 shrink-0">Provider</span>
-                            <span class="text-slate-500 dark:text-zinc-400">Pilih <strong>Google Gemini</strong></span>
-                        </div>
-                        <div class="px-4 py-3 flex gap-3">
-                            <span class="font-bold text-slate-600 dark:text-zinc-400 w-28 shrink-0">Nama Model</span>
-                            <div>
-                                <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5">gemini-1.5-flash</code>
-                                <span class="text-slate-400 ml-1">(direkomendasikan)</span>
-                            </div>
-                        </div>
-                        <div class="px-4 py-3 flex gap-3">
-                            <span class="font-bold text-slate-600 dark:text-zinc-400 w-28 shrink-0">API Key</span>
-                            <span class="text-slate-500 dark:text-zinc-400">Paste dari Google AI Studio. Dimulai dengan <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1">AIza…</code></span>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="flex gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-xs text-emerald-700 dark:text-emerald-400">
                     <i class="fa-solid fa-shield-halved shrink-0 mt-0.5"></i>
-                    <div><strong>Keamanan:</strong> API Key dienkripsi menggunakan Laravel Encryption sebelum disimpan. Nilai asli tidak bisa dilihat kembali dari halaman admin. Anda bisa menambahkan beberapa key sebagai cadangan.</div>
+                    <div><strong>Keamanan Enkripsi:</strong> Semua API Key dienkripsi di dalam database menggunakan algoritma enkripsi standar industri Laravel. Nilai asli tidak dapat dibaca dari dashboard admin oleh siapa pun.</div>
                 </div>
 
                 <div class="flex gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 text-xs text-blue-700 dark:text-blue-400">
-                    <i class="fa-solid fa-circle-info shrink-0 mt-0.5"></i>
-                    <div><strong>Tips:</strong> Tambahkan 2–3 API Key dari project Google yang berbeda sebagai cadangan. Jika satu key mencapai batas, sistem akan otomatis mencoba key berikutnya.</div>
+                    <i class="fa-solid fa-bug shrink-0 mt-0.5"></i>
+                    <div><strong>Log Error Detail & Rantai Fallback:</strong> Buka tab <strong>Log Aktivitas</strong> untuk memantau detail error. Jika terjadi fallback, tombol <strong>Detail</strong> akan menampilkan runtutan kegagalan secara visual (misalnya: Percobaan #1 Gemini API kena limit 429, dialihkan ke Percobaan #2 Groq API yang sukses).</div>
                 </div>
             </div>
         </div>

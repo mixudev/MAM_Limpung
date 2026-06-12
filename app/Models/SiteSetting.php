@@ -47,6 +47,7 @@ class SiteSetting extends Model
         'school_accreditation',
         'school_website',
         'school_email_official',
+        'is_chatbot_active',
     ];
 
     /**
@@ -56,6 +57,7 @@ class SiteSetting extends Model
     {
         return [
             'is_indexed' => 'boolean',
+            'is_chatbot_active' => 'boolean',
         ];
     }
 

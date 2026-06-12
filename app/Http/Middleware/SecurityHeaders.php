@@ -101,7 +101,7 @@ class SecurityHeaders
         ];
         $formAction = [
             "'self'",
-            "https://accounts.google.com",
+            'https://accounts.google.com',
         ];
         $fontSrc = [
             "'self'",

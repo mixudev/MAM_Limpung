@@ -188,6 +188,8 @@
         </div> --}}
 
         <!-- AOS initialized via app.js -->
-        @include('partials.chatbot_widget')
+        @if($siteSettings->is_chatbot_active ?? true)
+            @include('partials.chatbot_widget')
+        @endif
 </body>
 </html>

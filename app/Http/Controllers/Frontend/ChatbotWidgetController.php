@@ -5,14 +5,29 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\ChatbotAnalytic;
 use App\Models\ChatbotFaq;
+use App\Models\ChatbotLog;
 use App\Models\ChatbotMessage;
 use App\Models\ChatbotSession;
+use App\Models\SiteSetting;
 use App\Services\ChatbotService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ChatbotWidgetController extends Controller
 {
+    public function __construct()
+    {
+        $siteSettingsArray = cache()->remember('site_settings', 86400, function () {
+            return SiteSetting::first()?->toArray();
+        });
+
+        $isChatbotActive = $siteSettingsArray['is_chatbot_active'] ?? true;
+
+        if (! $isChatbotActive) {
+            abort(response()->json(['error' => 'Chatbot is disabled.'], 403));
+        }
+    }
+
     /**
      * Get active FAQs, optionally filtered by topic.
      */
@@ -92,11 +107,11 @@ class ChatbotWidgetController extends Controller
             'message' => $userMessageText,
         ]);
 
-        // 2. Fetch past 10 messages for conversational context
+        // 2. Fetch past 6 messages for conversational context
         $chatHistory = $session->messages()
             ->where('id', '<', $userMessage->id)
             ->orderBy('created_at', 'asc')
-            ->take(10)
+            ->take(6)
             ->get(['sender', 'message'])
             ->toArray();
 
@@ -113,6 +128,17 @@ class ChatbotWidgetController extends Controller
             $botResponseText = $faqMatch->answer;
             $endTime = microtime(true);
             $responseTimeMs = (int) round(($endTime - $startTime) * 1000);
+
+            ChatbotLog::create([
+                'session_id' => $session->id,
+                'level' => 'info',
+                'message' => 'Chatbot memberikan respons instan berdasarkan pencocokan FAQ Cepat.',
+                'payload' => [
+                    'faq_id' => $faqMatch->id,
+                    'question' => $faqMatch->question,
+                    'query' => $userMessageText,
+                ],
+            ]);
         } else {
             // Request Answer from Service
             try {
@@ -120,8 +146,32 @@ class ChatbotWidgetController extends Controller
                 $botResponseText = $aiResult['text'];
                 $apiKeyUsedId = $aiResult['api_key_used_id'];
                 $tokensUsed = $aiResult['tokens_used'];
+
+                ChatbotLog::create([
+                    'session_id' => $session->id,
+                    'api_key_id' => $apiKeyUsedId,
+                    'level' => 'success',
+                    'message' => 'Chatbot berhasil memberikan respons AI untuk topik: '.strtoupper($session->topic),
+                    'payload' => [
+                        'query' => $userMessageText,
+                        'response_preview' => mb_substr($botResponseText, 0, 100).'...',
+                        'tokens_used' => $tokensUsed,
+                    ],
+                ]);
             } catch (\Exception $e) {
                 $botResponseText = 'Maaf, asisten AI kami sedang tidak merespons atau mengalami kendala teknis saat ini. Anda dapat mencoba mengirim pesan kembali atau bisa langsung menghubungi admin sekolah kami melalui tombol WhatsApp Admin.';
+
+                ChatbotLog::create([
+                    'session_id' => $session->id,
+                    'level' => 'error',
+                    'message' => 'Chatbot gagal merespons permintaan pengguna: '.$e->getMessage(),
+                    'payload' => [
+                        'query' => $userMessageText,
+                        'topic' => $session->topic,
+                        'exception' => get_class($e),
+                        'trace' => substr($e->getTraceAsString(), 0, 1000),
+                    ],
+                ]);
             }
             $endTime = microtime(true);
             $responseTimeMs = (int) round(($endTime - $startTime) * 1000);

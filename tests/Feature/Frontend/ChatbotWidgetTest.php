@@ -188,3 +188,51 @@ test('API key rotates to key 2 if key 1 throws rate limit 429 error', function (
     $key2->refresh();
     expect($key2->error_count)->toBe(0);
 });
+
+test('sending message writes activity logs to the database', function () {
+    Http::fake([
+        'generativelanguage.googleapis.com/*fake_key_one*' => Http::response(['error' => ['message' => 'Quota Exceeded']], 429),
+        'generativelanguage.googleapis.com/*fake_key_two*' => Http::response([
+            'candidates' => [
+                [
+                    'content' => [
+                        'parts' => [
+                            ['text' => 'Jawaban dari API Key Kedua.'],
+                        ],
+                    ],
+                ],
+            ],
+        ], 200),
+    ]);
+
+    $key1 = ChatbotApiKey::factory()->create([
+        'api_key' => 'fake_key_one',
+        'is_active' => true,
+        'error_count' => 0,
+    ]);
+
+    $key2 = ChatbotApiKey::factory()->create([
+        'api_key' => 'fake_key_two',
+        'is_active' => true,
+        'error_count' => 0,
+    ]);
+
+    $session = ChatbotSession::factory()->create(['topic' => 'umum']);
+
+    $this->postJson(route('frontend.chatbot.sessions.send', $session->id), [
+        'message' => 'Halo AI',
+    ]);
+
+    // Check warning log for key 1 failure
+    $this->assertDatabaseHas('chatbot_logs', [
+        'api_key_id' => $key1->id,
+        'level' => 'warning',
+    ]);
+
+    // Check success log for key 2 success
+    $this->assertDatabaseHas('chatbot_logs', [
+        'session_id' => $session->id,
+        'api_key_id' => $key2->id,
+        'level' => 'success',
+    ]);
+});

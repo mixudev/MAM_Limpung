@@ -66,7 +66,7 @@ test('halaman atur ulang password tidak dapat ditampilkan jika token tidak cocok
         'created_at' => now(),
     ]);
 
-    $response = $this->get("/reset-password/wrong-token?email=user@example.com");
+    $response = $this->get('/reset-password/wrong-token?email=user@example.com');
 
     $response->assertRedirect(route('login'));
     $response->assertSessionHas('error');

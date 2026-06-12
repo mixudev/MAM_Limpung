@@ -208,13 +208,63 @@
                 </li>
                 @can('manage-chatbot')
                 <li>
-                    <a href="{{ route('admin.chatbot.index') }}" data-page="chatbot" class="sidebar-link {{ Route::is('admin.chatbot.*') ? 'active' : '' }}" aria-label="Konfigurasi Chatbot">
+                    <a href="#" class="sidebar-link dropdown-trigger {{ Route::is('admin.chatbot.*') ? 'active dropdown-open' : '' }}" aria-label="Konfigurasi Chatbot">
                         <span class="sidebar-icon w-5 h-5 shrink-0 flex items-center justify-center">
                             <i class="fa-solid fa-robot text-sm"></i>
                         </span>
-                        <span class="sidebar-label">Konfigurasi Chatbot</span>
-                        <span class="sidebar-tooltip">Konfigurasi Chatbot</span>
+                        <span class="sidebar-label">AI Chatbot</span>
+                        <svg class="dropdown-chevron w-3.5 h-3.5 ml-auto text-white/60 dark:text-zinc-500 sidebar-label" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <span class="sidebar-tooltip">AI Chatbot</span>
                     </a>
+                    <ul class="sidebar-submenu">
+                        <div class="sidebar-submenu-inner">
+                            <li>
+                                <a href="{{ route('admin.chatbot.analytics') }}" class="sidebar-link text-xs py-1.5 "
+                                    aria-label="Analitik Chatbot">
+                                    <span class="sidebar-label">Analitik</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.chatbot.apikeys') }}" class="sidebar-link text-xs py-1.5 "
+                                    aria-label="Kunci API Chatbot">
+                                    <span class="sidebar-label">Kunci API</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.chatbot.knowledge') }}" class="sidebar-link text-xs py-1.5 "
+                                    aria-label="Basis Pengetahuan Chatbot">
+                                    <span class="sidebar-label">Basis Pengetahuan</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.chatbot.faqs') }}" class="sidebar-link text-xs py-1.5 "
+                                    aria-label="FAQ Cepat Chatbot">
+                                    <span class="sidebar-label">FAQ Cepat</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.chatbot.history') }}" class="sidebar-link text-xs py-1.5 "
+                                    aria-label="Riwayat Chatbot">
+                                    <span class="sidebar-label">Riwayat Chat</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.chatbot.logs') }}" class="sidebar-link text-xs py-1.5 "
+                                    aria-label="Log Aktivitas Chatbot">
+                                    <span class="sidebar-label">Log Aktivitas</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.chatbot.guide') }}" class="sidebar-link text-xs py-1.5 "
+                                    aria-label="Panduan Chatbot">
+                                    <span class="sidebar-label">Panduan</span>
+                                </a>
+                            </li>
+                        </div>
+                    </ul>
                 </li>
                 @endcan
                 @endif

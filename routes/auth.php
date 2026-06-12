@@ -1,8 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Auth\ForgotPasswordController;
 /*
 |--------------------------------------------------------------------------
 | Authentication Routes (Web)
@@ -12,8 +11,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\OtpAuthController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

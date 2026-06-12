@@ -62,7 +62,7 @@ test('user can upload avatar image', function () {
 
     $user->refresh();
     expect($user->avatar)->not->toBeNull();
-    
+
     // Assert the file was stored...
     Storage::disk('public')->assertExists($user->avatar);
 });
@@ -91,7 +91,7 @@ test('old avatar is deleted when new avatar is uploaded', function () {
     $response->assertSessionHas('success');
 
     $user->refresh();
-    
+
     // Assert old file deleted
     Storage::disk('public')->assertMissing('avatars/old-avatar.jpg');
     // Assert new file exists

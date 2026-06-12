@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
-use Illuminate\View\View;
-use Illuminate\Support\Collection;
 
 class PegawaiController extends Controller
 {
@@ -12,7 +10,7 @@ class PegawaiController extends Controller
     {
         $pegawai = collect([
             // ================= GURU =================
-            (object)[
+            (object) [
                 'id' => 1,
                 'nama' => 'Ahmad Fauzi, S.Pd',
                 'nip' => '198706102019031001',
@@ -21,7 +19,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 2,
                 'nama' => 'Siti Aminah, S.Pd',
                 'nip' => '198905222020122002',
@@ -30,7 +28,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 3,
                 'nama' => 'Muhammad Rizki, M.Pd',
                 'nip' => '198402112018011003',
@@ -39,7 +37,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 4,
                 'nama' => 'Nur Aisyah, S.Pd',
                 'nip' => '199001152021032004',
@@ -48,7 +46,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 5,
                 'nama' => 'Hendra Saputra, S.Kom',
                 'nip' => '198812102019061005',
@@ -57,7 +55,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 6,
                 'nama' => 'Dewi Lestari, M.Pd',
                 'nip' => '198703192017041006',
@@ -66,7 +64,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 7,
                 'nama' => 'Agus Pratama, S.Pd',
                 'nip' => '199102012022071007',
@@ -75,7 +73,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 8,
                 'nama' => 'Rina Wulandari, S.Pd',
                 'nip' => '199203102021082008',
@@ -84,7 +82,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 9,
                 'nama' => 'Fajar Nugroho, M.Pd',
                 'nip' => '198601212016091009',
@@ -93,7 +91,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 10,
                 'nama' => 'Lina Marlina, S.Pd',
                 'nip' => '199011302020102010',
@@ -102,7 +100,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 11,
                 'nama' => 'Rahmat Hidayat, S.Ag',
                 'nip' => '198505172015111011',
@@ -111,7 +109,7 @@ class PegawaiController extends Controller
                 'bidang' => null,
                 'tipe' => 'guru',
             ],
-            (object)[
+            (object) [
                 'id' => 12,
                 'nama' => 'Yuni Kartika, S.Pd',
                 'nip' => '199104212022121012',
@@ -122,7 +120,7 @@ class PegawaiController extends Controller
             ],
 
             // ================= STAF TU =================
-            (object)[
+            (object) [
                 'id' => 13,
                 'nama' => 'Budi Santoso',
                 'nip' => '197912122010011013',
@@ -131,7 +129,7 @@ class PegawaiController extends Controller
                 'bidang' => 'Administrasi',
                 'tipe' => 'staf',
             ],
-            (object)[
+            (object) [
                 'id' => 14,
                 'nama' => 'Sri Wahyuni',
                 'nip' => '198308092012022014',
@@ -140,7 +138,7 @@ class PegawaiController extends Controller
                 'bidang' => 'Keuangan',
                 'tipe' => 'staf',
             ],
-            (object)[
+            (object) [
                 'id' => 15,
                 'nama' => 'Andi Kurniawan',
                 'nip' => '198912172015031015',
@@ -149,7 +147,7 @@ class PegawaiController extends Controller
                 'bidang' => 'Kesiswaan',
                 'tipe' => 'staf',
             ],
-            (object)[
+            (object) [
                 'id' => 16,
                 'nama' => 'Maya Puspitasari',
                 'nip' => '199203142018041016',
@@ -167,6 +165,7 @@ class PegawaiController extends Controller
     {
         // dummy detail page
         abort_unless($id, 404);
+
         return "Detail pegawai ID: $id";
     }
 }
