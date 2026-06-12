@@ -70,6 +70,11 @@ class ArticlePolicy
             return true;
         }
 
+        // Authors cannot edit if the article has been rejected 2 or more times
+        if ($article->rejection_count >= 2 && $authUser->id === $article->user_id) {
+            return false;
+        }
+
         // Authors can only update their own articles
         return $authUser->id === $article->user_id;
     }
@@ -86,6 +91,11 @@ class ArticlePolicy
         // Admins can delete any article
         if ($authUser->hasRole('admin')) {
             return true;
+        }
+
+        // Authors cannot delete if the article has been rejected 2 or more times
+        if ($article->rejection_count >= 2 && $authUser->id === $article->user_id) {
+            return false;
         }
 
         // Authors can only delete their own articles

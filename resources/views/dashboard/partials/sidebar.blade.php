@@ -206,6 +206,17 @@
                         <span class="sidebar-tooltip">Pengaturan Web</span>
                     </a>
                 </li>
+                @can('manage-chatbot')
+                <li>
+                    <a href="{{ route('admin.chatbot.index') }}" data-page="chatbot" class="sidebar-link {{ Route::is('admin.chatbot.*') ? 'active' : '' }}" aria-label="Konfigurasi Chatbot">
+                        <span class="sidebar-icon w-5 h-5 shrink-0 flex items-center justify-center">
+                            <i class="fa-solid fa-robot text-sm"></i>
+                        </span>
+                        <span class="sidebar-label">Konfigurasi Chatbot</span>
+                        <span class="sidebar-tooltip">Konfigurasi Chatbot</span>
+                    </a>
+                </li>
+                @endcan
                 @endif
             </ul>
         </div>

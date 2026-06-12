@@ -30,17 +30,20 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::post('/upload-temp', [ArticleController::class, 'uploadTemp'])->name('upload-temp');
             Route::get('/create', [ArticleController::class, 'create'])->name('create');
             Route::post('/', [ArticleController::class, 'store'])->name('store');
+            Route::get('/{article}', [ArticleController::class, 'show'])->name('show');
             Route::get('/{article}/edit', [ArticleController::class, 'edit'])->name('edit');
             Route::put('/{article}', [ArticleController::class, 'update'])->name('update');
             Route::delete('/{article}', [ArticleController::class, 'destroy'])->name('destroy');
         });
 
-    // Approve artikel — hanya Admin, Super Admin, dan Guru (BUKAN Siswa)
+    // Approve / Reject / Request Revision artikel — hanya Admin, Super Admin, dan Guru (BUKAN Siswa)
     Route::prefix('dashboard/articles')
         ->name('admin.articles.')
         ->middleware('permission:access-admin-dashboard|access-super-admin-dashboard|access-guru-dashboard')
         ->group(function () {
             Route::post('/{article}/approve', [ArticleController::class, 'approve'])->name('approve');
+            Route::post('/{article}/reject', [ArticleController::class, 'reject'])->name('reject');
+            Route::post('/{article}/revision', [ArticleController::class, 'requestRevision'])->name('revision');
         });
 
 });

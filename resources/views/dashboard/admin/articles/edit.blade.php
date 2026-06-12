@@ -16,15 +16,19 @@
         const publishTimeDiv = document.getElementById('publish_time_container');
         
         function togglePublishTime() {
-            if (statusSelect.value === 'published') {
-                publishTimeDiv.classList.remove('hidden');
+            if (statusSelect && statusSelect.value === 'publish_custom') {
+                if (publishTimeDiv) publishTimeDiv.classList.remove('hidden');
             } else {
-                publishTimeDiv.classList.add('hidden');
+                if (publishTimeDiv) publishTimeDiv.classList.add('hidden');
             }
         }
 
-        statusSelect.addEventListener('change', togglePublishTime);
-        togglePublishTime(); // Run once on load
+        if (statusSelect) {
+            if (statusSelect.tagName === 'SELECT') {
+                statusSelect.addEventListener('change', togglePublishTime);
+            }
+            togglePublishTime(); // Run once on load
+        }
     });
 </script>
 
@@ -56,6 +60,38 @@
         <form action="{{ route('admin.articles.update', $article) }}" method="POST" enctype="multipart/form-data" id="articleForm" class="space-y-6">
             @csrf
             @method('PUT')
+
+            @if($article->status === 'rejected' && $article->rejection_reason)
+                <div class="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/60 p-4 text-rose-800 dark:text-rose-400 text-xs font-semibold rounded-none mb-6">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                        </svg>
+                        <div>
+                            <p class="font-bold text-sm text-rose-800 dark:text-rose-300">Artikel Ditolak (Revisi Terakhir)</p>
+                            <p class="mt-1 font-mono text-xs leading-relaxed">{{ $article->rejection_reason }}</p>
+                            <p class="mt-2 text-[10px] text-rose-600 dark:text-rose-500 font-bold uppercase tracking-wider font-mono">⚠️ Peringatan: Ini kesempatan terakhir Anda untuk memperbaiki artikel ini. Jika ditolak sekali lagi, artikel akan dikunci secara permanen.</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if($article->status === 'revision' && $article->latestRevision)
+                <div class="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/60 p-4 text-blue-800 dark:text-blue-400 text-xs font-semibold rounded-none mb-6">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                        </svg>
+                        <div>
+                            <p class="font-bold text-sm text-blue-800 dark:text-blue-300">Catatan Revisi #{{ $article->latestRevision->revision_number }}</p>
+                            <p class="mt-1 font-mono text-xs leading-relaxed whitespace-pre-wrap">{{ $article->latestRevision->notes }}</p>
+                            <p class="mt-2 text-[10px] text-blue-650 dark:text-blue-500 font-mono">
+                                Diminta oleh: <strong>{{ $article->latestRevision->reviewer?->name ?? 'Reviewer' }}</strong> pada {{ $article->latestRevision->created_at->translatedFormat('d M Y, H:i') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Left Section: Title, Content, Excerpt (2 Cols) -->
@@ -106,26 +142,48 @@
                     </div>
 
                     <!-- Status -->
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 font-mono">Status Publikasi <span class="text-rose-500">*</span></label>
-                        <select name="status" id="status" required
-                            class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
-                            <option value="draft" {{ old('status', $article->status) === 'draft' ? 'selected' : '' }}>Simpan sebagai Draft</option>
-                            <option value="pending" {{ old('status', $article->status) === 'pending' ? 'selected' : '' }}>Menunggu Konfirmasi (Pending)</option>
-                            @if(!Auth::user()->hasRole('siswa'))
-                                <option value="published" {{ old('status', $article->status) === 'published' ? 'selected' : '' }}>Terbitkan Langsung</option>
-                                <option value="archived" {{ old('status', $article->status) === 'archived' ? 'selected' : '' }}>Simpan sebagai Arsip</option>
-                            @endif
-                        </select>
-                    </div>
+                    @if($article->status === 'revision')
+                        <input type="hidden" name="status" id="status" value="pending">
+                    @else
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 font-mono">Status Publikasi <span class="text-rose-500">*</span></label>
+                            @php
+                                // Map DB value 'published' to UI value for proper option selection
+                                $currentStatus = old('status', $article->status);
+                                // If already published, map to publish_now for display (user can re-choose)
+                                // If rejected, map to pending for re-submission
+                                $uiStatus = ($currentStatus === 'published') ? 'publish_now' : (($currentStatus === 'rejected') ? 'pending' : $currentStatus);
+                            @endphp
+                            <select name="status" id="status" required
+                                class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
+                                <option value="draft" {{ $uiStatus === 'draft' ? 'selected' : '' }}>📝 Simpan sebagai Draft</option>
+                                <option value="pending" {{ $uiStatus === 'pending' ? 'selected' : '' }}>⏳ Menunggu Konfirmasi (Pending)</option>
+                                @if(!Auth::user()->hasRole('siswa'))
+                                    <option value="publish_now" {{ $uiStatus === 'publish_now' ? 'selected' : '' }}>🚀 Terbitkan Sekarang</option>
+                                    <option value="publish_custom" {{ $uiStatus === 'publish_custom' ? 'selected' : '' }}>📅 Jadwalkan Publikasi</option>
+                                    <option value="archived" {{ $uiStatus === 'archived' ? 'selected' : '' }}>🗄️ Simpan sebagai Arsip</option>
+                                @endif
+                            </select>
+                            <p class="text-[10px] text-slate-400 dark:text-zinc-500 mt-1">
+                                <span id="status-hint-draft" class="{{ $uiStatus === 'draft' ? '' : 'hidden' }}">Artikel tidak akan tampil di website.</span>
+                                <span id="status-hint-pending" class="{{ $uiStatus === 'pending' ? '' : 'hidden' }}">Menunggu persetujuan dari Admin/Super Admin.</span>
+                                <span id="status-hint-publish_now" class="{{ $uiStatus === 'publish_now' ? '' : 'hidden' }}">Artikel langsung tayang di website saat disimpan.</span>
+                                <span id="status-hint-publish_custom" class="{{ $uiStatus === 'publish_custom' ? '' : 'hidden' }}">Tentukan tanggal dan jam artikel mulai tayang.</span>
+                                <span id="status-hint-archived" class="{{ $uiStatus === 'archived' ? '' : 'hidden' }}">Artikel disembunyikan dan diarsipkan.</span>
+                            </p>
+                        </div>
 
-                    <!-- Tanggal Publikasi -->
-                    <div id="publish_time_container" class="hidden">
-                        <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Tanggal & Waktu Rilis</label>
-                        <input type="datetime-local" name="published_at" value="{{ old('published_at', $article->published_at ? $article->published_at->format('Y-m-d\TH:i') : '') }}"
-                            class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
-                        <p class="text-[10px] text-slate-400 dark:text-zinc-500 mt-1">Kosongkan/biarkan default jika ingin artikel terbit langsung saat disimpan.</p>
-                    </div>
+                        <!-- Jadwal Publikasi Custom -->
+                        <div id="publish_time_container" class="{{ $uiStatus === 'publish_custom' ? '' : 'hidden' }}">
+                            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">
+                                <i class="fa-regular fa-calendar-clock mr-1"></i> Tanggal & Waktu Rilis
+                            </label>
+                            <input type="datetime-local" name="published_at" id="published_at"
+                                value="{{ old('published_at', $article->published_at ? $article->published_at->format('Y-m-d\TH:i') : '') }}"
+                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                            <p class="text-[10px] text-slate-400 dark:text-zinc-500 mt-1">Artikel akan otomatis tayang pada waktu yang dipilih.</p>
+                        </div>
+                    @endif
 
                     <!-- Upload Thumbnail (Drag & Drop + Preview) -->
                     <div>
@@ -359,8 +417,9 @@
                 <a href="{{ route('admin.articles.index') }}" class="py-2.5 px-5 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 font-bold text-xs rounded-none transition-all font-mono">
                     BATAL
                 </a>
-                <button type="submit" class="py-2.5 px-5 bg-[#4f45b2] hover:bg-[#4f45b2]/90 text-white font-bold text-xs rounded-none transition-all tracking-wider font-mono">
-                    PERBARUI ARTIKEL
+                <button type="submit" id="btn-submit"
+                    class="py-2.5 px-5 bg-[#4f45b2] hover:bg-[#4f45b2]/90 text-white font-bold text-xs rounded-none transition-all tracking-wider font-mono">
+                    {{ $article->status === 'revision' ? 'KIRIM REVISI' : 'PERBARUI ARTIKEL' }}
                 </button>
             </div>
         </form>

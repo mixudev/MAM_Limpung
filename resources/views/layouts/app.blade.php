@@ -188,5 +188,6 @@
         </div> --}}
 
         <!-- AOS initialized via app.js -->
+        @include('partials.chatbot_widget')
 </body>
 </html>

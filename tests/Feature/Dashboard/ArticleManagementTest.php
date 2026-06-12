@@ -2,6 +2,7 @@
 
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\ArticleRevision;
 use App\Models\User;
 use App\Support\Security\HtmlSanitizer;
 use Database\Seeders\Auth\PermissionSeeder;
@@ -531,4 +532,130 @@ test('temp_thumbnail path traversal prevention does not move file outside public
     $article = Article::where('judul', 'Artikel Jahat')->first();
     expect($article)->not->toBeNull();
     expect($article->thumbnail)->toBeNull();
+});
+
+// ─── NEW REVISI & TOLAK FLOWS ──────────────────────────────────────────────────
+
+test('author can edit rejected article if rejection_count is 1', function () {
+    $siswa = User::factory()->create();
+    $siswa->assignRole('siswa');
+
+    $category = ArticleCategory::factory()->create();
+    $article = Article::factory()->create([
+        'user_id' => $siswa->id,
+        'category_id' => $category->id,
+        'status' => 'rejected',
+        'rejection_count' => 1,
+        'rejection_reason' => 'First rejection reason',
+    ]);
+
+    $response = $this->actingAs($siswa)->put(route('admin.articles.update', $article), [
+        'judul' => 'Judul Baru',
+        'category_id' => $category->id,
+        'konten' => '<p>Konten revisi.</p>',
+        'status' => 'pending',
+    ]);
+
+    $response->assertRedirect(route('admin.articles.index'));
+    expect($article->fresh()->judul)->toBe('Judul Baru');
+});
+
+test('author is blocked from updating article if rejection_count >= 2', function () {
+    $siswa = User::factory()->create();
+    $siswa->assignRole('siswa');
+
+    $category = ArticleCategory::factory()->create();
+    $article = Article::factory()->create([
+        'user_id' => $siswa->id,
+        'category_id' => $category->id,
+        'status' => 'rejected',
+        'rejection_count' => 2,
+        'rejection_reason' => 'Second rejection reason',
+    ]);
+
+    $response = $this->actingAs($siswa)->put(route('admin.articles.update', $article), [
+        'judul' => 'Judul Baru',
+        'category_id' => $category->id,
+        'konten' => '<p>Konten revisi.</p>',
+        'status' => 'pending',
+    ]);
+
+    $response->assertStatus(403);
+    expect($article->fresh()->judul)->not->toBe('Judul Baru');
+});
+
+test('submitting a revision auto-resolves pending revisions and sets status back to pending', function () {
+    $siswa = User::factory()->create();
+    $siswa->assignRole('siswa');
+
+    $category = ArticleCategory::factory()->create();
+    $article = Article::factory()->create([
+        'user_id' => $siswa->id,
+        'category_id' => $category->id,
+        'status' => 'revision',
+    ]);
+
+    // Create a pending revision request
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $revision = ArticleRevision::create([
+        'article_id' => $article->id,
+        'reviewer_id' => $admin->id,
+        'revision_number' => 1,
+        'notes' => 'Please fix spelling.',
+        'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($siswa)->put(route('admin.articles.update', $article), [
+        'judul' => $article->judul,
+        'category_id' => $category->id,
+        'konten' => '<p>Fixed spelling.</p>',
+        'status' => 'pending',
+    ]);
+
+    $response->assertRedirect(route('admin.articles.index'));
+    expect($article->fresh()->status)->toBe('pending');
+    expect($revision->fresh()->status)->toBe('resolved');
+    expect($revision->fresh()->resolved_at)->not->toBeNull();
+});
+
+test('admin rejection increments rejection_count and sets status to rejected', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $category = ArticleCategory::factory()->create();
+    $article = Article::factory()->create([
+        'category_id' => $category->id,
+        'status' => 'pending',
+        'rejection_count' => 0,
+    ]);
+
+    $response = $this->actingAs($admin)->post(route('admin.articles.reject', $article), [
+        'rejection_reason' => 'Wrong format',
+    ]);
+
+    $response->assertRedirect(route('admin.articles.show', $article->slug));
+    $article->refresh();
+    expect($article->status)->toBe('rejected');
+    expect($article->rejection_count)->toBe(1);
+    expect($article->rejection_reason)->toBe('Wrong format');
+});
+
+test('admin approval resets rejection_count to 0', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $category = ArticleCategory::factory()->create();
+    $article = Article::factory()->create([
+        'category_id' => $category->id,
+        'status' => 'pending',
+        'rejection_count' => 1,
+    ]);
+
+    $response = $this->actingAs($admin)->post(route('admin.articles.approve', $article));
+
+    $response->assertRedirect(route('admin.articles.show', $article->slug));
+    $article->refresh();
+    expect($article->status)->toBe('published');
+    expect($article->rejection_count)->toBe(0);
 });

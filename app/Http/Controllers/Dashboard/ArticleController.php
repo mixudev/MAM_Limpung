@@ -7,6 +7,7 @@ use App\Http\Requests\Dashboard\StoreArticleRequest;
 use App\Http\Requests\Dashboard\UpdateArticleRequest;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\ArticleRevision;
 use App\Support\Security\HtmlSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -25,29 +26,45 @@ class ArticleController extends Controller
     {
         Gate::authorize('viewAny', Article::class);
 
-        $query = Article::query()->with(['penulis', 'category']);
-
-        // Tenancy Isolation: Guru can only see their own articles
         $user = $request->user();
-        if (! $user->hasRole('admin') && ! $user->hasRole('super-admin')) {
-            $query->where('user_id', $user->id);
+        $isAdmin = $user->hasRole('admin') || $user->hasRole('super-admin');
+
+        // Base query dengan tenancy isolation
+        $baseQuery = Article::query()->with(['penulis', 'category']);
+        if (! $isAdmin) {
+            $baseQuery->where('user_id', $user->id);
         }
 
-        // Apply filters
+        // Hitung per-tab untuk badge (clone query agar tidak saling mempengaruhi)
+        $counts = [
+            'all' => (clone $baseQuery)->count(),
+            'published' => (clone $baseQuery)->where('status', 'published')->count(),
+            'pending' => (clone $baseQuery)->whereIn('status', ['pending', 'revision'])->count(),
+            'others' => (clone $baseQuery)->whereIn('status', ['draft', 'archived', 'rejected'])->count(),
+        ];
+
+        // Tab aktif — default 'all'
+        $tab = $isAdmin ? $request->input('tab', 'all') : 'all';
+
+        // Terapkan filter tab ke query utama
+        $query = clone $baseQuery;
+        match ($tab) {
+            'published' => $query->where('status', 'published'),
+            'pending' => $query->whereIn('status', ['pending', 'revision']),
+            'others' => $query->whereIn('status', ['draft', 'archived', 'rejected']),
+            default => null,
+        };
+
+        // Filter tambahan (search & category)
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(fn ($q) => $q->where('judul', 'like', "%{$search}%")
                 ->orWhere('ringkasan', 'like', "%{$search}%")
-                ->orWhere('konten', 'like', "%{$search}%")
             );
         }
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->input('category_id'));
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
         }
 
         $articles = $query->latest()
@@ -56,7 +73,7 @@ class ArticleController extends Controller
 
         $categories = ArticleCategory::orderBy('name')->get();
 
-        return view('dashboard.admin.articles.index', compact('articles', 'categories'));
+        return view('dashboard.admin.articles.index', compact('articles', 'categories', 'counts', 'tab'));
     }
 
     /**
@@ -136,6 +153,15 @@ class ArticleController extends Controller
             }
         }
 
+        // Normalize publish_now / publish_custom → published, and set published_at
+        if ($data['status'] === 'publish_now') {
+            $data['status'] = 'published';
+            $data['published_at'] = now();
+        } elseif ($data['status'] === 'publish_custom') {
+            $data['status'] = 'published';
+            // published_at already validated and present (required_if:status,publish_custom)
+        }
+
         // If published, set published_at if not filled
         if ($data['status'] === 'published') {
             $data['published_at'] = $data['published_at'] ?? now();
@@ -159,6 +185,18 @@ class ArticleController extends Controller
     }
 
     /**
+     * Display the specified article for review / preview in dashboard.
+     */
+    public function show(Article $article): View
+    {
+        Gate::authorize('view', $article);
+
+        $article->load(['penulis', 'category', 'revisions.reviewer']);
+
+        return view('dashboard.admin.articles.show', compact('article'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Article $article): View
@@ -178,6 +216,8 @@ class ArticleController extends Controller
         // Authorization is handled in UpdateArticleRequest
 
         $data = $request->validated();
+
+        $wasRevision = $article->status === 'revision';
 
         // Clean content from XSS attacks using HtmlSanitizer
         $data['konten'] = HtmlSanitizer::clean($data['konten']);
@@ -216,6 +256,14 @@ class ArticleController extends Controller
         }
 
         // Handle publication timestamp
+        if ($data['status'] === 'publish_now') {
+            $data['status'] = 'published';
+            $data['published_at'] = now();
+        } elseif ($data['status'] === 'publish_custom') {
+            $data['status'] = 'published';
+            // published_at already validated and present
+        }
+
         if ($data['status'] === 'published') {
             $data['published_at'] = $data['published_at'] ?? $article->published_at ?? now();
         } else {
@@ -235,6 +283,15 @@ class ArticleController extends Controller
             'is_followed' => $request->boolean('seo_is_followed', true),
         ]);
 
+        if ($wasRevision) {
+            $article->revisions()
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'resolved',
+                    'resolved_at' => now(),
+                ]);
+        }
+
         return redirect()->route('admin.articles.index')
             ->with('success', 'Artikel berhasil diperbarui.');
     }
@@ -250,13 +307,89 @@ class ArticleController extends Controller
             abort(403, 'Siswa tidak dapat menyetujui artikel.');
         }
 
+        // Tandai semua revisi pending sebagai resolved
+        $article->revisions()
+            ->where('status', 'pending')
+            ->update(['status' => 'resolved', 'resolved_at' => now()]);
+
         $article->update([
             'status' => 'published',
             'published_at' => now(),
+            'rejection_reason' => null,
+            'rejection_count' => 0,
         ]);
 
-        return redirect()->route('admin.articles.index')
+        return redirect()->route('admin.articles.show', $article->slug)
             ->with('success', "Artikel '{$article->judul}' berhasil disetujui dan diterbitkan.");
+    }
+
+    /**
+     * Request revision — artikel dikembalikan ke penulis untuk diperbaiki.
+     */
+    public function requestRevision(Request $request, Article $article): RedirectResponse
+    {
+        Gate::authorize('update', $article);
+
+        if (auth()->user()->hasRole('siswa')) {
+            abort(403, 'Siswa tidak dapat meminta revisi.');
+        }
+
+        $request->validate([
+            'revision_notes' => ['required', 'string', 'max:2000'],
+        ], [
+            'revision_notes.required' => 'Catatan revisi wajib diisi.',
+            'revision_notes.max' => 'Catatan revisi maksimal 2000 karakter.',
+        ]);
+
+        // Nomor revisi berikutnya
+        $nextNumber = ($article->revisions()->max('revision_number') ?? 0) + 1;
+
+        ArticleRevision::create([
+            'article_id' => $article->id,
+            'reviewer_id' => auth()->id(),
+            'revision_number' => $nextNumber,
+            'notes' => $request->input('revision_notes'),
+            'status' => 'pending',
+        ]);
+
+        $article->update([
+            'status' => 'revision',
+            'published_at' => null,
+            'rejection_reason' => null,
+        ]);
+
+        return redirect()->route('admin.articles.show', $article->slug)
+            ->with('success', "Revisi ke-{$nextNumber} diminta. Artikel dikembalikan ke penulis untuk diperbaiki.");
+    }
+
+    /**
+     * Reject the specified article and send it back to draft with a reason.
+     */
+    public function reject(Request $request, Article $article): RedirectResponse
+    {
+        Gate::authorize('update', $article);
+
+        if (auth()->user()->hasRole('siswa')) {
+            abort(403, 'Siswa tidak dapat menolak artikel.');
+        }
+
+        $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:1000'],
+        ], [
+            'rejection_reason.required' => 'Alasan penolakan wajib diisi.',
+            'rejection_reason.max' => 'Alasan penolakan maksimal 1000 karakter.',
+        ]);
+
+        $article->increment('rejection_count');
+
+        $article->update([
+            'status' => 'rejected',
+            'published_at' => null,
+            'rejection_reason' => $request->input('rejection_reason'),
+        ]);
+
+        return redirect()->route('admin.articles.show', $article->slug)
+            ->with('success', "Artikel '{$article->judul}' ditolak.");
     }
 
     /**

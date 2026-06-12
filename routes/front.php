@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Frontend\ArticleController;
+use App\Http\Controllers\Frontend\ChatbotWidgetController;
 use App\Http\Controllers\Frontend\ContactController;
 use App\Http\Controllers\Frontend\EkstrakurikulerController;
 use App\Http\Controllers\Frontend\GaleriController;
@@ -95,6 +96,15 @@ Route::name('frontend.')->group(function () {
 
     Route::get('/pegawai', [PegawaiController::class, 'index'])->name('pegawai.index');
     Route::get('/pegawai/{id}', [PegawaiController::class, 'show'])->name('pegawai.show');
+
+    // Chatbot Frontend Widget Routes
+    Route::prefix('chatbot')->name('chatbot.')->group(function () {
+        Route::get('/faqs', [ChatbotWidgetController::class, 'getFaqs'])->name('faqs');
+        Route::post('/history', [ChatbotWidgetController::class, 'getHistory'])->name('history');
+        Route::post('/sessions', [ChatbotWidgetController::class, 'startSession'])->name('sessions.start');
+        Route::post('/sessions/{session}/send', [ChatbotWidgetController::class, 'sendMessage'])->name('sessions.send')->middleware('throttle:30,1');
+        Route::post('/sessions/{session}/feedback', [ChatbotWidgetController::class, 'submitFeedback'])->name('sessions.feedback');
+    });
 });
 
 Route::get('/link', function () {

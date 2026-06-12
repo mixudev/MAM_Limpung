@@ -29,8 +29,8 @@ class StoreArticleRequest extends FormRequest
             'konten' => ['required', 'string'],
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'], // Strict upload check
             'temp_thumbnail' => ['nullable', 'string'],
-            'status' => ['required', $this->user()->hasRole('siswa') ? 'in:draft,pending' : 'in:draft,pending,published,archived'],
-            'published_at' => ['nullable', 'required_if:status,published', 'date'],
+            'status' => ['required', $this->user()->hasRole('siswa') ? 'in:draft,pending' : 'in:draft,pending,publish_now,publish_custom,archived'],
+            'published_at' => ['nullable', 'required_if:status,publish_custom', 'date'],
             'seo_meta_title' => ['nullable', 'string', 'max:255'],
             'seo_meta_description' => ['nullable', 'string', 'max:500'],
             'seo_meta_keywords' => ['nullable', 'string', 'max:255'],

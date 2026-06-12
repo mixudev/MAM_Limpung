@@ -92,6 +92,9 @@ class PermissionSeeder extends Seeder
         ['edit-galeri',    'galeri', 'Edit Gallery',    'Update gallery information'],
         ['delete-galeri',  'galeri', 'Delete Gallery',  'Delete gallery records'],
         ['approve-galeri', 'galeri', 'Approve Gallery', 'Approve or reject gallery uploads'],
+
+        // --- Chatbot ---
+        ['manage-chatbot', 'chatbot', 'Manage Chatbot', 'Manage AI chatbot configuration, API keys, knowledge bases and FAQs'],
     ];
 
     public function run(): void

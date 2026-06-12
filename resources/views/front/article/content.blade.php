@@ -124,17 +124,29 @@
 
         <!-- Sharp Featured Image -->
         @if($article->thumbnail)
-        <div class="w-full aspect-video sm:aspect-[21/9] bg-slate-200 mb-8 md:mb-12 relative">
+        <div class="w-full aspect-video sm:aspect-21/9 bg-slate-200 mb-8 md:mb-12 relative">
             <img src="{{ $article->thumbnailUrl() }}" alt="{{ $article->judul }}" class="w-full h-full object-cover" loading="lazy">
         </div>
         @endif
 
         <!-- Article Body (Optimized for Readability) -->
-        <div class="prose prose-slate prose-base sm:prose-lg md:prose-xl mx-auto 
+        <div class="prose prose-slate prose-base sm:prose-lg md:prose-xl mx-auto
                     prose-p:text-slate-800 prose-p:leading-[1.8] prose-p:mb-6 sm:prose-p:mb-8
                     prose-headings:font-serif prose-headings:font-bold prose-headings:text-slate-900 prose-headings:leading-tight
-                    prose-a:text-blue-700 prose-a:underline prose-a:decoration-blue-300 hover:prose-a:decoration-blue-700
-                    prose-blockquote:border-l-4 prose-blockquote:border-amber-500 prose-blockquote:bg-white prose-blockquote:py-3 sm:prose-blockquote:py-4 prose-blockquote:px-5 sm:prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:font-serif prose-blockquote:text-slate-900 prose-blockquote:shadow-sm">
+                    prose-a:text-blue-700 prose-a:underline prose-a:decoration-blue-300 hover:prose-a:decoration-blue-700 prose-a:font-medium
+                    prose-blockquote:border-l-4 prose-blockquote:border-amber-500 prose-blockquote:bg-white prose-blockquote:py-3 sm:prose-blockquote:py-4 prose-blockquote:px-5 sm:prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:font-serif prose-blockquote:text-slate-900 prose-blockquote:shadow-sm
+                    prose-ul:list-disc prose-ul:pl-6 prose-ul:my-4
+                    prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-4
+                    prose-li:text-slate-800 prose-li:my-1
+                    prose-table:w-full prose-table:border-collapse
+                    prose-th:bg-slate-100 prose-th:font-semibold prose-th:text-slate-900 prose-th:border prose-th:border-slate-300 prose-th:px-3 prose-th:py-2
+                    prose-td:border prose-td:border-slate-300 prose-td:px-3 prose-td:py-2 prose-td:text-slate-700
+                    prose-strong:text-slate-900 prose-strong:font-bold
+                    prose-em:text-slate-700 prose-em:italic
+                    prose-code:text-rose-700 prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-medium
+                    prose-pre:bg-slate-800 prose-pre:text-slate-200 prose-pre:rounded prose-pre:overflow-x-auto
+                    prose-img:rounded prose-img:mx-auto prose-img:shadow-sm
+                    prose-hr:border-slate-200">
             {!! $article->konten !!}
         </div>
 

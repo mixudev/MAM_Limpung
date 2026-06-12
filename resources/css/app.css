@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -44,4 +45,102 @@
         0% { background-position: -200% 0; }
         100% { background-position: 200% 0; }
     }
+}
+
+/* ==========================================================================
+   Quill Editor Output Styles — untuk tampilan konten artikel di frontend.
+   Quill menghasilkan class-class khusus yang tidak punya styling di luar
+   dashboard (yang memuat quill.snow.css). Class ini di-scope di dalam
+   .prose supaya tidak bocor ke seluruh halaman.
+   ========================================================================== */
+
+/* Indentasi paragraf (Quill: Format > Indent) */
+.prose .ql-indent-1  { padding-left: 2rem; }
+.prose .ql-indent-2  { padding-left: 4rem; }
+.prose .ql-indent-3  { padding-left: 6rem; }
+.prose .ql-indent-4  { padding-left: 8rem; }
+.prose .ql-indent-5  { padding-left: 10rem; }
+.prose .ql-indent-6  { padding-left: 12rem; }
+.prose .ql-indent-7  { padding-left: 14rem; }
+.prose .ql-indent-8  { padding-left: 16rem; }
+
+/* Indentasi list items */
+.prose ol .ql-indent-1,
+.prose ul .ql-indent-1 { padding-left: 2rem; }
+.prose ol .ql-indent-2,
+.prose ul .ql-indent-2 { padding-left: 4rem; }
+.prose ol .ql-indent-3,
+.prose ul .ql-indent-3 { padding-left: 6rem; }
+
+/* Perataan teks (Quill: Format > Align) */
+.prose .ql-align-center  { text-align: center; }
+.prose .ql-align-right   { text-align: right; }
+.prose .ql-align-justify { text-align: justify; }
+
+/* Code block Quill (pre.ql-syntax) */
+.prose pre.ql-syntax {
+    background-color: #1e293b; /* slate-800 */
+    color: #e2e8f0;            /* slate-200 */
+    border-radius: 0.375rem;
+    padding: 1rem 1.25rem;
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
+    font-size: 0.875em;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+/* Inline code */
+.prose code:not(pre > code) {
+    background-color: #f1f5f9;  /* slate-100 */
+    color: #be123c;              /* rose-700 */
+    padding: 0.15em 0.4em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+    font-weight: 500;
+}
+
+/* Video embed — Quill menyisipkan iframe dalam div.ql-video */
+.prose .ql-video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: none;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Tabel dari Quill */
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    display: block;
+}
+
+.prose table th,
+.prose table td {
+    border: 1px solid #cbd5e1; /* slate-300 */
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.prose table th {
+    background-color: #f1f5f9; /* slate-100 */
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.prose table tr:nth-child(even) td {
+    background-color: #f8fafc; /* slate-50 */
+}
+
+/* Formula (KaTeX) yang disisipkan Quill */
+.prose .ql-formula {
+    display: inline-block;
+    vertical-align: middle;
 }

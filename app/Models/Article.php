@@ -7,6 +7,8 @@ use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -28,6 +30,8 @@ class Article extends Model
         'thumbnail',
         'status',
         'published_at',
+        'rejection_reason',
+        'rejection_count',
     ];
 
     /**
@@ -109,6 +113,22 @@ class Article extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ArticleCategory::class, 'category_id');
+    }
+
+    /**
+     * Riwayat revisi, diurutkan dari nomor terkecil ke terbesar.
+     */
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(ArticleRevision::class)->orderBy('revision_number');
+    }
+
+    /**
+     * Revisi aktif / terakhir (nomor terbesar).
+     */
+    public function latestRevision(): HasOne
+    {
+        return $this->hasOne(ArticleRevision::class)->latestOfMany('revision_number');
     }
 
     // -----------------------------------------------------------------------

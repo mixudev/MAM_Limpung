@@ -46,6 +46,7 @@ class RoleSeeder extends Seeder
                 'view-reports', 'export-reports', 'generate-reports',
                 'view-achievements', 'create-achievements', 'edit-achievements', 'delete-achievements',
                 'view-galeri', 'create-galeri', 'edit-galeri', 'delete-galeri', 'approve-galeri',
+                'manage-chatbot',
             ],
         ],
         [

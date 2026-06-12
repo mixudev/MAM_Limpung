@@ -135,7 +135,7 @@
         <div x-show="false" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 sm:gap-x-8 sm:gap-y-12">
             @forelse($articles as $article)
                 <a href="{{ route('frontend.article.show', $article->slug) }}" class="group flex flex-col">
-                    <div class="w-full aspect-[4/3] overflow-hidden bg-slate-200 mb-4 relative">
+                    <div class="w-full aspect-4/3 overflow-hidden bg-slate-200 mb-4 relative">
                         <img src="{{ $article->thumbnailUrl() }}" alt="{{ $article->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]" loading="lazy">
                         <div class="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors duration-500"></div>
                     </div>
@@ -161,7 +161,7 @@
         <div x-show="true" style="display: none;" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 sm:gap-x-8 sm:gap-y-12">
             <template x-for="article in filteredArticles" :key="article.id">
                 <a :href="article.url" class="group flex flex-col">
-                    <div class="w-full aspect-[4/3] overflow-hidden bg-slate-200 mb-4 relative">
+                    <div class="w-full aspect-4/3 overflow-hidden bg-slate-200 mb-4 relative">
                         <img :src="article.image" :alt="article.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]" loading="lazy">
                         <div class="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors duration-500"></div>
                     </div>
