@@ -47,6 +47,9 @@ class RoleSeeder extends Seeder
                 'view-achievements', 'create-achievements', 'edit-achievements', 'delete-achievements',
                 'view-galeri', 'create-galeri', 'edit-galeri', 'delete-galeri', 'approve-galeri',
                 'manage-chatbot',
+                'view-teacher-categories', 'create-teacher-categories', 'edit-teacher-categories', 'delete-teacher-categories',
+                'view-teachers', 'create-teachers', 'edit-teachers', 'delete-teachers',
+                'view-students', 'create-students', 'edit-students', 'delete-students',
             ],
         ],
         [
@@ -64,6 +67,9 @@ class RoleSeeder extends Seeder
                 'view-articles', 'create-articles', 'edit-articles', 'delete-articles',
                 'view-reports',
                 'view-galeri', 'create-galeri', 'edit-galeri', 'delete-galeri',
+                'view-teacher-categories',
+                'view-teachers',
+                'view-students',
             ],
         ],
         [

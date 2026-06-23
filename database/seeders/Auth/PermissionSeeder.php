@@ -95,6 +95,24 @@ class PermissionSeeder extends Seeder
 
         // --- Chatbot ---
         ['manage-chatbot', 'chatbot', 'Manage Chatbot', 'Manage AI chatbot configuration, API keys, knowledge bases and FAQs'],
+
+        // --- Teacher Categories ---
+        ['view-teacher-categories',   'teacher-categories', 'View Teacher Categories',   'View teacher category list and details'],
+        ['create-teacher-categories', 'teacher-categories', 'Create Teacher Categories', 'Create new teacher categories'],
+        ['edit-teacher-categories',   'teacher-categories', 'Edit Teacher Categories',   'Update teacher categories'],
+        ['delete-teacher-categories', 'teacher-categories', 'Delete Teacher Categories', 'Delete teacher categories'],
+
+        // --- Teachers ---
+        ['view-teachers',    'teachers', 'View Teachers',    'View teacher list and details'],
+        ['create-teachers',  'teachers', 'Create Teachers',  'Create new teacher records'],
+        ['edit-teachers',    'teachers', 'Edit Teachers',    'Update teacher information'],
+        ['delete-teachers',  'teachers', 'Delete Teachers',  'Delete teacher records'],
+
+        // --- Students ---
+        ['view-students',    'students', 'View Students',    'View student list and details'],
+        ['create-students',  'students', 'Create Students',  'Create new student records'],
+        ['edit-students',    'students', 'Edit Students',    'Update student information'],
+        ['delete-students',  'students', 'Delete Students',  'Delete student records'],
     ];
 
     public function run(): void

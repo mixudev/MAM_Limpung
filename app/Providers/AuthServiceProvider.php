@@ -4,10 +4,16 @@ namespace App\Providers;
 
 use App\Models\Galeri;
 use App\Models\Prestasi;
+use App\Models\Student;
+use App\Models\Teacher;
+use App\Models\TeacherCategory;
 use App\Models\User;
 use App\Policies\Auth\UserPolicy;
 use App\Policies\GaleriPolicy;
 use App\Policies\PrestasiPolicy;
+use App\Policies\StudentPolicy;
+use App\Policies\TeacherCategoryPolicy;
+use App\Policies\TeacherPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -20,6 +26,9 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         Prestasi::class => PrestasiPolicy::class,
         Galeri::class => GaleriPolicy::class,
+        TeacherCategory::class => TeacherCategoryPolicy::class,
+        Teacher::class => TeacherPolicy::class,
+        Student::class => StudentPolicy::class,
     ];
 
     public function boot(): void

@@ -41,7 +41,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" data-page="akademik" class="sidebar-link disabled" aria-label="Akademik">
+                    <a href="#" class="sidebar-link dropdown-trigger {{ Route::is('admin.teachers.*') || Route::is('admin.students.*') ? 'active dropdown-open' : '' }}" aria-label="Akademik">
                         <span class="sidebar-icon w-5 h-5 shrink-0 flex items-center justify-center">
                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
                                 class="w-4 h-4">
@@ -50,10 +50,32 @@
                             </svg>
                         </span>
                         <span class="sidebar-label">Akademik</span>
-                        <span
-                            class="sidebar-badge ml-auto text-[10px] font-mono bg-white dark:bg-zinc-900 text-indigo-700 dark:text-zinc-500 px-1.5 py-0.5 rounded-none border border-indigo-100/80 dark:border-zinc-800">12</span>
+                        <svg class="dropdown-chevron w-3.5 h-3.5 ml-auto text-white/60 dark:text-zinc-500 sidebar-label" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
                         <span class="sidebar-tooltip">Akademik</span>
                     </a>
+                    <ul class="sidebar-submenu">
+                        <div class="sidebar-submenu-inner">
+                            @can('view-teachers')
+                            <li>
+                                <a href="{{ route('admin.teachers.index') }}" class="sidebar-link text-xs py-1.5"
+                                    aria-label="Data Guru">
+                                    <span class="sidebar-label">Guru</span>
+                                </a>
+                            </li>
+                            @endcan
+                            @can('view-students')
+                            <li>
+                                <a href="{{ route('admin.students.index') }}" class="sidebar-link text-xs py-1.5"
+                                    aria-label="Data Siswa">
+                                    <span class="sidebar-label">Siswa</span>
+                                </a>
+                            </li>
+                            @endcan
+                        </div>
+                    </ul>
                 </li>
                 @if(Auth::user()->hasAnyPermission(['access-admin-dashboard', 'access-super-admin-dashboard']))
                 <li>
@@ -164,7 +186,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="sidebar-link dropdown-trigger {{ Route::is('admin.article-categories.*') ? 'active dropdown-open' : '' }}" aria-label="kategori">
+                    <a href="#" class="sidebar-link dropdown-trigger {{ Route::is('admin.article-categories.*') || Route::is('admin.teacher-categories.*') ? 'active dropdown-open' : '' }}" aria-label="kategori">
                         <span class="sidebar-icon w-5 h-5 shrink-0 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid" viewBox="0 0 16 16">
                                 <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/>
@@ -185,12 +207,14 @@
                                     <span class="sidebar-label">Kategori Artikel</span>
                                 </a>
                             </li>
+                            @can('view-teacher-categories')
                             <li>
-                                <a href="#" class="sidebar-link disabled text-xs py-1.5"
-                                    aria-label="Lain-lain">
-                                    <span class="sidebar-label">Lain-lain</span>
+                                <a href="{{ route('admin.teacher-categories.index') }}" class="sidebar-link text-xs py-1.5"
+                                    aria-label="Kategori Guru">
+                                    <span class="sidebar-label">Kategori Guru</span>
                                 </a>
                             </li>
+                            @endcan
                         </div>
                     </ul>
                 </li>

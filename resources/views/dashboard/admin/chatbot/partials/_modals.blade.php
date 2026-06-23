@@ -1,13 +1,13 @@
 {{-- ═══════════════════════════════════════════
      MODAL: API KEY
 ═══════════════════════════════════════════ --}}
-<x-app-modal id="keyModal" maxWidth="md"
-    title="Kunci API AI"
-    description="Tambah atau perbarui API Key untuk model AI chatbot.">
+<form id="keyForm" method="POST">
+    @csrf
+    <input type="hidden" name="_method" id="keyMethodInput" value="PUT">
 
-    <form id="keyForm" method="POST">
-        @csrf
-        <input type="hidden" name="_method" id="keyMethodInput" value="PUT">
+    <x-app-modal id="keyModal" maxWidth="md"
+        title="Kunci API AI"
+        description="Tambah atau perbarui API Key untuk model AI chatbot.">
 
         <div class="space-y-4">
             <div>
@@ -40,25 +40,25 @@
             </div>
         </div>
 
-        <div class="flex justify-end gap-2 pt-5 mt-2 border-t border-slate-100 dark:border-zinc-800">
+        <x-slot name="footer">
             <button type="button" onclick="AppModal.close('keyModal')" class="modal-btn-cancel">Batal</button>
             <button type="submit" id="keySubmitBtn" class="modal-btn-primary">
                 <i class="fa-solid fa-floppy-disk"></i> Tambah API Key
             </button>
-        </div>
-    </form>
-</x-app-modal>
+        </x-slot>
+    </x-app-modal>
+</form>
 
 {{-- ═══════════════════════════════════════════
      MODAL: KNOWLEDGE BASE
 ═══════════════════════════════════════════ --}}
-<x-app-modal id="knowledgeModal" maxWidth="lg"
-    title="Basis Pengetahuan"
-    description="Informasi ini digunakan AI sebagai konteks saat menjawab pertanyaan pengguna.">
+<form id="knowledgeForm" method="POST">
+    @csrf
+    <input type="hidden" name="_method" id="knowledgeMethodInput" value="PUT">
 
-    <form id="knowledgeForm" method="POST">
-        @csrf
-        <input type="hidden" name="_method" id="knowledgeMethodInput" value="PUT">
+    <x-app-modal id="knowledgeModal" maxWidth="lg"
+        title="Basis Pengetahuan"
+        description="Informasi ini digunakan AI sebagai konteks saat menjawab pertanyaan pengguna.">
 
         <div class="space-y-4">
             <div>
@@ -82,25 +82,25 @@
             </div>
         </div>
 
-        <div class="flex justify-end gap-2 pt-5 mt-2 border-t border-slate-100 dark:border-zinc-800">
+        <x-slot name="footer">
             <button type="button" onclick="AppModal.close('knowledgeModal')" class="modal-btn-cancel">Batal</button>
             <button type="submit" id="knowledgeSubmitBtn" class="modal-btn-primary">
                 <i class="fa-solid fa-floppy-disk"></i> Tambah Pengetahuan
             </button>
-        </div>
-    </form>
-</x-app-modal>
+        </x-slot>
+    </x-app-modal>
+</form>
 
 {{-- ═══════════════════════════════════════════
      MODAL: FAQ
 ═══════════════════════════════════════════ --}}
-<x-app-modal id="faqModal" maxWidth="lg"
-    title="FAQ Cepat"
-    description="Pertanyaan pintasan di chatbot, dijawab instan tanpa memanggil AI.">
+<form id="faqForm" method="POST">
+    @csrf
+    <input type="hidden" name="_method" id="faqMethodInput" value="PUT">
 
-    <form id="faqForm" method="POST">
-        @csrf
-        <input type="hidden" name="_method" id="faqMethodInput" value="PUT">
+    <x-app-modal id="faqModal" maxWidth="lg"
+        title="FAQ Cepat"
+        description="Pertanyaan pintasan di chatbot, dijawab instan tanpa memanggil AI.">
 
         <div class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -131,14 +131,14 @@
             </div>
         </div>
 
-        <div class="flex justify-end gap-2 pt-5 mt-2 border-t border-slate-100 dark:border-zinc-800">
+        <x-slot name="footer">
             <button type="button" onclick="AppModal.close('faqModal')" class="modal-btn-cancel">Batal</button>
             <button type="submit" id="faqSubmitBtn" class="modal-btn-primary">
                 <i class="fa-solid fa-floppy-disk"></i> Tambah FAQ
             </button>
-        </div>
-    </form>
-</x-app-modal>
+        </x-slot>
+    </x-app-modal>
+</form>
 
 {{-- ═══════════════════════════════════════════
      MODAL: TRANSCRIPT
