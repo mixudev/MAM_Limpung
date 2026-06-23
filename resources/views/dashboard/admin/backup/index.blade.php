@@ -5,7 +5,6 @@
     document.addEventListener("DOMContentLoaded", function() {
         const breadcrumb = document.getElementById('breadcrumb');
         if (breadcrumb) breadcrumb.textContent = 'Manajemen Backup';
-        if (typeof toggleStorageFolders === 'function') toggleStorageFolders();
     });
 </script>
 
@@ -18,16 +17,26 @@
             </h1>
             <p class="text-xs text-slate-400 dark:text-zinc-400 mt-1">Atur jadwal backup, enkripsi AES-256, sinkronisasi Google Drive, dan verifikasi integritas berkas cadangan data Anda.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
             <span class="flex h-3 w-3 relative">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $backupSettings['enabled'] ? 'bg-emerald-400' : 'bg-amber-400' }} opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 {{ $backupSettings['enabled'] ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
             </span>
-            <span class="text-xs font-mono font-bold tracking-wider uppercase bg-white/10 px-3 py-1.5 border border-white/20">
-                Scheduler: {{ $backupSettings['enabled'] ? 'Aktif' : 'Nonaktif' }}
-            </span>
+            
+            <a href="{{ !empty($backupSettings['google_drive_folder_id']) ? 'https://drive.google.com/drive/folders/' . $backupSettings['google_drive_folder_id'] : 'https://drive.google.com/' }}" target="_blank"
+               class="inline-flex items-center gap-1.5 text-xs font-mono font-bold tracking-wider uppercase bg-white/10 px-3 py-1.5 border border-white/20 hover:bg-white/20 transition-colors"
+               title="{{ !empty($backupSettings['google_drive_folder_id']) ? 'Buka folder Google Drive' : 'Buka Google Drive' }}">
+                <i class="fa-brands fa-google-drive text-emerald-400"></i> Drive
+            </a>
         </div>
     </div>
+
+    @if(session('success'))
+    <div class="bg-emerald-50 dark:bg-emerald-950/20 border-l-4 border-emerald-500 p-4 shadow-sm flex items-center gap-3">
+        <div class="p-1 bg-emerald-500 text-white rounded-full"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
+        <p class="text-xs font-bold text-emerald-800 dark:text-emerald-300">{{ session('success') }}</p>
+    </div>
+    @endif
 
     @if($errors->any())
     <div class="bg-rose-50 dark:bg-rose-950/20 border-l-4 border-rose-500 p-4 shadow-sm space-y-1">

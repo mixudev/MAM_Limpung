@@ -58,12 +58,6 @@
     // Init preview on page load
     document.addEventListener('DOMContentLoaded', () => updateSchedulePreview());
 
-    function toggleStorageFolders() {
-        const checkbox = document.getElementById('backup-storage-checkbox');
-        const wrapper = document.getElementById('storage-folders-wrapper');
-        if (checkbox && wrapper) wrapper.classList.toggle('hidden', !checkbox.checked);
-    }
-
     function logToTerminal(message, type = 'info') {
         const terminal = document.getElementById('terminal-log-content');
         const line = document.createElement('div');
@@ -75,12 +69,62 @@
         terminal.scrollTop = terminal.scrollHeight;
     }
 
+    let progressPollingId = null;
+
+    function startProgressPolling() {
+        const progressUrl = "{{ route('admin.backup.progress') }}";
+        progressPollingId = setInterval(function() {
+            fetch(progressUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var stepLabel = document.getElementById('progress-step-label');
+                var pctLabel = document.getElementById('progress-pct-label');
+                var progressBar = document.getElementById('progress-bar-fill');
+                var progressWrapper = document.getElementById('progress-bar-wrapper');
+
+                if (stepLabel && data.step && data.step !== 'idle') {
+                    progressWrapper.classList.remove('hidden');
+                    var labels = {
+                        'memulai': 'Memulai...',
+                        'database': 'Mendump Database',
+                        'storage': 'Mengompresi Storage',
+                        'compressing': 'Membuat Arsip',
+                        'encrypting': 'Mengenkripsi',
+                        'finalizing': 'Finalisasi',
+                        'drive': 'Upload Google Drive',
+                        'selesai': 'Selesai!',
+                        'error': 'Error'
+                    };
+                    stepLabel.textContent = labels[data.step] || data.step;
+                    if (data.detail) {
+                        stepLabel.textContent += ' — ' + data.detail;
+                    }
+                    if (pctLabel) {
+                        pctLabel.textContent = data.percent + '%';
+                    }
+                    if (data.percent > 0) {
+                        progressBar.style.width = data.percent + '%';
+                    }
+                }
+            })
+            .catch(function() {});
+        }, 1500);
+    }
+
+    function stopProgressPolling() {
+        if (progressPollingId) {
+            clearInterval(progressPollingId);
+            progressPollingId = null;
+        }
+    }
+
     function triggerManualBackup() {
         const btn = document.getElementById('manual-backup-btn');
         const indicator = document.getElementById('terminal-indicator');
         const statusText = document.getElementById('terminal-status-text');
         const spinner = document.getElementById('terminal-spinner-wrapper');
         const content = document.getElementById('terminal-log-content');
+        const progressWrapper = document.getElementById('progress-bar-wrapper');
 
         btn.disabled = true;
         btn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -88,53 +132,74 @@
         indicator.className = 'w-2 h-2 rounded-full bg-indigo-500 animate-ping';
         statusText.innerText = 'Status: Memproses...';
         content.innerHTML = '';
-        logToTerminal('Memulai inisialisasi backup manual...', 'system');
-        logToTerminal('Backup file storage mungkin membutuhkan waktu beberapa menit. Mohon tunggu...', 'warn');
+        progressWrapper.classList.add('hidden');
+        document.getElementById('progress-bar-fill').style.width = '0%';
 
-        // Gunakan AbortController tanpa timeout — biarkan server selesai
-        // (timeout default fetch bisa memotong backup storage besar)
+        logToTerminal('Memulai inisialisasi backup manual...', 'system');
+        logToTerminal('Proses dapat berlangsung beberapa menit tergantung ukuran database & storage.', 'warn');
+
+        startProgressPolling();
+
+        var progressUrl = "{{ route('admin.backup.progress') }}";
+
         fetch("{{ route('admin.backup.run') }}", {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
         })
         .then(function(response) {
-            // Ambil raw text dulu untuk menghindari SyntaxError jika response kosong
             return response.text().then(function(text) {
-                let data = {};
+                var data = {};
                 try {
                     data = text ? JSON.parse(text) : {};
                 } catch (e) {
-                    // Response tidak valid JSON — kemungkinan server timeout atau crash
-                    throw new Error('Server tidak merespons dengan benar. Kemungkinan proses backup masih berjalan di background atau terjadi timeout server. Periksa tab Riwayat Backup untuk hasilnya.');
+                    stopProgressPolling();
+                    var snippet = text ? text.substring(0, 300) : '(respons kosong)';
+                    logToTerminal('Respons server tidak valid: ' + snippet, 'error');
+                    fetch(progressUrl).then(function(r) { return r.json(); }).then(function(p) {
+                        if (p.step === 'selesai') {
+                            data = { success: true, log: null, message: 'Backup selesai!' };
+                            return handleBackupSuccess(data, btn, indicator, statusText, spinner);
+                        }
+                    });
+                    throw new Error('Server tidak merespons dengan benar. Detail: ' + snippet);
                 }
                 if (!response.ok) throw data;
                 return data;
             });
         })
         .then(function(data) {
-            logToTerminal('Inisialisasi berhasil!', 'success');
-            if (data.log) {
-                logToTerminal(`Tipe: ${data.log.type || '-'}`, 'info');
-                if (data.log.encrypted) logToTerminal('Enkripsi AES-256: AKTIF', 'success');
-                if (data.log.drive_uploaded) logToTerminal(`Google Drive: SUKSES (${data.log.drive_file_id})`, 'success');
-                else if (data.log.drive_error) logToTerminal(`Google Drive: GAGAL (${data.log.drive_error})`, 'error');
-                logToTerminal(`Ukuran: ${data.log.formatted_size} | Durasi: ${data.log.duration}s`, 'system');
-                logToTerminal(`Selesai! File: ${data.log.filename}`, 'success');
-                appendBackupLogToTable(data.log);
-            }
-            indicator.className = 'w-2 h-2 rounded-full bg-emerald-500';
-            statusText.innerText = 'Status: Sukses!';
-            btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); spinner.classList.add('hidden');
+            stopProgressPolling();
+            handleBackupSuccess(data, btn, indicator, statusText, spinner);
         })
         .catch(function(err) {
+            stopProgressPolling();
             const msg = typeof err === 'string' ? err : (err.message || JSON.stringify(err));
-            logToTerminal(`GAGAL: ${msg}`, 'error');
-            logToTerminal('Jika proses baru pertama kali dilakukan dengan storage besar, coba refresh halaman dan cek tabel Riwayat Backup — backup mungkin berhasil di background.', 'warn');
+            logToTerminal('GAGAL: ' + msg, 'error');
+            logToTerminal('Periksa tabel Riwayat Backup untuk melihat hasil akhir.', 'warn');
             indicator.className = 'w-2 h-2 rounded-full bg-rose-500';
             statusText.innerText = 'Status: Error!';
             if (err && err.log) appendBackupLogToTable(err.log);
-            btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); spinner.classList.add('hidden');
+            if (!btn.disabled) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); spinner.classList.add('hidden'); }
         });
+    }
+
+    function handleBackupSuccess(data, btn, indicator, statusText, spinner) {
+        logToTerminal('Proses backup selesai!', 'success');
+        if (data.log) {
+            var log = data.log;
+            logToTerminal('Tipe: ' + (log.type || '-'), 'info');
+            if (log.encrypted) logToTerminal('Enkripsi AES-256: AKTIF', 'success');
+            if (log.drive_uploaded) logToTerminal('Google Drive: SUKSES (ID: ' + log.drive_file_id + ')', 'success');
+            else if (log.drive_error) logToTerminal('Google Drive: GAGAL (' + log.drive_error + ')', 'error');
+            logToTerminal('Ukuran: ' + log.formatted_size + ' | Durasi: ' + log.duration + 's', 'system');
+            logToTerminal('File: ' + log.filename, 'success');
+            appendBackupLogToTable(log);
+        } else {
+            location.reload();
+        }
+        indicator.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        statusText.innerText = 'Status: Sukses!';
+        btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); spinner.classList.add('hidden');
     }
 
     function appendBackupLogToTable(log) {
@@ -171,7 +236,7 @@
 
         fetch("{{ route('admin.backup.verify') }}", {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
             body: JSON.stringify({ filename, passphrase })
         })
         .then(r => r.json().then(data => ({ status: r.status, body: data })))
@@ -208,7 +273,7 @@
             confirmText: 'Ya, Hapus', cancelText: 'Batal',
             onConfirm: () => {
                 const url = "{{ route('admin.backup.delete', ['filename' => ':filename']) }}".replace(':filename', filename);
-                fetch(url, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } })
+                fetch(url, { method: 'DELETE', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' } })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) { AppPopup.success({ title: 'Berhasil!', description: data.message, duration: 2000 }); setTimeout(() => window.location.reload(), 2000); }
@@ -218,26 +283,9 @@
         });
     }
 
-    function scanStorageDirectories() {
-        const icon = document.getElementById('scan-btn-icon');
-        const list = document.getElementById('storage-folders-list');
-        icon.classList.add('fa-spin');
-        fetch("{{ route('admin.backup.storage-directories') }}", { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(r => r.json())
-        .then(data => {
-            icon.classList.remove('fa-spin');
-            if (data.success) {
-                list.innerHTML = data.directories.length === 0
-                    ? '<div class="col-span-2 py-4 text-center text-zinc-550 font-mono text-[10px]">Tidak ada folder.</div>'
-                    : data.directories.map(d => `<label class="flex items-center justify-between p-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-indigo-500 cursor-pointer transition-all select-none"><div class="flex items-center gap-2"><input type="checkbox" name="storage_folders[]" value="${d.name}" ${(data.selected_folders||[]).includes(d.name)?'checked':''} class="text-indigo-600"><span class="text-xs font-mono text-slate-700 dark:text-zinc-300">${d.name}</span></div><span class="text-[10px] font-mono font-bold text-slate-400">${d.formatted_size}</span></label>`).join('');
-            }
-        })
-        .catch(() => icon.classList.remove('fa-spin'));
-    }
-
     function showBackupLogDetails(id) {
         const url = "{{ route('admin.backup.log-details', ['id' => ':id']) }}".replace(':id', id);
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
         .then(r => r.json())
         .then(data => {
             if (!data.success) return;
@@ -297,5 +345,258 @@
         })
         .catch(() => AppPopup.show({ type: 'error', title: 'Gagal', description: 'Tidak dapat memuat detail log.' }));
     }
+
+    function toggleSyncSetting(checked) {
+        const toggle = document.getElementById('sync-enabled-toggle');
+        toggle.disabled = true;
+
+        fetch("{{ route('admin.backup.sync-settings') }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ sync_enabled: checked })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                const badge = document.getElementById('sync-status-badge');
+                if (badge) {
+                    if (checked) {
+                        badge.textContent = 'AKTIF';
+                        badge.className = 'inline-block text-[10px] font-bold px-2 py-0.5 bg-emerald-500 text-white';
+                        document.getElementById('storage-sync-btn').disabled = false;
+                        document.getElementById('storage-sync-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        badge.textContent = 'NONAKTIF';
+                        badge.className = 'inline-block text-[10px] font-bold px-2 py-0.5 bg-slate-400 text-white';
+                        document.getElementById('storage-sync-btn').disabled = true;
+                        document.getElementById('storage-sync-btn').classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            } else {
+                toggle.checked = !checked;
+            }
+        })
+        .catch(function() {
+            toggle.checked = !checked;
+        })
+        .finally(function() {
+            toggle.disabled = false;
+        });
+    }
+
+    // ===== Storage Sync Functions (paginated) =====
+
+    var currentSyncPage = 1;
+    var totalSyncPages = 1;
+
+    function loadSyncLogs(page) {
+        currentSyncPage = page || 1;
+        var tbody = document.getElementById('sync-log-tbody');
+        var icon = document.getElementById('sync-log-refresh-icon');
+        var pagination = document.getElementById('sync-log-pagination');
+        var summary = document.getElementById('sync-log-summary');
+        icon.classList.add('fa-spin');
+
+        fetch("{{ route('admin.backup.sync-logs') }}?page=" + currentSyncPage + "&per_page=15", {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            icon.classList.remove('fa-spin');
+            if (!data.success) return;
+
+            totalSyncPages = data.last_page || 1;
+            var logs = data.logs || [];
+
+            // Summary
+            summary.textContent = data.total > 0 ? 'Halaman ' + data.page + ' dari ' + data.last_page + ' (' + data.total + ' file)' : '';
+
+            // Table rows
+            if (!logs.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-slate-400 dark:text-zinc-500 font-mono text-[11px]"><i class="fa-solid fa-inbox text-lg block mb-2 opacity-50"></i> Belum ada riwayat sinkronisasi storage.</td></tr>';
+                pagination.classList.add('hidden');
+                return;
+            }
+
+            var startNum = (data.page - 1) * data.per_page + 1;
+            tbody.innerHTML = logs.map(function(l, i) {
+                var errorAttr = l.error_message ? ' title="' + l.error_message.replace(/"/g, '&quot;') + '"' : '';
+                var statusBadge;
+                if (l.sync_status === 'synced') {
+                    statusBadge = '<span class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">SUKSES</span>';
+                } else if (l.sync_status === 'failed') {
+                    statusBadge = '<span' + errorAttr + ' class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 cursor-help">GAGAL <i class="fa-solid fa-circle-exclamation text-[9px]"></i></span>';
+                } else if (l.sync_status === 'removed') {
+                    statusBadge = '<span class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 bg-slate-500/10 text-slate-500 dark:text-zinc-400 border border-slate-500/20">DIHAPUS</span>';
+                } else {
+                    statusBadge = '<span class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">' + l.sync_status.toUpperCase() + '</span>';
+                }
+                var time = l.synced_at || l.updated_at || '-';
+                return '<tr class="hover:bg-slate-50/30 dark:hover:bg-zinc-900/20 transition-colors">'
+                    + '<td class="py-2 px-3 text-center font-mono text-[10px] text-slate-400 dark:text-zinc-500">' + (startNum + i) + '</td>'
+                    + '<td class="py-2 px-3 font-medium text-slate-700 dark:text-zinc-300 font-mono text-[11px] break-all max-w-[320px]">' + l.file_path + (l.error_message ? '<div class="text-[9px] text-rose-500 mt-0.5 leading-tight truncate max-w-[320px]" title="' + l.error_message.replace(/"/g, '&quot;') + '"><i class="fa-solid fa-circle-exclamation mr-0.5"></i>' + l.error_message.substring(0, 80) + '</div>' : '') + '</td>'
+                    + '<td class="py-2 px-3 text-right font-mono text-[10px] text-slate-500 dark:text-zinc-400 whitespace-nowrap">' + (l.formatted_size || '-') + '</td>'
+                    + '<td class="py-2 px-3 text-center whitespace-nowrap">' + statusBadge + '</td>'
+                    + '<td class="py-2 px-3 font-mono text-[10px] text-slate-400 dark:text-zinc-500 whitespace-nowrap">' + time + '</td>'
+                    + '</tr>';
+            }).join('');
+
+            // Pagination
+            pagination.classList.remove('hidden');
+            renderSyncPagination(data);
+        })
+        .catch(function() {
+            icon.classList.remove('fa-spin');
+        });
+    }
+
+    function renderSyncPagination(data) {
+        document.getElementById('sync-log-prev').disabled = !data.has_prev;
+        document.getElementById('sync-log-next').disabled = !data.has_next;
+
+        var container = document.getElementById('sync-log-page-numbers');
+        container.innerHTML = '';
+
+        var page = data.page;
+        var last = data.last_page;
+        var start = Math.max(1, page - 2);
+        var end = Math.min(last, page + 2);
+
+        for (var i = start; i <= end; i++) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.onclick = function(p) { return function() { loadSyncLogs(p); }; }(i);
+            btn.textContent = i;
+            if (i === page) {
+                btn.className = 'w-7 h-7 text-[10px] font-mono font-bold bg-indigo-600 text-white border border-indigo-600';
+            } else {
+                btn.className = 'w-7 h-7 text-[10px] font-mono font-bold bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors border border-slate-200 dark:border-zinc-700';
+            }
+            container.appendChild(btn);
+        }
+    }
+
+    let syncPollingId = null;
+
+    function startSyncPolling() {
+        const progressUrl = "{{ route('admin.backup.sync-progress') }}";
+        syncPollingId = setInterval(function() {
+            fetch(progressUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!data.success) return;
+                if (data.running) {
+                    const badge = document.getElementById('sync-status-badge');
+                    if (badge) {
+                        badge.textContent = 'SYNC... (' + data.processed + '/' + data.total + ')';
+                        badge.className = 'inline-block text-[10px] font-bold px-2 py-0.5 bg-amber-500 text-white';
+                    }
+                } else {
+                    const badge = document.getElementById('sync-status-badge');
+                    if (badge) {
+                        var failedCount = data.failed || 0;
+                        if (failedCount > 0) {
+                            badge.textContent = data.enabled ? 'AKTIF (' + failedCount + ' GAGAL)' : 'NONAKTIF';
+                            badge.className = 'inline-block text-[10px] font-bold px-2 py-0.5 ' + (data.enabled ? 'bg-rose-500 text-white' : 'bg-slate-400 text-white');
+                        } else {
+                            badge.textContent = data.enabled ? 'AKTIF' : 'NONAKTIF';
+                            badge.className = 'inline-block text-[10px] font-bold px-2 py-0.5 ' + (data.enabled ? 'bg-emerald-500 text-white' : 'bg-slate-400 text-white');
+                        }
+                    }
+                }
+            })
+            .catch(function() {});
+        }, 2000);
+    }
+
+    function stopSyncPolling() {
+        if (syncPollingId) {
+            clearInterval(syncPollingId);
+            syncPollingId = null;
+        }
+    }
+
+    function triggerStorageSync() {
+        const btn = document.getElementById('storage-sync-btn');
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.innerHTML = '<svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> SYNCING...';
+
+        const badge = document.getElementById('sync-status-badge');
+        badge.textContent = 'MENJALANKAN...';
+        badge.className = 'inline-block text-[10px] font-bold px-2 py-0.5 bg-indigo-500 text-white';
+
+        logToTerminal('Memulai sinkronisasi storage ke Google Drive...', 'system');
+        logToTerminal('Pastikan queue worker berjalan: php artisan queue:work', 'warn');
+        startSyncPolling();
+
+        fetch("{{ route('admin.backup.sync-run') }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                logToTerminal('Sinkronisasi storage dimulai. File akan diproses via antrian.', 'success');
+                logToTerminal(data.dispatched + ' file akan di-sync.', 'info');
+                if (data.drive_folder) {
+                    logToTerminal('Drive folder: My Drive/' + data.drive_folder.path + ' (ID: ' + data.drive_folder.id + ')', 'system');
+                }
+            } else {
+                logToTerminal('GAGAL: ' + (data.message || JSON.stringify(data)), 'error');
+            }
+        })
+        .catch(function(err) {
+            logToTerminal('GAGAL: ' + (err.message || JSON.stringify(err)), 'error');
+        })
+        .finally(function() {
+            setTimeout(function() {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> SYNC STORAGE SEKARANG';
+                stopSyncPolling();
+                loadSyncLogs(1);
+            }, 5000);
+        });
+    }
+
+    function confirmClearSyncLogs() {
+        AppPopup.confirm({
+            title: 'Bersihkan Log Sinkronisasi?',
+            description: 'Semua log sinkronisasi storage akan dihapus permanen. Data di Google Drive tidak terpengaruh.',
+            confirmText: 'Ya, Bersihkan',
+            cancelText: 'Batal',
+            onConfirm: function() {
+                var btn = document.querySelector('[onclick="confirmClearSyncLogs()"]');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[9px]"></i>';
+
+                fetch("{{ route('admin.backup.sync-logs.clear') }}", {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        loadSyncLogs(1);
+                        AppPopup.success({ title: 'Berhasil!', description: data.message });
+                    } else {
+                        AppPopup.error({ title: 'Gagal', description: data.message });
+                    }
+                })
+                .catch(function() {
+                    AppPopup.error({ title: 'Error', description: 'Gagal membersihkan log.' });
+                })
+                .finally(function() {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-trash-can text-[9px]"></i> Bersihkan';
+                });
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSyncLogs(1);
+    });
 
 </script>

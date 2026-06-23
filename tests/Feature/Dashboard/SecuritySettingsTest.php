@@ -222,7 +222,6 @@ test('admin can save backup settings with selective storage folders', function (
         'backup_storage' => '1',
         'storage_folders' => ['documents', 'photos'],
         'google_drive_enabled' => '0',
-        'google_drive_folder_id' => '1234567890abcdef',
         'retention_days' => '45',
     ]);
 

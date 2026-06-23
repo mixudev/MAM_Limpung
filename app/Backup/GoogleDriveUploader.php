@@ -5,6 +5,7 @@ namespace App\Backup;
 use App\Models\SecuritySetting;
 use Exception;
 use Google\Client as GoogleClient;
+use Google\Http\MediaFileUpload;
 use Google\Service\Drive as GoogleDrive;
 use Google\Service\Drive\DriveFile;
 use GuzzleHttp\Client as GuzzleClient;
@@ -19,7 +20,28 @@ class GoogleDriveUploader
      *
      * @throws Exception
      */
-    public function upload(string $filePath, string $filename): string
+    /**
+     * Get or create the root folder for backups.
+     * Returns google_drive_folder_id if set (shared folder),
+     * otherwise creates an app-named folder in My Drive root.
+     *
+     * @throws Exception
+     */
+    public function getOrCreateRootFolder(): string
+    {
+        $backupSettings = SecuritySetting::getValue('backup_settings', []);
+        $sharedFolderId = $backupSettings['google_drive_folder_id'] ?? null;
+
+        if (! empty($sharedFolderId)) {
+            return $sharedFolderId;
+        }
+
+        $appName = trim(config('app.name'));
+
+        return $this->ensureFolderPath(($appName ? $appName.' - ' : '').'Backup');
+    }
+
+    public function upload(string $filePath, string $filename, ?string $parentFolderId = null): string
     {
         if (! file_exists($filePath)) {
             throw new Exception("File backup tidak ditemukan di path: {$filePath}");
@@ -34,34 +56,103 @@ class GoogleDriveUploader
 
         $driveService = new GoogleDrive($client);
 
-        $backupSettings = SecuritySetting::getValue('backup_settings', []);
-        $folderId = $backupSettings['google_drive_folder_id'] ?? null;
+        $folderId = $parentFolderId ?? $this->getOrCreateRootFolder();
 
-        $metadataOpts = ['name' => $filename];
-        if (! empty($folderId)) {
-            $metadataOpts['parents'] = [$folderId];
+        $metadataOpts = ['name' => $filename, 'parents' => [$folderId]];
+
+        // Gunakan resumable chunked upload untuk menangani file besar tanpa OOM
+        $client->setDefer(true);
+        $file = new DriveFile($metadataOpts);
+        $request = $driveService->files->create($file, ['supportsAllDrives' => true]);
+
+        $chunkSize = 1 * 1024 * 1024; // 1MB per chunk
+        $media = new MediaFileUpload($client, $request, 'application/octet-stream', null, true, $chunkSize);
+        $media->setFileSize($fileSize);
+
+        $uploadResult = null;
+        $handle = fopen($filePath, 'rb');
+
+        if ($handle === false) {
+            $client->setDefer(false);
+            throw new Exception('Tidak dapat membuka file untuk dibaca: '.$filePath);
         }
 
-        $content = file_get_contents($filePath);
-
-        if ($content === false || $content === '') {
-            throw new Exception('Gagal membaca berkas backup untuk diunggah ke Google Drive. File mungkin terkunci atau tidak dapat dibaca.');
+        while ($uploadResult === null && ! feof($handle)) {
+            $chunk = fread($handle, $chunkSize);
+            $uploadResult = $media->nextChunk($chunk);
+            $progress = $media->getProgress();
+            if ($progress > 0) {
+                $pct = round(($progress / $fileSize) * 100, 1);
+                Log::info("Backup: Upload Google Drive — {$pct}% ({$progress}/{$fileSize} bytes)");
+            }
         }
 
-        $file = $driveService->files->create(new DriveFile($metadataOpts), [
-            'data' => $content,
-            'mimeType' => 'application/octet-stream',
-            'uploadType' => 'multipart',
-            'fields' => 'id,name,size',
-        ]);
+        fclose($handle);
+        $client->setDefer(false);
 
-        if (empty($file->id)) {
+        if (empty($uploadResult->id)) {
             throw new Exception('Gagal mengunggah berkas ke Google Drive (tidak ada ID berkas dikembalikan).');
         }
 
-        Log::info("Backup: File {$filename} ({$fileSize} bytes) berhasil diunggah ke Google Drive. ID: {$file->id}");
+        Log::info("Backup: File {$filename} ({$fileSize} bytes) berhasil diunggah ke Google Drive. ID: {$uploadResult->id}");
 
-        return $file->id;
+        return $uploadResult->id;
+    }
+
+    /**
+     * Ensure a folder path exists in Google Drive, creating folders recursively as needed.
+     * Returns the ID of the deepest folder.
+     *
+     * @throws Exception
+     */
+    public function ensureFolderPath(string $folderPath, ?string $rootFolderId = null): string
+    {
+        $parts = array_filter(explode('/', $folderPath));
+        if (empty($parts)) {
+            return $rootFolderId ?? 'root';
+        }
+
+        $client = $this->buildAuthenticatedClient();
+        $driveService = new GoogleDrive($client);
+        $parentId = $rootFolderId ?? 'root';
+
+        foreach ($parts as $part) {
+            $parentId = $this->findOrCreateFolder($driveService, $part, $parentId);
+        }
+
+        return $parentId;
+    }
+
+    /**
+     * Find a folder by name under a parent, or create it if it doesn't exist.
+     *
+     * @throws Exception
+     */
+    private function findOrCreateFolder(GoogleDrive $driveService, string $name, string $parentId): string
+    {
+        $query = "mimeType='application/vnd.google-apps.folder' and name='".str_replace("'", "\\'", $name)."' and '{$parentId}' in parents and trashed=false";
+        $results = $driveService->files->listFiles([
+            'q' => $query,
+            'fields' => 'files(id)',
+            'pageSize' => 1,
+            'supportsAllDrives' => true,
+            'includeItemsFromAllDrives' => true,
+        ]);
+
+        $files = $results->getFiles();
+        if (! empty($files)) {
+            return $files[0]->getId();
+        }
+
+        $folder = new DriveFile([
+            'name' => $name,
+            'mimeType' => 'application/vnd.google-apps.folder',
+            'parents' => [$parentId],
+        ]);
+
+        $created = $driveService->files->create($folder, ['fields' => 'id', 'supportsAllDrives' => true]);
+
+        return $created->getId();
     }
 
     /**

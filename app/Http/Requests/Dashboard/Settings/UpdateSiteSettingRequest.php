@@ -40,6 +40,8 @@ class UpdateSiteSettingRequest extends FormRequest
             'instagram_url' => ['nullable', 'url', 'max:255'],
             'youtube_url' => ['nullable', 'url', 'max:255'],
             'twitter_url' => ['nullable', 'url', 'max:255'],
+            'tiktok_url' => ['nullable', 'url', 'max:255'],
+            'threads_url' => ['nullable', 'url', 'max:255'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:1000'],
             'meta_keywords' => ['nullable', 'string', 'max:255'],

@@ -13,6 +13,11 @@ Route::prefix('super-admin')
         Route::get('/backup/download/{filename}', [BackupController::class, 'downloadBackup'])->name('backup.download');
         Route::delete('/backup/delete/{filename}', [BackupController::class, 'deleteBackup'])->name('backup.delete');
         Route::post('/backup/verify', [BackupController::class, 'verifyBackup'])->name('backup.verify');
-        Route::get('/backup/storage-directories', [BackupController::class, 'getStorageDirectories'])->name('backup.storage-directories');
         Route::get('/backup/log/{id}', [BackupController::class, 'getLogDetails'])->name('backup.log-details');
+        Route::get('/backup/progress', [BackupController::class, 'getProgress'])->name('backup.progress');
+        Route::post('/backup/sync-settings', [BackupController::class, 'updateSyncSettings'])->name('backup.sync-settings');
+        Route::post('/backup/sync-run', [BackupController::class, 'runStorageSync'])->name('backup.sync-run');
+        Route::get('/backup/sync-progress', [BackupController::class, 'getSyncProgress'])->name('backup.sync-progress');
+        Route::get('/backup/sync-logs', [BackupController::class, 'getSyncLogs'])->name('backup.sync-logs');
+        Route::delete('/backup/sync-logs', [BackupController::class, 'clearSyncLogs'])->name('backup.sync-logs.clear');
     });

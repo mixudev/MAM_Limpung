@@ -63,7 +63,11 @@
             <h1 class="text-xl font-bold text-slate-900 dark:text-white">Log Sistem (System Logs)</h1>
             <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">Audit trail perubahan data, catatan keamanan, kegagalan antrean (failed jobs), dan log pencadangan sistem.</p>
         </div>
-        <div>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="openCleanModal()"
+                    class="px-3 py-1 text-[10px] font-mono font-bold bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30 uppercase tracking-wider hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors">
+                <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan
+            </button>
             <span class="px-3 py-1 text-[10px] font-mono font-bold bg-indigo-50 dark:bg-indigo-950/20 text-[#4f45b2] dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30 uppercase tracking-wider">
                 Monitoring Panel
             </span>
@@ -92,6 +96,10 @@
             <a href="{{ route($routePrefix . '.logs.index', ['tab' => 'backup']) }}" 
                class="px-5 py-3.5 text-xs font-mono font-bold uppercase tracking-wider border-b-2 whitespace-nowrap {{ $activeTab === 'backup' ? 'border-[#4f45b2] text-[#4f45b2] dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200' }}">
                 Log Backup
+            </a>
+            <a href="{{ route($routePrefix . '.logs.index', ['tab' => 'job_queue']) }}" 
+               class="px-5 py-3.5 text-xs font-mono font-bold uppercase tracking-wider border-b-2 whitespace-nowrap {{ $activeTab === 'job_queue' ? 'border-[#4f45b2] text-[#4f45b2] dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200' }}">
+                Log Antrian Job
             </a>
         </div>
 
@@ -361,6 +369,13 @@
                     </div>
                 @endif
             @endif
+
+            <!-- 5. Queue Jobs Tab -->
+            @if ($activeTab === 'job_queue')
+                <div id="queue-tab-content">
+                    @include('dashboard.admin.security.logs.partials.queue-job')
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -373,8 +388,56 @@
 
 @include('dashboard.admin.security.logs.partials.script')
 
+{{-- Clean Logs Modal --}}
+<div id="cleanLogsModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 max-w-md w-full shadow-xl">
+        <div class="p-5 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center bg-slate-50 dark:bg-zinc-950/30">
+            <h3 class="text-xs font-bold text-slate-800 dark:text-zinc-100 uppercase tracking-wider font-mono flex items-center gap-2">
+                <i class="fa-solid fa-trash-can text-rose-500"></i> Bersihkan Log
+            </h3>
+            <button type="button" onclick="closeCleanModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-6 space-y-5">
+            <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih periode data yang akan dibersihkan untuk tab <strong id="clean-tab-label" class="text-slate-700 dark:text-zinc-200"></strong>:</p>
 
+            <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="selectCleanPeriod('today')" id="period-today"
+                        class="py-2.5 px-3 text-[10px] font-mono font-bold uppercase tracking-wider bg-indigo-600 text-white border border-indigo-600 transition-colors">Hari Ini</button>
+                <button type="button" onclick="selectCleanPeriod('week')" id="period-week"
+                        class="py-2.5 px-3 text-[10px] font-mono font-bold uppercase tracking-wider bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors">Seminggu</button>
+                <button type="button" onclick="selectCleanPeriod('month')" id="period-month"
+                        class="py-2.5 px-3 text-[10px] font-mono font-bold uppercase tracking-wider bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors">Sebulan</button>
+            </div>
 
-
+            <div id="custom-date-range" class="hidden grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Dari Tanggal</label>
+                    <input type="date" id="clean-start-date"
+                           class="w-full font-mono text-xs px-3 py-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Sampai Tanggal</label>
+                    <input type="date" id="clean-end-date"
+                           class="w-full font-mono text-xs px-3 py-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/30 flex justify-between items-center">
+            <span id="clean-summary" class="text-[10px] font-mono text-slate-400 dark:text-zinc-500"></span>
+            <div class="flex gap-2">
+                <button type="button" onclick="closeCleanModal()"
+                        class="py-2 px-5 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 font-mono font-bold text-xs uppercase tracking-wider transition-colors">
+                    Batal
+                </button>
+                <button type="button" onclick="executeClean()" id="clean-confirm-btn"
+                        class="py-2 px-5 bg-rose-600 hover:bg-rose-700 text-white font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i> Bersihkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection

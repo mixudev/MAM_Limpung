@@ -24,5 +24,17 @@
             <input type="url" name="twitter_url" value="{{ old('twitter_url', $siteSetting->twitter_url) }}" placeholder="https://x.com/nama-sekolah"
                    class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
         </div>
+
+        <div>
+            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Link TikTok</label>
+            <input type="url" name="tiktok_url" value="{{ old('tiktok_url', $siteSetting->tiktok_url) }}" placeholder="https://tiktok.com/@nama-sekolah"
+                   class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+        </div>
+
+        <div>
+            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Link Threads</label>
+            <input type="url" name="threads_url" value="{{ old('threads_url', $siteSetting->threads_url) }}" placeholder="https://threads.net/@nama-sekolah"
+                   class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+        </div>
     </div>
 </div>

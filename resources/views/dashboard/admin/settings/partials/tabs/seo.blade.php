@@ -3,7 +3,19 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="md:col-span-2">
             <h3 class="text-sm font-bold text-slate-800 dark:text-zinc-200 mb-1">Pengaturan SEO Global</h3>
-            <p class="text-xs text-slate-400 dark:text-zinc-500">Kelola kata kunci default website sekolah dan visibilitas mesin pencari.</p>
+            <p class="text-xs text-slate-400 dark:text-zinc-500">Kelola meta tag dan visibilitas mesin pencari website sekolah.</p>
+        </div>
+
+        <div>
+            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Meta Title (SEO)</label>
+            <input type="text" name="meta_title" value="{{ old('meta_title', $siteSetting->meta_title) }}" placeholder="MAM Limpung - Unggul dan Berprestasi"
+                   class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+        </div>
+
+        <div>
+            <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Meta Description (SEO)</label>
+            <input type="text" name="meta_description" value="{{ old('meta_description', $siteSetting->meta_description) }}" placeholder="Deskripsi pencarian Google..."
+                   class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
         </div>
 
         <div class="md:col-span-2">

@@ -27,6 +27,8 @@ class SiteSetting extends Model
         'instagram_url',
         'youtube_url',
         'twitter_url',
+        'tiktok_url',
+        'threads_url',
         'meta_title',
         'meta_description',
         'meta_keywords',

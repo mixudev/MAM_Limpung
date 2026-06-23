@@ -19,6 +19,8 @@ Route::prefix('super-admin')
         Route::get('/logs', [SystemLogController::class, 'index'])->name('logs.index');
         Route::get('/logs/activity/{systemLog}', [SystemLogController::class, 'showActivity'])->name('logs.activity.show');
         Route::get('/logs/failed-job/{id}', [SystemLogController::class, 'showFailedJob'])->name('logs.failed-job.show');
+        Route::get('/logs/queue-data', [SystemLogController::class, 'getQueueData'])->name('logs.queue-data');
+        Route::post('/logs/clean', [SystemLogController::class, 'cleanLogs'])->name('logs.clean');
         Route::post('/logs/failed-job/{id}/retry', [SystemLogController::class, 'retryFailedJob'])->name('logs.failed-job.retry');
         Route::delete('/logs/failed-job/{id}', [SystemLogController::class, 'deleteFailedJob'])->name('logs.failed-job.destroy');
     });

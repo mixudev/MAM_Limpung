@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Dashboard\Backup;
 
 use App\Http\Controllers\Controller;
 use App\Models\BackupLog;
+use App\Models\FileSyncLog;
 use App\Models\SecuritySetting;
 use App\Services\BackupService;
+use App\Services\StorageSyncService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +30,6 @@ class BackupController extends Controller
             'schedule' => 'daily',
             'cron_expression' => '0 0 * * *',
             'backup_db' => true,
-            'backup_storage' => true,
             'encryption_enabled' => true,
             'google_drive_enabled' => false,
             'google_drive_folder_id' => '',
@@ -53,16 +54,15 @@ class BackupController extends Controller
         $hasGoogleCredentials = $hasServiceAccount || $hasOAuth2;
 
         $backupHistory = BackupLog::orderBy('created_at', 'desc')->get();
-        $storageDirs = $backupService->getStorageDirectories();
-        $selectedFolders = $backupSettings['storage_folders'] ?? [];
+
+        $syncSettings = array_merge(['enabled' => false], SecuritySetting::getValue('storage_sync_settings', []));
 
         return view('dashboard.admin.backup.index', [
             'backupSettings' => $backupSettings,
             'hasEncryptionKey' => $hasEncryptionKey,
             'hasGoogleCredentials' => $hasGoogleCredentials,
             'backupHistory' => $backupHistory,
-            'storageDirs' => $storageDirs,
-            'selectedFolders' => $selectedFolders,
+            'syncSettings' => $syncSettings,
         ]);
     }
 
@@ -76,19 +76,13 @@ class BackupController extends Controller
             'cron_expression' => ['nullable', 'string'],
             'retention_days' => ['required', 'integer', 'min:1', 'max:365'],
             'google_drive_folder_id' => ['nullable', 'string'],
-            'storage_folders' => ['nullable', 'array'],
-            'storage_folders.*' => ['string'],
         ]);
-
-        $currentSettings = SecuritySetting::getValue('backup_settings', []);
 
         $config = [
             'enabled' => $request->has('enabled'),
             'schedule' => $request->input('schedule'),
             'cron_expression' => $request->input('cron_expression', '0 0 * * *'),
             'backup_db' => $request->has('backup_db'),
-            'backup_storage' => $request->has('backup_storage'),
-            'storage_folders' => $request->has('backup_storage') ? ($request->input('storage_folders', [])) : [],
             'encryption_enabled' => $request->has('encryption_enabled'),
             'google_drive_enabled' => $request->has('google_drive_enabled'),
             'google_drive_folder_id' => $request->input('google_drive_folder_id'),
@@ -105,19 +99,14 @@ class BackupController extends Controller
     }
 
     /**
-     * Run manual backup — returns JSON for AJAX terminal UI.
-     *
-     * Storage backup bisa memakan waktu lama tergantung ukuran file.
-     * set_time_limit(0) mencegah PHP timeout saat proses zipping berjalan.
-     * ignore_user_abort(true) memastikan proses tetap berjalan meski browser tutup koneksi.
+     * Run manual backup — fokus pada database saja.
+     * Storage sync dijalankan terpisah via background job.
      */
-    public function runBackup(BackupService $backupService): JsonResponse
+    public function runBackup(BackupService $backupService, StorageSyncService $syncService): JsonResponse
     {
-        // Cegah PHP timeout saat zipping storage besar
         set_time_limit(0);
         ignore_user_abort(true);
 
-        // Pastikan output buffer tidak memotong response JSON di tengah jalan
         while (ob_get_level()) {
             ob_end_clean();
         }
@@ -125,10 +114,18 @@ class BackupController extends Controller
         try {
             $result = $backupService->runBackup(false);
 
+            // Setelah backup DB, trigger storage sync jobs (background)
+            $syncSettings = SecuritySetting::getValue('storage_sync_settings', ['enabled' => false]);
+            $syncJobCount = 0;
+            if (! empty($syncSettings['enabled'])) {
+                $syncJobCount = $syncService->dispatchSyncJobs();
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Proses backup selesai dengan sukses!',
+                'message' => 'Backup database selesai!',
                 'log' => $result,
+                'sync_dispatched' => $syncJobCount,
             ]);
         } catch (Exception $e) {
             Log::error('Backup Manual Gagal: '.$e->getMessage());
@@ -304,22 +301,107 @@ class BackupController extends Controller
     }
 
     /**
-     * Return storage directories as JSON for AJAX scan.
+     * Update storage sync settings.
      */
-    public function getStorageDirectories(BackupService $backupService): JsonResponse
+    public function updateSyncSettings(Request $request): JsonResponse
+    {
+        $request->validate([
+            'sync_enabled' => ['required', 'boolean'],
+        ]);
+
+        $config = [
+            'enabled' => $request->boolean('sync_enabled'),
+        ];
+
+        SecuritySetting::setValue('storage_sync_settings', $config);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Konfigurasi sinkronisasi storage berhasil diperbarui!',
+        ]);
+    }
+
+    /**
+     * Trigger storage sync manually from UI — dispatches background jobs.
+     */
+    public function runStorageSync(StorageSyncService $syncService): JsonResponse
     {
         try {
-            $directories = $backupService->getStorageDirectories();
-            $backupSettings = SecuritySetting::getValue('backup_settings', []);
+            $dispatched = $syncService->dispatchSyncJobs();
+
+            // Pre-create storage_sync folder in Drive so user knows where to look
+            $driveFolder = null;
+            try {
+                $driveFolder = $syncService->ensureStorageFolder();
+            } catch (Exception $e) {
+                Log::warning('StorageSync: Gagal pre-create Drive folder: '.$e->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
-                'directories' => $directories,
-                'selected_folders' => $backupSettings['storage_folders'] ?? [],
+                'message' => "{$dispatched} file akan di-sinkronisasi ke Google Drive secara bertahap.",
+                'dispatched' => $dispatched,
+                'drive_folder' => $driveFolder,
             ]);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal memindai direktori: '.$e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memulai sinkronisasi: '.$e->getMessage(),
+            ], 500);
         }
+    }
+
+    /**
+     * Get storage sync progress.
+     */
+    public function getSyncProgress(StorageSyncService $syncService): JsonResponse
+    {
+        return response()->json($syncService->getSyncProgress());
+    }
+
+    /**
+     * Clear all file sync logs.
+     */
+    public function clearSyncLogs(): JsonResponse
+    {
+        try {
+            $deleted = FileSyncLog::count();
+            FileSyncLog::truncate();
+
+            Log::info("StorageSync: Semua log sinkronisasi telah dibersihkan ({$deleted} record).");
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$deleted} log sinkronisasi berhasil dibersihkan.",
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membersihkan log: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get sync logs with pagination.
+     */
+    public function getSyncLogs(Request $request, StorageSyncService $syncService): JsonResponse
+    {
+        $page = max(1, $request->integer('page', 1));
+        $perPage = min(50, max(10, $request->integer('per_page', 15)));
+
+        return response()->json(array_merge(
+            ['success' => true],
+            $syncService->getSyncLogsPaginated($page, $perPage)
+        ));
+    }
+
+    /**
+     * Return current backup progress for UI polling.
+     */
+    public function getProgress(BackupService $backupService): JsonResponse
+    {
+        return response()->json($backupService->getProgress());
     }
 
     /**

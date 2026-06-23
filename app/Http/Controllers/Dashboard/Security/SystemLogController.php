@@ -30,6 +30,9 @@ class SystemLogController extends Controller
         $securityLogs = null;
         $failedJobs = null;
         $backupLogs = null;
+        $queueStats = null;
+        $queueJobs = null;
+        $jobBatches = null;
 
         if ($activeTab === 'activity') {
             $activityLogs = SystemLog::where('log_type', 'activity')
@@ -52,6 +55,17 @@ class SystemLogController extends Controller
             $backupLogs = BackupLog::orderBy('created_at', 'desc')
                 ->paginate(15)
                 ->withQueryString();
+        } elseif ($activeTab === 'job_queue') {
+            $queueStats = $this->getQueueStats();
+            $queueJobs = DB::table('jobs')
+                ->select('queue', DB::raw('count(*) as total'), DB::raw('MIN(created_at) as oldest'), DB::raw('SUM(attempts) as total_attempts'))
+                ->groupBy('queue')
+                ->orderBy('queue')
+                ->get();
+            $jobBatches = DB::table('job_batches')
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get();
         }
 
         return view('dashboard.admin.security.logs.index', [
@@ -60,6 +74,9 @@ class SystemLogController extends Controller
             'securityLogs' => $securityLogs,
             'failedJobs' => $failedJobs,
             'backupLogs' => $backupLogs,
+            'queueStats' => $queueStats,
+            'queueJobs' => $queueJobs,
+            'jobBatches' => $jobBatches,
         ]);
     }
 
@@ -149,6 +166,49 @@ class SystemLogController extends Controller
     }
 
     /**
+     * Get queue statistics.
+     */
+    private function getQueueStats(): array
+    {
+        return [
+            'total_pending' => DB::table('jobs')->count(),
+            'total_processing' => DB::table('jobs')->whereNotNull('reserved_at')->count(),
+            'total_batches' => DB::table('job_batches')->count(),
+            'total_failed' => DB::table('failed_jobs')->count(),
+        ];
+    }
+
+    /**
+     * Get real-time queue data for AJAX polling.
+     */
+    public function getQueueData(): JsonResponse
+    {
+        Gate::authorize('view-users', User::class);
+
+        $stats = $this->getQueueStats();
+
+        $queueJobs = DB::table('jobs')
+            ->select('queue', DB::raw('count(*) as total'), DB::raw('MIN(created_at) as oldest'), DB::raw('SUM(attempts) as total_attempts'))
+            ->groupBy('queue')
+            ->orderBy('queue')
+            ->get();
+
+        $jobBatches = DB::table('job_batches')
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'stats' => $stats,
+                'queueJobs' => $queueJobs,
+                'jobBatches' => $jobBatches,
+            ],
+        ]);
+    }
+
+    /**
      * Retry a failed job.
      */
     public function retryFailedJob(int $id): RedirectResponse
@@ -167,6 +227,71 @@ class SystemLogController extends Controller
         }
 
         return redirect()->back()->with('error', 'Log pekerjaan gagal tidak ditemukan.');
+    }
+
+    /**
+     * Clean logs by tab and period.
+     */
+    public function cleanLogs(Request $request): JsonResponse
+    {
+        Gate::authorize('view-users', User::class);
+
+        $tab = $request->input('tab');
+        $period = $request->input('period', 'today');
+
+        $now = now();
+        $start = match ($period) {
+            'today' => $now->copy()->startOfDay(),
+            'week' => $now->copy()->subWeek()->startOfDay(),
+            'month' => $now->copy()->subMonth()->startOfDay(),
+            'custom' => $request->input('start_date')
+                ? Carbon::parse($request->input('start_date'))->startOfDay()
+                : null,
+            default => null,
+        };
+        $end = $period === 'custom' && $request->input('end_date')
+            ? Carbon::parse($request->input('end_date'))->endOfDay()
+            : $now;
+
+        if (! $start) {
+            return response()->json(['success' => false, 'message' => 'Periode tidak valid.'], 422);
+        }
+
+        $deleted = 0;
+        $label = '';
+
+        try {
+            match ($tab) {
+                'activity' => $deleted = SystemLog::where('log_type', 'activity')
+                    ->whereBetween('created_at', [$start, $end])->delete(),
+                'security' => $deleted = SystemLog::where('log_type', 'security')
+                    ->whereBetween('created_at', [$start, $end])->delete(),
+                'failed_jobs' => $deleted = DB::table('failed_jobs')
+                    ->whereBetween('failed_at', [$start, $end])->delete(),
+                'backup' => $deleted = BackupLog::whereBetween('created_at', [$start, $end])->delete(),
+                'job_queue' => $deleted = DB::table('jobs')
+                    ->whereBetween('created_at', [$start->timestamp, $end->timestamp])->delete(),
+                default => throw new \InvalidArgumentException('Tab tidak valid.'),
+            };
+
+            $periodLabel = match ($period) {
+                'today' => 'Hari Ini',
+                'week' => 'Seminggu Terakhir',
+                'month' => 'Sebulan Terakhir',
+                'custom' => 'Kustom',
+                default => $period,
+            };
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$deleted} record {$tab} periode {$periodLabel} berhasil dibersihkan.",
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membersihkan log: '.$e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

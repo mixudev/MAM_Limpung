@@ -38,3 +38,13 @@ try {
 } catch (Exception) {
     // Ignore database errors during bootstrap (e.g., during tests when migrations haven't run yet)
 }
+
+// Storage Sync Scheduler — setiap hari jam 02:00
+try {
+    $syncSettings = SecuritySetting::getValue('storage_sync_settings', ['enabled' => false]);
+    if (! empty($syncSettings['enabled'])) {
+        Schedule::command('app:storage-sync')->dailyAt('02:00');
+    }
+} catch (Exception) {
+    // Ignore database errors during bootstrap
+}
