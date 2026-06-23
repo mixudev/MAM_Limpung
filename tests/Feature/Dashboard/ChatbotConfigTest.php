@@ -34,11 +34,11 @@ test('authorized admin can view chatbot config dashboard', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin'); // Has manage-chatbot permission from RoleSeeder
 
-    $response = $this->actingAs($admin)->get(route('admin.chatbot.index'));
+    $response = $this->actingAs($admin)->get(route('admin.chatbot.analytics'));
 
     $response->assertStatus(200)
-        ->assertViewIs('dashboard.admin.chatbot.index')
-        ->assertSee('Konfigurasi AI Chatbot');
+        ->assertViewIs('dashboard.admin.chatbot.analytics')
+        ->assertSee('Analitik');
 });
 
 // ─── API KEYS CRUD ───────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ test('authorized admin can store a new api key', function () {
         'api_key' => 'AIzaSyTestKeyContent12345',
     ]);
 
-    $response->assertRedirect(route('admin.chatbot.index', ['tab' => 'apikeys']))
+    $response->assertRedirect(route('admin.chatbot.apikeys'))
         ->assertSessionHas('success');
 
     $this->assertDatabaseHas('chatbot_api_keys', [
@@ -83,7 +83,7 @@ test('authorized admin can update an api key without changing the secret key', f
         'api_key' => '', // Empty means do not update
     ]);
 
-    $response->assertRedirect(route('admin.chatbot.index', ['tab' => 'apikeys']));
+    $response->assertRedirect(route('admin.chatbot.apikeys'));
 
     $key->refresh();
     expect($key->model_name)->toBe('gemini-1.5-pro');
@@ -98,7 +98,7 @@ test('authorized admin can toggle api key status', function () {
 
     $response = $this->actingAs($admin)->put(route('admin.chatbot.apikeys.toggle', $key));
 
-    $response->assertRedirect(route('admin.chatbot.index', ['tab' => 'apikeys']));
+    $response->assertRedirect(route('admin.chatbot.apikeys'));
     expect($key->fresh()->is_active)->toBeFalse();
 });
 
@@ -110,7 +110,7 @@ test('authorized admin can delete an api key', function () {
 
     $response = $this->actingAs($admin)->delete(route('admin.chatbot.apikeys.destroy', $key));
 
-    $response->assertRedirect(route('admin.chatbot.index', ['tab' => 'apikeys']));
+    $response->assertRedirect(route('admin.chatbot.apikeys'));
     $this->assertDatabaseMissing('chatbot_api_keys', ['id' => $key->id]);
 });
 
@@ -121,14 +121,12 @@ test('authorized admin can store a new knowledge entry', function () {
     $admin->assignRole('admin');
 
     $response = $this->actingAs($admin)->post(route('admin.chatbot.knowledge.store'), [
-        'topic' => 'ppdb',
         'title' => 'Jadwal Pendaftaran',
         'content' => 'Pendaftaran gelombang satu dibuka Januari.',
     ]);
 
-    $response->assertRedirect(route('admin.chatbot.index', ['tab' => 'knowledge']));
+    $response->assertRedirect(route('admin.chatbot.knowledge'));
     $this->assertDatabaseHas('chatbot_knowledge_bases', [
-        'topic' => 'ppdb',
         'title' => 'Jadwal Pendaftaran',
         'content' => 'Pendaftaran gelombang satu dibuka Januari.',
     ]);
@@ -142,7 +140,7 @@ test('authorized admin can delete a knowledge entry', function () {
 
     $response = $this->actingAs($admin)->delete(route('admin.chatbot.knowledge.destroy', $kb));
 
-    $response->assertRedirect(route('admin.chatbot.index', ['tab' => 'knowledge']));
+    $response->assertRedirect(route('admin.chatbot.knowledge'));
     $this->assertDatabaseMissing('chatbot_knowledge_bases', ['id' => $kb->id]);
 });
 
@@ -154,28 +152,26 @@ test('authorized admin can manage faq entries', function () {
 
     // Create
     $responseStore = $this->actingAs($admin)->post(route('admin.chatbot.faqs.store'), [
-        'topic' => 'kegiatan',
         'question' => 'Kapan pramuka diadakan?',
         'answer' => 'Pramuka diadakan setiap Jumat sore.',
         'order' => 1,
     ]);
-    $responseStore->assertRedirect(route('admin.chatbot.index', ['tab' => 'faqs']));
+    $responseStore->assertRedirect(route('admin.chatbot.faqs'));
     $this->assertDatabaseHas('chatbot_faqs', ['question' => 'Kapan pramuka diadakan?']);
 
     // Update
     $faq = ChatbotFaq::first();
     $responseUpdate = $this->actingAs($admin)->put(route('admin.chatbot.faqs.update', $faq), [
-        'topic' => 'kegiatan',
         'question' => 'Kapan pramuka diadakan reguler?',
         'answer' => 'Setiap hari Jumat jam 14.00.',
         'order' => 2,
     ]);
-    $responseUpdate->assertRedirect(route('admin.chatbot.index', ['tab' => 'faqs']));
+    $responseUpdate->assertRedirect(route('admin.chatbot.faqs'));
     expect($faq->fresh()->order)->toBe(2);
 
     // Delete
     $responseDelete = $this->actingAs($admin)->delete(route('admin.chatbot.faqs.destroy', $faq));
-    $responseDelete->assertRedirect(route('admin.chatbot.index', ['tab' => 'faqs']));
+    $responseDelete->assertRedirect(route('admin.chatbot.faqs'));
     $this->assertDatabaseMissing('chatbot_faqs', ['id' => $faq->id]);
 });
 
@@ -191,5 +187,5 @@ test('authorized admin can view session transcript logs', function () {
 
     $response->assertStatus(200)
         ->assertJsonPath('id', $session->id)
-        ->assertJsonStructure(['id', 'topic', 'messages']);
+        ->assertJsonStructure(['id', 'messages']);
 });

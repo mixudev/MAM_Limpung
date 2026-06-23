@@ -48,7 +48,6 @@ function openKnowledgeModal(editMode, data) {
         form.action = '{{ url('admin/chatbot/knowledge') }}/' + data.id;
         methodInput.disabled = false;
         submitBtn.textContent = 'Simpan Perubahan';
-        document.getElementById('kbTopic').value    = data.topic;
         document.getElementById('kbIsActive').value = data.is_active;
         document.getElementById('kbTitle').value    = data.title;
         document.getElementById('kbContent').value  = data.content;
@@ -56,7 +55,6 @@ function openKnowledgeModal(editMode, data) {
         form.action = '{{ route('admin.chatbot.knowledge.store') }}';
         methodInput.disabled = true;
         submitBtn.textContent = 'Tambah Pengetahuan';
-        document.getElementById('kbTopic').value    = 'umum';
         document.getElementById('kbIsActive').value = '1';
         document.getElementById('kbTitle').value    = '';
         document.getElementById('kbContent').value  = '';

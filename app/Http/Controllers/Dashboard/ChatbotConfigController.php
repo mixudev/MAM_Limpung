@@ -48,10 +48,6 @@ class ChatbotConfigController extends Controller
             ->take(8)
             ->get();
 
-        $topicStats = ChatbotAnalytic::select('topic', DB::raw('count(*) as count'))
-            ->groupBy('topic')
-            ->get();
-
         // API usage stats: how many successful calls per API key (provider + model)
         $apiStats = ChatbotAnalytic::selectRaw('api_key_used_id, count(*) as total_calls, avg(response_time_ms) as avg_ms')
             ->whereNotNull('api_key_used_id')
@@ -88,7 +84,7 @@ class ChatbotConfigController extends Controller
         return view('dashboard.admin.chatbot.analytics', compact(
             'totalSessions', 'totalQueries', 'avgResponseTime',
             'feedbackRatio', 'likes', 'dislikes',
-            'traffic', 'topQuestions', 'topicStats',
+            'traffic', 'topQuestions',
             'apiStats', 'apiErrorStats', 'apiDailyStats', 'apiDailyRaw'
         ));
     }
@@ -108,7 +104,7 @@ class ChatbotConfigController extends Controller
      */
     public function knowledgePage(): View
     {
-        $knowledgeBases = ChatbotKnowledgeBase::orderBy('topic')->orderBy('created_at', 'desc')->get();
+        $knowledgeBases = ChatbotKnowledgeBase::orderBy('created_at', 'desc')->get();
 
         return view('dashboard.admin.chatbot.knowledge', compact('knowledgeBases'));
     }
@@ -118,7 +114,7 @@ class ChatbotConfigController extends Controller
      */
     public function faqsPage(): View
     {
-        $faqs = ChatbotFaq::orderBy('topic')->orderBy('order')->get();
+        $faqs = ChatbotFaq::orderBy('order')->get();
 
         return view('dashboard.admin.chatbot.faqs', compact('faqs'));
     }
@@ -229,7 +225,6 @@ class ChatbotConfigController extends Controller
     public function storeKnowledge(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'topic' => 'required|string|in:umum,ppdb,kegiatan,bantuan',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'is_active' => 'nullable|boolean',
@@ -246,7 +241,6 @@ class ChatbotConfigController extends Controller
     public function updateKnowledge(Request $request, ChatbotKnowledgeBase $knowledge): RedirectResponse
     {
         $data = $request->validate([
-            'topic' => 'required|string|in:umum,ppdb,kegiatan,bantuan',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'is_active' => 'nullable|boolean',
@@ -275,7 +269,6 @@ class ChatbotConfigController extends Controller
     public function storeFaq(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'topic' => 'required|string|in:umum,ppdb,kegiatan,bantuan',
             'question' => 'required|string|max:255',
             'answer' => 'required|string',
             'order' => 'required|integer|min:0',
@@ -293,7 +286,6 @@ class ChatbotConfigController extends Controller
     public function updateFaq(Request $request, ChatbotFaq $faq): RedirectResponse
     {
         $data = $request->validate([
-            'topic' => 'required|string|in:umum,ppdb,kegiatan,bantuan',
             'question' => 'required|string|max:255',
             'answer' => 'required|string',
             'order' => 'required|integer|min:0',

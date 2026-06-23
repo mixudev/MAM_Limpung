@@ -32,7 +32,6 @@ class ChatbotSession extends Model
         'id',
         'user_id',
         'user_ip',
-        'topic',
     ];
 
     protected static function boot()

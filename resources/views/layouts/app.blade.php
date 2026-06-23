@@ -41,6 +41,9 @@
     <meta name="robots" content="{{ $robotsDirective }}">
     <link rel="canonical" href="{{ $canonicalUrl }}">
 
+    <meta name="author" content="{{ $siteSettings->school_name }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="{{ $ogType }}">
     <meta property="og:title" content="{{ $ogTitle }}">
@@ -48,7 +51,10 @@
     <meta property="og:image" content="{{ $ogImage }}">
     <meta property="og:url" content="{{ request()->url() }}">
     <meta property="og:site_name" content="{{ $siteSettings->school_name ?? 'MA Muhammadiyah Limpung' }}">
-
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="id_ID">
+    
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $ogTitle }}">

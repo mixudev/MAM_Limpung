@@ -21,6 +21,15 @@ class GoogleDriveUploader
      */
     public function upload(string $filePath, string $filename): string
     {
+        if (! file_exists($filePath)) {
+            throw new Exception("File backup tidak ditemukan di path: {$filePath}");
+        }
+
+        $fileSize = filesize($filePath);
+        if ($fileSize === false || $fileSize === 0) {
+            throw new Exception('File backup kosong atau tidak dapat dibaca ukurannya.');
+        }
+
         $client = $this->buildAuthenticatedClient();
 
         $driveService = new GoogleDrive($client);
@@ -35,20 +44,22 @@ class GoogleDriveUploader
 
         $content = file_get_contents($filePath);
 
-        if ($content === false) {
-            throw new Exception('Gagal membaca berkas backup untuk diunggah ke Google Drive.');
+        if ($content === false || $content === '') {
+            throw new Exception('Gagal membaca berkas backup untuk diunggah ke Google Drive. File mungkin terkunci atau tidak dapat dibaca.');
         }
 
         $file = $driveService->files->create(new DriveFile($metadataOpts), [
             'data' => $content,
             'mimeType' => 'application/octet-stream',
             'uploadType' => 'multipart',
-            'fields' => 'id',
+            'fields' => 'id,name,size',
         ]);
 
         if (empty($file->id)) {
             throw new Exception('Gagal mengunggah berkas ke Google Drive (tidak ada ID berkas dikembalikan).');
         }
+
+        Log::info("Backup: File {$filename} ({$fileSize} bytes) berhasil diunggah ke Google Drive. ID: {$file->id}");
 
         return $file->id;
     }
@@ -68,13 +79,19 @@ class GoogleDriveUploader
         //  SSL CA bundle — di Windows, PHP sering tidak punya CA bundle bawaan.
         //  Gunakan cacert.pem yang disimpan di storage/app jika ada,
         //  lalu fallback ke curl.cainfo dari php.ini.
-        //  Jangan pernah set verify=false di production.
+        //  Di environment local (development), SSL verify dinonaktifkan sebagai
+        //  last resort agar tidak blocking development. Di production, harus verify=true.
         // -----------------------------------------------------------------------
         $cacertPath = storage_path('app/cacert.pem');
+
         if (file_exists($cacertPath)) {
             $client->setHttpClient(new GuzzleClient(['verify' => $cacertPath]));
         } elseif (! empty(ini_get('curl.cainfo')) && file_exists(ini_get('curl.cainfo'))) {
             $client->setHttpClient(new GuzzleClient(['verify' => ini_get('curl.cainfo')]));
+        } elseif (app()->environment('local')) {
+            // Di Windows local dev, CA bundle sering tidak tersedia — nonaktifkan SSL verify
+            // JANGAN gunakan ini di production
+            $client->setHttpClient(new GuzzleClient(['verify' => false]));
         }
 
         // Try OAuth2 first (works with personal Gmail / Google Drive)

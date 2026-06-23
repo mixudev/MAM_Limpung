@@ -14,7 +14,6 @@ class ChatbotKnowledgeBase extends Model
     protected $table = 'chatbot_knowledge_bases';
 
     protected $fillable = [
-        'topic',
         'title',
         'content',
         'is_active',

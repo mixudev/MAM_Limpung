@@ -9,11 +9,19 @@ use App\Models\ChatbotLog;
 use App\Models\PpdbSetting;
 use App\Models\Prestasi;
 use App\Models\SiteSetting;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ChatbotService
 {
+    /**
+     * Batas aman karakter context yang dikirim ke AI agar tidak membebani
+     * context window model (terutama provider dengan window kecil seperti
+     * Groq/DeepSeek). ~12000 karakter ≈ 3000-4000 token.
+     */
+    protected const MAX_CONTEXT_CHARS = 12000;
+
     /**
      * Send a query to the Gemini AI API, handling API key rotation and context gathering.
      *
@@ -21,9 +29,9 @@ class ChatbotService
      *
      * @throws \Exception
      */
-    public function askAI(string $query, string $topic = 'umum', array $chatHistory = []): array
+    public function askAI(string $query, array $chatHistory = []): array
     {
-        $context = $this->gatherContext($topic, $query);
+        $context = $this->gatherContext($query);
 
         // Fetch all active API keys, sorted by error count
         $apiKeys = ChatbotApiKey::where('is_active', true)
@@ -42,15 +50,12 @@ class ChatbotService
             throw new \Exception('Maaf, tidak ada API Key AI yang aktif atau tersedia saat ini.');
         }
 
-        $response = null;
-        $apiKeyUsed = null;
         $lastException = null;
         $errorLogs = [];
 
         foreach ($apiKeys as $keyRecord) {
             try {
-                $apiKeyUsed = $keyRecord;
-                $responseText = $this->callApi($keyRecord, $context, $query, $chatHistory);
+                $callResult = $this->callApi($keyRecord, $context, $query, $chatHistory);
 
                 // Success! Reset error count
                 $keyRecord->update([
@@ -72,9 +77,9 @@ class ChatbotService
                 }
 
                 return [
-                    'text' => $responseText,
+                    'text' => $callResult['text'],
                     'api_key_used_id' => $keyRecord->id,
-                    'tokens_used' => str_word_count($responseText) + str_word_count($context) + 100, // Estimate
+                    'tokens_used' => $callResult['tokens_used'] ?? $this->estimateTokens($callResult['text'], $context, $query),
                 ];
             } catch (\Exception $e) {
                 $lastException = $e;
@@ -132,21 +137,17 @@ class ChatbotService
     /**
      * Call the appropriate API based on key provider.
      *
+     * @return array{text: string, tokens_used: int|null}
+     *
      * @throws \Exception
      */
-    protected function callApi(ChatbotApiKey $apiKeyRecord, string $context, string $query, array $chatHistory): string
+    protected function callApi(ChatbotApiKey $apiKeyRecord, string $context, string $query, array $chatHistory): array
     {
         $provider = strtolower($apiKeyRecord->provider);
         $model = $apiKeyRecord->model_name;
         $apiKey = $apiKeyRecord->api_key;
 
-        // Structure system instructions
-        $systemInstruction = 'Anda adalah Customer Service AI yang ramah, sopan, dan profesional dari MA Muhammadiyah Limpung. '
-            .'Tugas Anda adalah membantu menjawab pertanyaan pengguna dengan berbasis PADA INFORMASI KONTEKS SEKOLAH yang disediakan di bawah ini. '
-            .'PENTING: Jawablah dengan SANGAT SINGKAT, PADAT, dan langsung pada intinya (maksimal 1-2 paragraf pendek, total maksimal 100 kata). Hindari penjelasan yang bertele-tele atau pengulangan kata. '
-            .'Jawaban Anda harus selesai sepenuhnya dan tidak terpotong di tengah kalimat. '
-            ."Jika informasi tidak ada dalam konteks, jawablah dengan sopan bahwa Anda kurang mengetahui tentang hal tersebut dan arahkan pengguna untuk menghubungi admin WhatsApp kami.\n\n"
-            ."KONTEKS SEKOLAH:\n".$context;
+        $systemInstruction = $this->buildSystemInstruction($context);
 
         if ($provider === 'gemini') {
             return $this->callGeminiApi($model, $apiKey, $systemInstruction, $query, $chatHistory);
@@ -165,11 +166,31 @@ class ChatbotService
     }
 
     /**
+     * Build the system instruction sent to the AI model.
+     */
+    protected function buildSystemInstruction(string $context): string
+    {
+        return 'Kamu adalah Asisten AI MA Muhammadiyah Limpung. Ngobrol santai kayak kakak kelas atau teman, bukan kayak robot formal — pakai bahasa sehari-hari (boleh "kamu", "aku/min", "yuk", "nih", "kok") biar siswa ngerasa deket dan nggak sungkan tanya. '
+            .'Pakai emoji secukupnya sesuai konteks biar hangat, tapi jangan berlebihan, cukup 1-3 emoji per jawaban '
+            .'(contoh: 😊🙌 sambutan, 📚 artikel/edukasi, 🏆 prestasi, 📋 PPDB/pendaftaran, 📞 kontak, 🏫 info sekolah). '
+            .'Jawab berdasarkan DATA AKTUAL dari konteks di bawah — SANGAT PENTING: jika konteks menyebut angka jumlah (misalnya "Total: 25 artikel", "Total: 10 prestasi"), '
+            .'WAJIB sebutkan angka tersebut secara eksplisit dalam jawaban. Jangan mengarang angka. '
+            .'Jawab SINGKAT, PADAT, dan ngalir kayak ngomong biasa (maksimal 2 paragraf pendek, total ≤ 120 kata). Jawaban harus selesai penuh, jangan terpotong. '
+            .'Variasikan gaya bukaan kalimat, jangan selalu mulai dengan kata yang sama biar nggak terasa template. '
+            .'Jika pengguna menanyakan halaman tertentu, artikel terbaru, atau pendaftaran PPDB, tambahkan tombol navigasi di akhir: [BUTTON: Label Tombol|URL] '
+            .'Jika informasi nggak ada di konteks, jawab jujur aja dan arahkan ke WhatsApp Admin. '
+            ."JANGAN pernah ngarang informasi yang nggak ada di konteks.\n\n"
+            ."DATA AKTUAL SEKOLAH:\n".$context;
+    }
+
+    /**
      * Call the Google Gemini native API.
+     *
+     * @return array{text: string, tokens_used: int|null}
      *
      * @throws \Exception
      */
-    protected function callGeminiApi(string $model, string $apiKey, string $systemInstruction, string $query, array $chatHistory): string
+    protected function callGeminiApi(string $model, string $apiKey, string $systemInstruction, string $query, array $chatHistory): array
     {
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
@@ -204,13 +225,23 @@ class ChatbotService
             ],
             'generationConfig' => [
                 'temperature' => 0.4,
-                'maxOutputTokens' => 1000,
+                // Diberi headroom lebih besar dari batas ~120 kata (≈180-220 token)
+                // karena beberapa model Gemini (terutama varian "thinking") memakai
+                // sebagian token output untuk reasoning internal sebelum menulis
+                // jawaban akhir — jika maxOutputTokens terlalu kecil, jawaban akan
+                // terpotong di tengah kalimat.
+                'maxOutputTokens' => 800,
+            ],
+            // Matikan/minimalkan thinking budget agar token tidak terbuang untuk
+            // reasoning tersembunyi (didukung oleh model Gemini 2.5 series).
+            'thinkingConfig' => [
+                'thinkingBudget' => 0,
             ],
         ];
 
         $request = Http::withHeaders([
             'Content-Type' => 'application/json',
-        ])->timeout(12);
+        ])->timeout(20);
 
         if (app()->environment('local')) {
             $request->withoutVerifying();
@@ -225,21 +256,44 @@ class ChatbotService
         }
 
         $result = $response->json();
-        $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? null;
+        $candidate = $result['candidates'][0] ?? null;
+        $text = $candidate['content']['parts'][0]['text'] ?? null;
+        $finishReason = $candidate['finishReason'] ?? null;
 
         if (! $text) {
-            throw new \Exception('Gemini API returned an empty response candidate.');
+            // finishReason MAX_TOKENS tanpa teks biasanya berarti seluruh budget
+            // terpakai untuk thinking — anggap sebagai error agar key/provider
+            // lain dicoba, bukan mengembalikan jawaban kosong.
+            throw new \Exception(
+                'Gemini API returned an empty response candidate'
+                .($finishReason ? " (finishReason: {$finishReason})" : '').'.'
+            );
         }
 
-        return trim($text);
+        if ($finishReason === 'MAX_TOKENS') {
+            // Jawaban kemungkinan terpotong di tengah kalimat. Lempar exception
+            // supaya askAI() mencoba API key/provider berikutnya yang mungkin
+            // punya budget output lebih besar, alih-alih mengirim teks terpotong.
+            throw new \Exception('Gemini API response terpotong (finishReason: MAX_TOKENS).');
+        }
+
+        // Gemini menyediakan usageMetadata yang lebih akurat dibanding estimasi manual.
+        $tokensUsed = $result['usageMetadata']['totalTokenCount'] ?? null;
+
+        return [
+            'text' => trim($text),
+            'tokens_used' => $tokensUsed,
+        ];
     }
 
     /**
      * Call OpenAI Chat Completions compatible API (for Groq, DeepSeek, OpenRouter).
      *
+     * @return array{text: string, tokens_used: int|null}
+     *
      * @throws \Exception
      */
-    protected function callOpenAiCompatibleApi(string $url, string $model, string $apiKey, string $systemInstruction, string $query, array $chatHistory, array $extraHeaders = []): string
+    protected function callOpenAiCompatibleApi(string $url, string $model, string $apiKey, string $systemInstruction, string $query, array $chatHistory, array $extraHeaders = []): array
     {
         $messages = [];
         $messages[] = [
@@ -264,7 +318,10 @@ class ChatbotService
             'model' => $model,
             'messages' => $messages,
             'temperature' => 0.4,
-            'max_tokens' => 300,
+            // Headroom lebih besar dari batas ~120 kata agar jawaban tidak
+            // terpotong di tengah kalimat, terutama untuk model reasoning
+            // yang memakai sebagian token untuk "thinking" sebelum jawaban.
+            'max_tokens' => 800,
         ];
 
         $headers = array_merge([
@@ -272,7 +329,7 @@ class ChatbotService
             'Content-Type' => 'application/json',
         ], $extraHeaders);
 
-        $request = Http::withHeaders($headers)->timeout(12);
+        $request = Http::withHeaders($headers)->timeout(20);
 
         if (app()->environment('local')) {
             $request->withoutVerifying();
@@ -287,26 +344,60 @@ class ChatbotService
         }
 
         $result = $response->json();
-        $text = $result['choices'][0]['message']['content'] ?? null;
+        $choice = $result['choices'][0] ?? null;
+        $text = $choice['message']['content'] ?? null;
+        $finishReason = $choice['finish_reason'] ?? null;
 
         if (! $text) {
-            throw new \Exception('API returned an empty response candidate.');
+            throw new \Exception(
+                'API returned an empty response candidate'
+                .($finishReason ? " (finish_reason: {$finishReason})" : '').'.'
+            );
         }
 
-        return trim($text);
+        if ($finishReason === 'length') {
+            // Jawaban kemungkinan terpotong di tengah kalimat. Lempar exception
+            // supaya askAI() mencoba API key/provider berikutnya.
+            throw new \Exception('API response terpotong (finish_reason: length).');
+        }
+
+        // OpenAI-compatible providers (Groq, DeepSeek, OpenRouter) menyediakan usage.total_tokens.
+        $tokensUsed = $result['usage']['total_tokens'] ?? null;
+
+        return [
+            'text' => trim($text),
+            'tokens_used' => $tokensUsed,
+        ];
+    }
+
+    /**
+     * Estimasi token sebagai fallback ketika API tidak mengembalikan usage info.
+     * Untuk teks Bahasa Indonesia, rasio karakter:token berkisar ~3.2-3.8.
+     * Menggunakan strlen/3.5 jauh lebih akurat dibanding str_word_count.
+     */
+    protected function estimateTokens(string $responseText, string $context, string $query): int
+    {
+        $totalChars = strlen($responseText) + strlen($context) + strlen($query);
+
+        return (int) ceil($totalChars / 3.5) + 50; // +50 buffer untuk system instruction overhead
     }
 
     /**
      * Gather relevant context from database according to selected topic and user query keywords.
      */
-    public function gatherContext(string $topic, string $query): string
+    public function gatherContext(string $query): string
     {
         $contextParts = [];
+        $lq = strtolower($query);
 
-        // 1. Load General School Info
-        $site = SiteSetting::first();
-        if ($site) {
-            $contextParts[] = 'Nama Sekolah: '.($site->school_name ?? 'MA Muhammadiyah Limpung')."\n"
+        // 1. Load General School Info (cached — data ini jarang berubah)
+        $siteInfo = Cache::remember('chatbot:site_info_context', now()->addHours(6), function () {
+            $site = SiteSetting::first();
+            if (! $site) {
+                return null;
+            }
+
+            return 'Nama Sekolah: '.($site->school_name ?? 'MA Muhammadiyah Limpung')."\n"
                 .'Motto: '.($site->school_motto ?? '-')."\n"
                 .'Alamat: '.($site->address ?? '-')."\n"
                 .'Email Resmi: '.($site->school_email_official ?? $site->email ?? '-')."\n"
@@ -314,22 +405,67 @@ class ChatbotService
                 .'WhatsApp Admin: '.($site->whatsapp ?? '-')."\n"
                 .'Kepala Sekolah: '.($site->headmaster_name ?? '-').' (NIP: '.($site->headmaster_nip ?? '-').")\n"
                 .'Profil Singkat: '.($site->about_short ?? '-');
+        });
+
+        if ($siteInfo) {
+            $contextParts[] = $siteInfo;
         }
 
-        // 2. Load Knowledge Base Entries (filtered by keywords to save tokens)
-        $cleanQuery = preg_replace('/[^\p{L}\p{N}\s]/u', '', strtolower($query));
+        // 2. Load School Navigation URLs (cached — route() jarang berubah per deploy)
+        // Hanya disertakan jika query terindikasi butuh navigasi, untuk hemat token
+        // pada percakapan ringan (sapaan, basa-basi, dll).
+        $needsNavigation = (bool) preg_match(
+            '/\b(halaman|link|tautan|url|alamat\s*web|website|situs|kunjungi|buka|akses|daftar|pendaftaran|ppdb|artikel|berita|prestasi|galeri|profil|kontak|hubungi|kurikulum|ekstrakurikuler|jurusan|guru|pegawai|cek\s*status)\b/iu',
+            $lq
+        );
+
+        if ($needsNavigation) {
+            $urlText = Cache::remember('chatbot:nav_urls_context', now()->addHours(6), function () {
+                $urls = [
+                    'Beranda Sekolah' => route('frontend.home'),
+                    'Halaman Informasi PPDB' => route('frontend.ppdb.index'),
+                    'Formulir Pendaftaran PPDB Online' => route('frontend.ppdb.form'),
+                    'Halaman Cek Status Pendaftaran PPDB' => route('frontend.ppdb.status'),
+                    'Halaman Artikel & Berita Terbaru' => route('frontend.article.index'),
+                    'Halaman Prestasi Sekolah' => route('frontend.prestasi'),
+                    'Halaman Galeri Foto Kegiatan' => route('frontend.galeri'),
+                    'Halaman Profil Sekolah (Visi Misi, Sejarah, dsb)' => route('frontend.profile'),
+                    'Halaman Hubungi Kami (Kontak)' => route('frontend.contact'),
+                    'Halaman Kurikulum' => route('frontend.kurikulum'),
+                    'Halaman Ekstrakurikuler' => route('frontend.ekstrakurikuler'),
+                    'Halaman Jurusan / Kompetensi Keahlian' => route('frontend.jurusan'),
+                    'Halaman Direktori Guru & Pegawai' => route('frontend.pegawai.index'),
+                ];
+
+                $text = "Tautan/Link resmi sistem sekolah yang dapat diakses:\n";
+                foreach ($urls as $name => $url) {
+                    $text .= "- {$name}: {$url}\n";
+                }
+
+                return $text;
+            });
+
+            $contextParts[] = $urlText;
+        }
+
+        // 3. Load Knowledge Base Entries (filtered by keywords to save tokens)
+        $cleanQuery = preg_replace('/[^\p{L}\p{N}\s]/u', '', $lq);
+
+        // "berapa" sengaja TIDAK dimasukkan stop words agar count queries bisa terdeteksi
         $words = array_filter(explode(' ', $cleanQuery), function ($word) {
             $word = trim($word);
-            $stopWords = ['yang', 'dan', 'untuk', 'atau', 'ini', 'itu', 'saya', 'anda', 'kami', 'kita', 'mereka', 'dia', 'adalah', 'yaitu', 'yakni', 'pada', 'ke', 'dari', 'di', 'dengan', 'secara', 'oleh', 'karena', 'sehingga', 'maka', 'namun', 'tetapi', 'saja', 'juga', 'pun', 'ada', 'bisa', 'dapat', 'akan', 'telah', 'sudah', 'belum', 'baru', 'hanya', 'sangat', 'amat', 'paling', 'lebih', 'kurang', 'seperti', 'bagai', 'oleh', 'tentang', 'sebagai', 'apakah', 'bagaimana', 'kapan', 'siapa', 'mengapa', 'berapa', 'dimana', 'ke mana', 'dari mana', 'halo', 'hai', 'tanya', 'dong', 'sih', 'kah'];
+            $stopWords = ['yang', 'dan', 'untuk', 'atau', 'ini', 'itu', 'saya', 'anda', 'kami', 'kita',
+                'mereka', 'dia', 'adalah', 'yaitu', 'yakni', 'pada', 'ke', 'dari', 'di', 'dengan',
+                'secara', 'oleh', 'karena', 'sehingga', 'maka', 'namun', 'tetapi', 'saja', 'juga',
+                'pun', 'ada', 'bisa', 'dapat', 'akan', 'telah', 'sudah', 'belum', 'baru', 'hanya',
+                'sangat', 'amat', 'paling', 'lebih', 'kurang', 'seperti', 'bagai', 'tentang',
+                'sebagai', 'apakah', 'bagaimana', 'kapan', 'siapa', 'mengapa', 'dimana',
+                'halo', 'hai', 'tanya', 'dong', 'sih', 'kah', 'tolong', 'mohon'];
 
             return strlen($word) >= 3 && ! in_array($word, $stopWords);
         });
 
-        $knowledgeQuery = ChatbotKnowledgeBase::where('is_active', true)
-            ->where(function ($q) use ($topic) {
-                $q->where('topic', $topic)
-                    ->orWhere('topic', 'umum');
-            });
+        $knowledgeQuery = ChatbotKnowledgeBase::where('is_active', true);
 
         if (! empty($words)) {
             $knowledgeQuery->where(function ($q) use ($words) {
@@ -340,24 +476,36 @@ class ChatbotService
             });
         }
 
-        // Limit to max 3 entries for context efficiency
-        $knowledge = $knowledgeQuery->latest()->take(3)->get();
+        $knowledge = $knowledgeQuery->latest()->take(4)->get();
 
-        // If no keyword matches found, load up to 2 general records as basic context
         if ($knowledge->isEmpty()) {
-            $knowledge = ChatbotKnowledgeBase::where('is_active', true)
-                ->where('topic', 'umum')
-                ->latest()
-                ->take(2)
-                ->get();
+            $knowledge = ChatbotKnowledgeBase::where('is_active', true)->latest()->take(3)->get();
         }
 
         foreach ($knowledge as $item) {
-            $contextParts[] = "Topik Pengetahuan [{$item->topic}] - {$item->title}:\n{$item->content}";
+            $contextParts[] = "Pengetahuan - {$item->title}:\n{$item->content}";
         }
 
-        // 3. Load Topic Specific Content
-        if ($topic === 'ppdb') {
+        // 4. Keyword detection — perluas agar "berapa", "jumlah", "total" terdeteksi juga
+        $isPPDBQuery = (bool) preg_match('/\b(ppdb|daftar|pendaftaran|registrasi|gelombang|syarat|biaya|siswa baru|ajaran|dokumen)\b/i', $lq);
+
+        $isArticleQuery = (bool) preg_match('/\b(artikel|berita|publikasi|kegiatan|terbaru|kabar|info|pengumuman)\b/i', $lq);
+
+        $isPrestasiQuery = (bool) preg_match('/\b(prestasi|juara|lomba|kompetisi|olimpiade|achievement|award)\b/i', $lq);
+
+        // "ada berapa", "berapa jumlah", "total data" — tangkap query statistik umum,
+        // tapi hindari kata generik "data"/"angka"/"banyak" sendirian agar tidak
+        // memicu count query pada percakapan yang tidak relevan.
+        $isCountQuery = (bool) preg_match('/\b(berapa|jumlah|total|statistik)\b/i', $lq);
+
+        // Jika count query tanpa keyword spesifik, load semua kategori data
+        if ($isCountQuery && ! $isPPDBQuery && ! $isArticleQuery && ! $isPrestasiQuery) {
+            $isArticleQuery = true;
+            $isPrestasiQuery = true;
+        }
+
+        // 5. PPDB context
+        if ($isPPDBQuery) {
             $ppdbGeneral = PpdbSetting::getValue('general');
             $ppdbWaves = PpdbSetting::getValue('waves');
             $ppdbReqs = PpdbSetting::getValue('requirements');
@@ -384,35 +532,80 @@ class ChatbotService
                 }
             }
             $contextParts[] = $ppdbText;
-        } elseif ($topic === 'kegiatan') {
-            // Load latest 4 articles/activities
-            $articles = Article::where('status', 'published')
-                ->latest('published_at')
-                ->take(4)
-                ->get(['judul', 'ringkasan', 'published_at']);
-
-            $articleTexts = "ARTIKEL DAN KEGIATAN SEKOLAH TERBARU:\n";
-            foreach ($articles as $art) {
-                $date = $art->published_at ? $art->published_at->format('d M Y') : '';
-                $articleTexts .= "- Judul: {$art->judul} ({$date})\n  Ringkasan: {$art->ringkasan}\n";
-            }
-            $contextParts[] = $articleTexts;
-
-            // Load achievements
-            $achievements = Prestasi::latest()
-                ->take(4)
-                ->get(['judul', 'kategori', 'tanggal', 'deskripsi']);
-
-            if ($achievements->isNotEmpty()) {
-                $achTexts = "PRESTASI SEKOLAH TERBARU:\n";
-                foreach ($achievements as $ach) {
-                    $date = $ach->tanggal ? $ach->tanggal->format('d M Y') : '';
-                    $achTexts .= "- Prestasi: {$ach->judul} ({$ach->kategori} - {$date})\n  Detail: {$ach->deskripsi}\n";
-                }
-                $contextParts[] = $achTexts;
-            }
         }
 
-        return implode("\n\n=== SECTION ===\n\n", $contextParts);
+        // 6. Article context — selalu sertakan TOTAL count agar AI bisa jawab "ada berapa"
+        if ($isArticleQuery || $isCountQuery) {
+            $totalArticles = Cache::remember('chatbot:total_articles', now()->addMinutes(15), function () {
+                return Article::where('status', 'published')->count();
+            });
+
+            $articleTexts = "ARTIKEL DAN BERITA SEKOLAH:\n";
+            $articleTexts .= "Total artikel diterbitkan: {$totalArticles} artikel\n";
+
+            if ($isArticleQuery) {
+                $articles = Article::where('status', 'published')
+                    ->latest('published_at')
+                    ->take(5)
+                    ->get(['judul', 'ringkasan', 'published_at', 'slug']);
+
+                if ($articles->isNotEmpty()) {
+                    $articleTexts .= "5 Artikel Terbaru:\n";
+                    foreach ($articles as $art) {
+                        $date = $art->published_at ? $art->published_at->format('d M Y') : '';
+                        $artUrl = route('frontend.article.show', $art->slug);
+                        $articleTexts .= "- {$art->judul} ({$date}) — {$artUrl}\n";
+                        if ($art->ringkasan) {
+                            $articleTexts .= "  Ringkasan: {$art->ringkasan}\n";
+                        }
+                    }
+                }
+            }
+            $contextParts[] = $articleTexts;
+        }
+
+        // 7. Prestasi context — selalu sertakan TOTAL count
+        if ($isPrestasiQuery || $isCountQuery) {
+            $totalPrestasi = Cache::remember('chatbot:total_prestasi', now()->addMinutes(15), function () {
+                return Prestasi::count();
+            });
+
+            $achTexts = "PRESTASI SEKOLAH:\n";
+            $achTexts .= "Total prestasi tercatat: {$totalPrestasi} prestasi\n";
+
+            if ($isPrestasiQuery) {
+                $achievements = Prestasi::latest()
+                    ->take(5)
+                    ->get(['judul', 'deskripsi', 'tingkat', 'jenis', 'penyelenggara', 'peraih', 'juara', 'tahun', 'tanggal_prestasi']);
+
+                if ($achievements->isNotEmpty()) {
+                    $achTexts .= "5 Prestasi Terbaru:\n";
+                    foreach ($achievements as $ach) {
+                        $date = $ach->tanggal_prestasi ? $ach->tanggal_prestasi->format('d M Y') : ($ach->tahun ?? '');
+                        $tingkat = $ach->tingkat ? ucfirst($ach->tingkat) : '';
+                        $achTexts .= "- {$ach->judul} ({$tingkat}, {$date})\n"
+                            .'  Jenis: '.($ach->jenis ?? '-').' | Peraih: '.($ach->peraih ?? '-').' | Juara: '.($ach->juara ?? '-')."\n";
+                    }
+                }
+            }
+            $contextParts[] = $achTexts;
+        }
+
+        $finalContext = implode("\n\n=== SECTION ===\n\n", $contextParts);
+
+        return $this->truncateContext($finalContext);
+    }
+
+    /**
+     * Pastikan context tidak melebihi batas aman karakter agar tidak membebani
+     * context window model dan tetap konsisten antar provider.
+     */
+    protected function truncateContext(string $context): string
+    {
+        if (strlen($context) <= self::MAX_CONTEXT_CHARS) {
+            return $context;
+        }
+
+        return substr($context, 0, self::MAX_CONTEXT_CHARS)."\n\n[... konteks dipotong karena terlalu panjang ...]";
     }
 }

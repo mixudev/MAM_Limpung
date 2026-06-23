@@ -14,7 +14,6 @@ class ChatbotFaq extends Model
     protected $table = 'chatbot_faqs';
 
     protected $fillable = [
-        'topic',
         'question',
         'answer',
         'order',

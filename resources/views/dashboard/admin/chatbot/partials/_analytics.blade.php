@@ -45,19 +45,13 @@
         </div>
     </div>
 
-    {{-- ── Row 2: Traffic Chart + Topik ────────────────────────────────── --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div class="border border-slate-200 dark:border-zinc-700 p-5 lg:col-span-2">
+    {{-- ── Row 2: Traffic Chart ────────────────────────────────── --}}
+    <div class="grid grid-cols-1 gap-3">
+        <div class="border border-slate-200 dark:border-zinc-700 p-5">
             <h3 class="text-[10px] font-bold font-mono uppercase tracking-widest text-slate-500 dark:text-zinc-400 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-chart-line text-[#4f45b2]"></i> Trafik Chat 7 Hari Terakhir
             </h3>
             <div class="h-48 relative"><canvas id="trafficChart"></canvas></div>
-        </div>
-        <div class="border border-slate-200 dark:border-zinc-700 p-5">
-            <h3 class="text-[10px] font-bold font-mono uppercase tracking-widest text-slate-500 dark:text-zinc-400 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-chart-pie text-cyan-500"></i> Distribusi Topik
-            </h3>
-            <div class="h-48 relative"><canvas id="topicChart"></canvas></div>
         </div>
     </div>
 

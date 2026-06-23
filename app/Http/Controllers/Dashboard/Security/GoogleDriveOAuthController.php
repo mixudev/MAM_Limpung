@@ -135,6 +135,11 @@ class GoogleDriveOAuthController extends Controller
 
                     if ($clientId && $clientSecret) {
                         $client = $this->buildClient($clientId, $clientSecret);
+
+                        if (app()->environment('local')) {
+                            $client->setHttpClient(new GuzzleClient(['verify' => false]));
+                        }
+
                         $client->setAccessToken(['access_token' => $tokenData['access_token']]);
                         $client->revokeToken();
                     }
@@ -149,8 +154,18 @@ class GoogleDriveOAuthController extends Controller
         } catch (Exception $e) {
             Log::error('Backup OAuth2 Revoke Error: '.$e->getMessage());
 
+            // Tetap hapus token dari DB meskipun revoke ke Google gagal
+            // (token mungkin sudah expired atau akun sudah tidak valid)
+            try {
+                $securityCredentials = SecuritySetting::getValue('security_credentials', []);
+                unset($securityCredentials['google_oauth2_credentials']);
+                SecuritySetting::setValue('security_credentials', $securityCredentials);
+            } catch (Exception) {
+                // silent
+            }
+
             return redirect()->route('admin.security.index')
-                ->withErrors(['google_oauth2' => 'Gagal mencabut otorisasi: '.$e->getMessage()]);
+                ->with('success', 'Token lokal berhasil dihapus. Catatan: pencabutan ke server Google gagal ('.$e->getMessage().'), tapi akses telah dicabut dari sisi sistem.');
         }
     }
 

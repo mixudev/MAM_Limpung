@@ -202,39 +202,17 @@
             <div><strong>Cara kerjanya:</strong> Ketika pengguna bertanya, sistem mengambil pengetahuan yang relevan berdasarkan topik dan menyertakannya ke AI sebagai konteks. AI kemudian menjawab berdasarkan informasi tersebut. Semakin lengkap isinya, semakin akurat jawaban AI.</div>
         </div>
 
-        {{-- Tabel topik --}}
-        <div class="overflow-x-auto border border-slate-200 dark:border-zinc-700 mb-5">
-            <table class="w-full text-xs border-collapse">
-                <thead>
-                    <tr class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-700 text-[10px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-zinc-400">
-                        <th class="py-3 px-4 text-left w-28">Topik</th>
-                        <th class="py-3 px-4 text-left">Contoh Isi yang Perlu Ditambahkan</th>
-                        <th class="py-3 px-4 text-left w-32 hidden md:table-cell">Prioritas</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
-                    <tr class="hover:bg-slate-50/60 dark:hover:bg-zinc-800/30">
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-[#4f45b2] text-[9px] font-bold font-mono uppercase">UMUM</span></td>
-                        <td class="py-3 px-4 text-slate-600 dark:text-zinc-400">Profil sekolah, visi misi, sejarah berdiri, alamat lengkap, nomor telepon, email, jam operasional, fasilitas, jurusan/program</td>
-                        <td class="py-3 px-4 hidden md:table-cell"><span class="px-2 py-0.5 bg-red-50 border border-red-200 text-red-600 text-[9px] font-bold font-mono uppercase">WAJIB</span></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50/60 dark:hover:bg-zinc-800/30">
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-sky-50 border border-sky-200 text-sky-700 text-[9px] font-bold font-mono uppercase">PPDB</span></td>
-                        <td class="py-3 px-4 text-slate-600 dark:text-zinc-400">Syarat pendaftaran, jadwal penerimaan, biaya pendaftaran, dokumen yang dibutuhkan, prosedur tes/seleksi, daftar ulang, link formulir</td>
-                        <td class="py-3 px-4 hidden md:table-cell"><span class="px-2 py-0.5 bg-red-50 border border-red-200 text-red-600 text-[9px] font-bold font-mono uppercase">WAJIB</span></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50/60 dark:hover:bg-zinc-800/30">
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 text-[9px] font-bold font-mono uppercase">KEGIATAN</span></td>
-                        <td class="py-3 px-4 text-slate-600 dark:text-zinc-400">Jadwal ujian semester, kalender akademik, daftar ekstrakurikuler beserta jadwal, agenda tahunan sekolah (upacara, wisuda, dll)</td>
-                        <td class="py-3 px-4 hidden md:table-cell"><span class="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 text-[9px] font-bold font-mono uppercase">PENTING</span></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50/60 dark:hover:bg-zinc-800/30">
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-bold font-mono uppercase">BANTUAN</span></td>
-                        <td class="py-3 px-4 text-slate-600 dark:text-zinc-400">Cara menghubungi guru/TU, prosedur izin tidak masuk, tata tertib sekolah, info beasiswa, prosedur pengaduan</td>
-                        <td class="py-3 px-4 hidden md:table-cell"><span class="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 text-[9px] font-bold font-mono uppercase">PENTING</span></td>
-                    </tr>
-                </tbody>
-            </table>
+        {{-- Penjelasan Basis Data Pengetahuan --}}
+        <div class="border border-slate-200 dark:border-zinc-700 p-5 mb-5 bg-slate-50 dark:bg-zinc-800/40">
+            <h4 class="font-bold text-slate-800 dark:text-zinc-200 text-sm leading-snug mb-2 flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-[#4f45b2]"></i> Informasi Sekolah yang Dapat Ditambahkan</h4>
+            <p class="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed mb-3">
+                Anda dapat menambahkan informasi apa saja mengenai sekolah kita ke dalam Basis Pengetahuan. AI akan mempelajari seluruh data tersebut untuk merespons pertanyaan pengguna secara dinamis.
+            </p>
+            <ul class="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
+                <li class="flex gap-2"><span class="text-[#4f45b2] font-bold">•</span> <strong>Profil Umum:</strong> Visi misi, sejarah berdiri, struktur organisasi, alamat lengkap, fasilitas, kontak resmi, dll.</li>
+                <li class="flex gap-2"><span class="text-[#4f45b2] font-bold">•</span> <strong>Informasi PPDB:</strong> Syarat administrasi, jadwal pendaftaran offline, alur seleksi masuk, rincian seragam, dll.</li>
+                <li class="flex gap-2"><span class="text-[#4f45b2] font-bold">•</span> <strong>Akademik & Kegiatan:</strong> Program keahlian (jurusan), kurikulum, kalender akademik, jadwal ekstrakurikuler, dll.</li>
+            </ul>
         </div>
 
         {{-- Tips --}}
@@ -292,9 +270,8 @@
             <div class="space-y-4">
                 @foreach([
                     ['1', 'Buka tab "FAQ Cepat"', 'Klik kotak tab <strong>FAQ Cepat</strong> di deretan tab atas. Klik tombol <strong>TAMBAH FAQ</strong>.'],
-                    ['2', 'Pilih topik yang sesuai', 'Pilih topik yang sesuai (Umum, PPDB, Kegiatan, Bantuan). FAQ hanya ditampilkan saat pengguna memilih topik yang sama di chatbot.'],
-                    ['3', 'Atur nomor urutan', 'Isi nomor urutan tampil. Angka <strong>0</strong> = tampil paling atas. FAQ diurutkan dari angka terkecil ke terbesar.'],
-                    ['4', 'Tulis pertanyaan dan jawaban', 'Pertanyaan harus singkat dan jelas (maks. 255 karakter). Jawaban bisa panjang dan mendetail karena langsung ditampilkan ke pengguna.'],
+                    ['2', 'Atur nomor urutan', 'Isi nomor urutan tampil. Angka <strong>0</strong> = tampil paling atas. FAQ diurutkan dari angka terkecil ke terbesar.'],
+                    ['3', 'Tulis pertanyaan dan jawaban', 'Pertanyaan harus singkat dan jelas (maks. 255 karakter). Jawaban bisa panjang dan mendetail karena langsung ditampilkan ke pengguna.'],
                 ] as [$n, $title, $desc])
                 <div class="flex gap-4">
                     <div class="w-6 h-6 bg-[#4f45b2] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">{{ $n }}</div>
@@ -309,15 +286,12 @@
             <div class="space-y-3">
                 <p class="text-xs font-bold font-mono uppercase tracking-wider text-slate-500 dark:text-zinc-400">Contoh FAQ yang Baik</p>
                 @foreach([
-                    ['Kapan jadwal PPDB dibuka?', 'PPDB MAM Limpung dibuka setiap tahun pada bulan Januari hingga Maret. Pendaftaran dilakukan secara langsung di sekretariat sekolah atau melalui website resmi sekolah di jam kerja (07.00–14.00 WIB).', 'ppdb', 'bg-sky-50 border-sky-200 text-sky-700'],
-                    ['Berapa biaya pendaftaran?', 'Biaya pendaftaran PPDB sebesar Rp 50.000 yang dibayarkan saat pengambilan formulir. Biaya ini sudah termasuk formulir pendaftaran dan kartu peserta seleksi.', 'ppdb', 'bg-sky-50 border-sky-200 text-sky-700'],
-                    ['Apa saja ekskul yang tersedia?', 'MAM Limpung memiliki berbagai kegiatan ekstrakurikuler: Pramuka (wajib), PMR, Seni Musik, Seni Tari, Olahraga (sepak bola, voli, bulu tangkis), Komputer, dan KIR. Jadwal ekskul setiap Sabtu pukul 08.00–11.00 WIB.', 'kegiatan', 'bg-amber-50 border-amber-200 text-amber-700'],
-                ] as [$q, $a, $t, $cls])
+                    ['Kapan jadwal PPDB dibuka?', 'PPDB MAM Limpung dibuka setiap tahun pada bulan Januari hingga Maret. Pendaftaran dilakukan secara langsung di sekretariat sekolah atau melalui website resmi sekolah di jam kerja (07.00–14.00 WIB).'],
+                    ['Berapa biaya pendaftaran?', 'Biaya pendaftaran PPDB sebesar Rp 50.000 yang dibayarkan saat pengambilan formulir. Biaya ini sudah termasuk formulir pendaftaran dan kartu peserta seleksi.'],
+                    ['Apa saja ekskul yang tersedia?', 'MAM Limpung memiliki berbagai kegiatan ekstrakurikuler: Pramuka (wajib), PMR, Seni Musik, Seni Tari, Olahraga (sepak bola, voli, bulu tangkis), Komputer, dan KIR. Jadwal ekskul setiap Sabtu pukul 08.00–11.00 WIB.'],
+                ] as [$q, $a])
                 <div class="border border-slate-200 dark:border-zinc-700 p-3 bg-slate-50 dark:bg-zinc-800/40">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <p class="text-xs font-bold text-slate-800 dark:text-zinc-200">{{ $q }}</p>
-                        <span class="px-1.5 py-0.5 border {{ $cls }} text-[9px] font-bold font-mono uppercase shrink-0">{{ $t }}</span>
-                    </div>
+                    <p class="text-xs font-bold text-slate-800 dark:text-zinc-200 mb-2">{{ $q }}</p>
                     <p class="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed">{{ $a }}</p>
                 </div>
                 @endforeach
@@ -350,8 +324,7 @@
                 <div class="space-y-2.5">
                     @foreach([
                         ['Minimal 1 API Key terdaftar dan statusnya AKTIF', true],
-                        ['Minimal 2–3 entri basis pengetahuan topik Umum sudah diisi', true],
-                        ['Minimal 2–3 entri basis pengetahuan topik PPDB sudah diisi', true],
+                        ['Minimal 3-5 entri basis pengetahuan sekolah sudah diisi', true],
                         ['Minimal 3–5 FAQ cepat sudah dibuat dan statusnya AKTIF', true],
                         ['Coba buka website di tab browser baru', false],
                     ] as [$item, $done])
@@ -377,7 +350,7 @@
                     </div>
                     <div class="flex gap-3">
                         <div class="w-6 h-6 bg-[#4f45b2] text-white text-[11px] font-bold flex items-center justify-center shrink-0">2</div>
-                        <div class="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">Klik tombol tersebut, pilih topik, coba klik FAQ yang muncul — pastikan langsung dijawab.</div>
+                        <div class="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">Klik tombol tersebut, coba klik FAQ cepat yang muncul — pastikan langsung dijawab.</div>
                     </div>
                     <div class="flex gap-3">
                         <div class="w-6 h-6 bg-[#4f45b2] text-white text-[11px] font-bold flex items-center justify-center shrink-0">3</div>
@@ -418,7 +391,7 @@
                     [
                         'fa-eye-slash text-slate-500',
                         'FAQ tidak muncul di chatbot',
-                        'Periksa tab <strong>FAQ Cepat</strong> — pastikan status FAQ adalah <strong>AKTIF</strong>. Periksa juga topik FAQ sudah sesuai dengan topik yang dipilih pengguna di chatbot.',
+                        'Periksa tab <strong>FAQ Cepat</strong> — pastikan status FAQ adalah <strong>AKTIF</strong>.',
                     ],
                     [
                         'fa-clock text-indigo-500',

@@ -106,9 +106,22 @@ class BackupController extends Controller
 
     /**
      * Run manual backup — returns JSON for AJAX terminal UI.
+     *
+     * Storage backup bisa memakan waktu lama tergantung ukuran file.
+     * set_time_limit(0) mencegah PHP timeout saat proses zipping berjalan.
+     * ignore_user_abort(true) memastikan proses tetap berjalan meski browser tutup koneksi.
      */
     public function runBackup(BackupService $backupService): JsonResponse
     {
+        // Cegah PHP timeout saat zipping storage besar
+        set_time_limit(0);
+        ignore_user_abort(true);
+
+        // Pastikan output buffer tidak memotong response JSON di tengah jalan
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $result = $backupService->runBackup(false);
 

@@ -61,23 +61,12 @@
         <input type="hidden" name="_method" id="knowledgeMethodInput" value="PUT">
 
         <div class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label for="kbTopic">Kategori Topik</label>
-                    <select id="kbTopic" name="topic">
-                        <option value="umum">Umum</option>
-                        <option value="ppdb">PPDB</option>
-                        <option value="kegiatan">Kegiatan</option>
-                        <option value="bantuan">Bantuan</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="kbIsActive">Status</label>
-                    <select id="kbIsActive" name="is_active">
-                        <option value="1">Aktif</option>
-                        <option value="0">Nonaktif</option>
-                    </select>
-                </div>
+            <div>
+                <label for="kbIsActive">Status</label>
+                <select id="kbIsActive" name="is_active">
+                    <option value="1">Aktif</option>
+                    <option value="0">Nonaktif</option>
+                </select>
             </div>
 
             <div>
@@ -114,16 +103,7 @@
         <input type="hidden" name="_method" id="faqMethodInput" value="PUT">
 
         <div class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                    <label for="faqTopic">Topik</label>
-                    <select id="faqTopic" name="topic">
-                        <option value="umum">Umum</option>
-                        <option value="ppdb">PPDB</option>
-                        <option value="kegiatan">Kegiatan</option>
-                        <option value="bantuan">Bantuan</option>
-                    </select>
-                </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="faqOrder">Urutan Tampil</label>
                     <input id="faqOrder" type="number" name="order" min="0" value="0">
@@ -176,7 +156,6 @@
     {{-- Content --}}
     <div id="transcriptContent" style="display:none">
         <div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100 dark:border-zinc-800 text-[11px] font-mono">
-            <span id="transcriptTopic" class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 text-[#4f45b2] dark:text-indigo-400 font-bold uppercase">—</span>
             <span id="transcriptUser" class="text-slate-500 dark:text-zinc-400">—</span>
             <span id="transcriptTime" class="text-slate-300 dark:text-zinc-600 ml-auto">—</span>
         </div>

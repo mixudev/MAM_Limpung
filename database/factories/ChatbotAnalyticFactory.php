@@ -25,7 +25,6 @@ class ChatbotAnalyticFactory extends Factory
             'session_id' => ChatbotSession::factory(),
             'query' => fake()->sentence(6).'?',
             'response' => fake()->paragraph(1),
-            'topic' => fake()->randomElement(['ppdb', 'kegiatan', 'bantuan', 'umum']),
             'response_time_ms' => fake()->numberBetween(100, 1500),
             'tokens_used' => fake()->numberBetween(50, 400),
             'api_key_used_id' => ChatbotApiKey::factory(),

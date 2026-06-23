@@ -20,7 +20,6 @@ class ChatbotKnowledgeBaseFactory extends Factory
     public function definition(): array
     {
         return [
-            'topic' => fake()->randomElement(['ppdb', 'kegiatan', 'bantuan', 'umum']),
             'title' => fake()->sentence(4),
             'content' => fake()->paragraph(4),
             'is_active' => true,

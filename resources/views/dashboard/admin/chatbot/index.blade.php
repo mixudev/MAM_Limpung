@@ -135,7 +135,6 @@ function openKnowledgeModal(editMode, data) {
         form.action = '{{ url('admin/chatbot/knowledge') }}/' + data.id;
         methodInput.disabled = false;
         submitBtn.textContent = 'Simpan Perubahan';
-        document.getElementById('kbTopic').value    = data.topic;
         document.getElementById('kbIsActive').value = data.is_active;
         document.getElementById('kbTitle').value    = data.title;
         document.getElementById('kbContent').value  = data.content;
@@ -143,7 +142,6 @@ function openKnowledgeModal(editMode, data) {
         form.action = '{{ route('admin.chatbot.knowledge.store') }}';
         methodInput.disabled = true;
         submitBtn.textContent = 'Tambah Pengetahuan';
-        document.getElementById('kbTopic').value    = 'umum';
         document.getElementById('kbIsActive').value = '1';
         document.getElementById('kbTitle').value    = '';
         document.getElementById('kbContent').value  = '';
@@ -163,7 +161,6 @@ function openFaqModal(editMode, data) {
         form.action = '{{ url('admin/chatbot/faqs') }}/' + data.id;
         methodInput.disabled = false;
         submitBtn.textContent = 'Simpan Perubahan';
-        document.getElementById('faqTopic').value    = data.topic;
         document.getElementById('faqOrder').value    = data.order;
         document.getElementById('faqIsActive').value = data.is_active;
         document.getElementById('faqQuestion').value = data.question;
@@ -172,7 +169,6 @@ function openFaqModal(editMode, data) {
         form.action = '{{ route('admin.chatbot.faqs.store') }}';
         methodInput.disabled = true;
         submitBtn.textContent = 'Tambah FAQ';
-        document.getElementById('faqTopic').value    = 'umum';
         document.getElementById('faqOrder').value    = '0';
         document.getElementById('faqIsActive').value = '1';
         document.getElementById('faqQuestion').value = '';
@@ -186,7 +182,6 @@ function openTranscript(sessionId) {
     var loadingEl  = document.getElementById('transcriptLoading');
     var contentEl  = document.getElementById('transcriptContent');
     var bubblesEl  = document.getElementById('transcriptBubbles');
-    var metaTopicEl = document.getElementById('transcriptTopic');
     var metaUserEl  = document.getElementById('transcriptUser');
     var metaTimeEl  = document.getElementById('transcriptTime');
 
@@ -203,7 +198,6 @@ function openTranscript(sessionId) {
         loadingEl.style.display = 'none';
         contentEl.style.display = '';
 
-        metaTopicEl.textContent = d.topic || '—';
         metaUserEl.textContent  = d.user ? d.user.name : ('Tamu · ' + (d.user_ip || '—'));
         metaTimeEl.textContent  = d.created_at ? new Date(d.created_at).toLocaleString('id-ID') : '';
 
@@ -212,6 +206,15 @@ function openTranscript(sessionId) {
             bubblesEl.innerHTML = '<div class="flex items-center justify-center h-24 text-slate-400 text-xs font-mono">Sesi ini tidak memiliki pesan.</div>';
             return;
         }
+        
+        function parseMessageHtml(messageText) {
+            var esc = escHtml(messageText);
+            var buttonRegex = /\[BUTTON:\s*([^|]+)\s*\|\s*([^\]]+)\]/g;
+            return esc.replace(buttonRegex, function(match, label, url) {
+                return '<div class="mt-2"><a href="' + url + '" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#4f45b2] text-white rounded-lg font-bold text-[10px] tracking-wider uppercase transition-colors"><i class="fa-solid fa-arrow-up-right-from-square"></i> ' + label + '</a></div>';
+            });
+        }
+
         msgs.forEach(function(msg) {
             var isUser = msg.sender === 'user';
             var bubble = document.createElement('div');
@@ -220,7 +223,7 @@ function openTranscript(sessionId) {
                 '<div class="w-6 h-6 bg-[#4f45b2] text-white flex items-center justify-center text-[10px] shrink-0 mb-0.5"><i class="fa-solid fa-robot"></i></div>')
                 + '<div class="max-w-[78%]">'
                     + '<div class="px-4 py-2.5 text-xs leading-relaxed ' + (isUser ? 'bg-[#4f45b2] text-white' : 'bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700') + '">'
-                        + '<p class="whitespace-pre-wrap">' + escHtml(msg.message) + '</p>'
+                        + '<p class="whitespace-pre-wrap">' + parseMessageHtml(msg.message) + '</p>'
                     + '</div>'
                     + '<div class="text-[10px] text-slate-400 font-mono mt-1 px-1 ' + (isUser ? 'text-right' : 'text-left') + '">' + (isUser ? 'Pengguna' : 'AI Chatbot') + '</div>'
                 + '</div>'
@@ -319,24 +322,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    var topicCtx = document.getElementById('topicChart');
-    if (topicCtx) {
-        new Chart(topicCtx, {
-            type: 'doughnut',
-            data: {
-                labels: [@foreach($topicStats as $ts)'{{ strtoupper($ts->topic) }}',@endforeach],
-                datasets: [{
-                    data: [@foreach($topicStats as $ts){{ $ts->count }},@endforeach],
-                    backgroundColor: ['#4f45b2','#06b6d4','#f59e0b','#10b981','#64748b'],
-                    borderWidth: 2, borderColor: '#fff',
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, padding: 12 } } },
-                cutout: '62%',
-            }
-        });
     }
 });
 </script>

@@ -28,7 +28,6 @@
             <thead>
                 <tr class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-700 text-[10px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-zinc-400">
                     <th class="py-3.5 px-4 w-16">Urut</th>
-                    <th class="py-3.5 px-4 w-28">Topik</th>
                     <th class="py-3.5 px-4">Pertanyaan &amp; Jawaban</th>
                     <th class="py-3.5 px-4 text-center w-20">Status</th>
                     <th class="py-3.5 px-4 text-right w-32">Aksi</th>
@@ -36,23 +35,10 @@
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
                 @foreach($faqs as $faq)
-                @php
-                    $topicBadge = [
-                        'umum'     => 'bg-indigo-50 border-indigo-200 text-[#4f45b2] dark:bg-indigo-950/30 dark:border-indigo-800 dark:text-indigo-400',
-                        'ppdb'     => 'bg-sky-50 border-sky-200 text-sky-700 dark:bg-sky-950/30 dark:border-sky-800 dark:text-sky-400',
-                        'kegiatan' => 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-400',
-                        'bantuan'  => 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400',
-                    ];
-                @endphp
                 <tr class="hover:bg-slate-50/60 dark:hover:bg-zinc-800/30 transition-colors">
                     <td class="py-3.5 px-4">
                         <span class="w-7 h-7 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 font-bold font-mono text-xs flex items-center justify-center">
                             {{ $faq->order }}
-                        </span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                        <span class="px-2 py-0.5 border text-[9px] font-bold font-mono uppercase tracking-wider {{ $topicBadge[$faq->topic] ?? '' }}">
-                            {{ $faq->topic }}
                         </span>
                     </td>
                     <td class="py-3.5 px-4">
@@ -70,7 +56,7 @@
                     <td class="py-3.5 px-4 text-right">
                         <div class="flex items-center justify-end gap-1.5">
                             <button type="button"
-                                onclick="openFaqModal(true, {{ json_encode(['id'=>$faq->id,'topic'=>$faq->topic,'question'=>$faq->question,'answer'=>$faq->answer,'order'=>$faq->order,'is_active'=>(int)$faq->is_active]) }})"
+                                onclick="openFaqModal(true, {{ json_encode(['id'=>$faq->id,'question'=>$faq->question,'answer'=>$faq->answer,'order'=>$faq->order,'is_active'=>(int)$faq->is_active]) }})"
                                 class="inline-flex items-center gap-1 py-1 px-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 font-bold text-[10px] uppercase font-mono tracking-wider transition-colors cursor-pointer">
                                 <i class="fa-solid fa-pen"></i> Edit
                             </button>

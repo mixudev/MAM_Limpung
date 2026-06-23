@@ -33,18 +33,10 @@ class ChatbotWidgetController extends Controller
      */
     public function getFaqs(Request $request): JsonResponse
     {
-        $topic = $request->query('topic');
-
-        $query = ChatbotFaq::where('is_active', true);
-
-        if ($topic && $topic !== 'umum') {
-            $query->where(function ($q) use ($topic) {
-                $q->where('topic', $topic)
-                    ->orWhere('topic', 'umum');
-            });
-        }
-
-        $faqs = $query->orderBy('order', 'asc')->get();
+        $faqs = ChatbotFaq::where('is_active', true)
+            ->orderBy('order', 'asc')
+            ->take(5)
+            ->get();
 
         return response()->json($faqs);
     }
@@ -73,14 +65,9 @@ class ChatbotWidgetController extends Controller
      */
     public function startSession(Request $request): JsonResponse
     {
-        $request->validate([
-            'topic' => 'required|string|in:umum,ppdb,kegiatan,bantuan',
-        ]);
-
         $session = ChatbotSession::create([
             'user_id' => auth()->id(),
             'user_ip' => $request->ip(),
-            'topic' => $request->input('topic'),
         ]);
 
         // Load empty messages relation
@@ -142,7 +129,7 @@ class ChatbotWidgetController extends Controller
         } else {
             // Request Answer from Service
             try {
-                $aiResult = $chatbotService->askAI($userMessageText, $session->topic, $chatHistory);
+                $aiResult = $chatbotService->askAI($userMessageText, $chatHistory);
                 $botResponseText = $aiResult['text'];
                 $apiKeyUsedId = $aiResult['api_key_used_id'];
                 $tokensUsed = $aiResult['tokens_used'];
@@ -151,7 +138,7 @@ class ChatbotWidgetController extends Controller
                     'session_id' => $session->id,
                     'api_key_id' => $apiKeyUsedId,
                     'level' => 'success',
-                    'message' => 'Chatbot berhasil memberikan respons AI untuk topik: '.strtoupper($session->topic),
+                    'message' => 'Chatbot berhasil memberikan respons AI.',
                     'payload' => [
                         'query' => $userMessageText,
                         'response_preview' => mb_substr($botResponseText, 0, 100).'...',
@@ -167,7 +154,6 @@ class ChatbotWidgetController extends Controller
                     'message' => 'Chatbot gagal merespons permintaan pengguna: '.$e->getMessage(),
                     'payload' => [
                         'query' => $userMessageText,
-                        'topic' => $session->topic,
                         'exception' => get_class($e),
                         'trace' => substr($e->getTraceAsString(), 0, 1000),
                     ],
@@ -189,7 +175,6 @@ class ChatbotWidgetController extends Controller
             'session_id' => $session->id,
             'query' => $userMessageText,
             'response' => $botResponseText,
-            'topic' => $session->topic,
             'response_time_ms' => $responseTimeMs,
             'tokens_used' => $tokensUsed,
             'api_key_used_id' => $apiKeyUsedId,

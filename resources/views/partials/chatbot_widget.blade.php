@@ -16,7 +16,6 @@
     sessions: [],
     faqs: [],
     messages: [],
-    activeTopic: 'umum',
     inputValue: '',
     isTyping: false,
     isInitialLoading: false,
@@ -56,27 +55,18 @@
 
     async loadFaqs() {
         try {
-            const res = await fetch('{{ route('frontend.chatbot.faqs') }}?topic=' + this.activeTopic);
+            const res = await fetch('{{ route('frontend.chatbot.faqs') }}');
             this.faqs = await res.json();
         } catch (e) { console.error(e); }
     },
 
-    async selectTopic(topic) {
-        this.activeTopic = topic;
-        this.activeSession = null;
-        this.messages = [];
-        this.showSidebar = false;
-        await this.loadFaqs();
-    },
-
-    async startNewChat(topic = null) {
-        if (topic) this.activeTopic = topic;
+    async startNewChat() {
         this.isInitialLoading = true;
         try {
             const res = await fetch('{{ route('frontend.chatbot.sessions.start') }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                body: JSON.stringify({ topic: this.activeTopic })
+                body: JSON.stringify({})
             });
             const session = await res.json();
             this.activeSession = session;
@@ -96,7 +86,6 @@
 
     async loadSession(session) {
         this.activeSession = session;
-        this.activeTopic = session.topic;
         this.messages = (session.messages || []).map(m => {
             return {
                 ...m,
@@ -154,7 +143,7 @@
     },
 
     async clickFaq(faq) {
-        if (!this.activeSession) await this.startNewChat(faq.topic);
+        if (!this.activeSession) await this.startNewChat();
         await this.sendMessage(faq.question);
     },
 
@@ -176,6 +165,26 @@
                 body: JSON.stringify({ feedback: type })
             });
         } catch (e) { console.error(e); }
+    },
+
+    parseMessageButtons(messageText) {
+        const buttonRegex = /\[BUTTON:\s*([^|]+)\s*\|\s*([^\]]+)\]/g;
+        let match;
+        let textWithoutButtons = messageText.replace(buttonRegex, '').trim();
+        let buttons = [];
+        
+        buttonRegex.lastIndex = 0;
+        while ((match = buttonRegex.exec(messageText)) !== null) {
+            buttons.push({
+                label: match[1].trim(),
+                url: match[2].trim()
+            });
+        }
+        
+        return {
+            text: textWithoutButtons,
+            buttons: buttons
+        };
     },
 
     scrollToBottom() {

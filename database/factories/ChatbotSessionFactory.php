@@ -24,7 +24,6 @@ class ChatbotSessionFactory extends Factory
             'id' => (string) Str::uuid(),
             'user_id' => null,
             'user_ip' => fake()->ipv4(),
-            'topic' => fake()->randomElement(['ppdb', 'kegiatan', 'bantuan', 'umum']),
         ];
     }
 }

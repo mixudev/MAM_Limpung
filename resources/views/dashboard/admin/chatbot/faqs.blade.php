@@ -48,7 +48,6 @@ function openFaqModal(editMode, data) {
         form.action = '{{ url('admin/chatbot/faqs') }}/' + data.id;
         methodInput.disabled = false;
         submitBtn.textContent = 'Simpan Perubahan';
-        document.getElementById('faqTopic').value    = data.topic;
         document.getElementById('faqOrder').value    = data.order;
         document.getElementById('faqIsActive').value = data.is_active;
         document.getElementById('faqQuestion').value = data.question;
@@ -57,7 +56,6 @@ function openFaqModal(editMode, data) {
         form.action = '{{ route('admin.chatbot.faqs.store') }}';
         methodInput.disabled = true;
         submitBtn.textContent = 'Tambah FAQ';
-        document.getElementById('faqTopic').value    = 'umum';
         document.getElementById('faqOrder').value    = '0';
         document.getElementById('faqIsActive').value = '1';
         document.getElementById('faqQuestion').value = '';

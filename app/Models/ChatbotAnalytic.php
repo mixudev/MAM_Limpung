@@ -23,7 +23,6 @@ class ChatbotAnalytic extends Model
         'session_id',
         'query',
         'response',
-        'topic',
         'response_time_ms',
         'tokens_used',
         'api_key_used_id',

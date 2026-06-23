@@ -1,5 +1,28 @@
 @extends('layouts.app')
 
+@section('schema_json_ld')
+@php
+  $schemaData = [
+    '@context' => 'https://schema.org',
+    '@type' => 'EducationalOrganization',
+    '@id' => config('app.url') . '#school',
+    'name' => $siteSettings->school_name ?? 'MA Muhammadiyah Limpung',
+    'url' => config('app.url'),
+    'logo' => !empty($siteSettings->logo_path) ? asset('storage/' . $siteSettings->logo_path) : asset('images/logo.png'),
+    'description' => $siteSettings->about_short ?? '',
+    'telephone' => $siteSettings->phone ?? '',
+    'email' => $siteSettings->email ?? '',
+    'address' => [
+      '@type' => 'PostalAddress',
+      'streetAddress' => $siteSettings->address ?? '',
+      'addressCountry' => 'ID',
+    ],
+  ];
+@endphp
+<script type="application/ld+json">
+  {!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) !!}
+</script>
+@endsection
 @section('content')
     <div class="overflow-x-hidden">
         <!-- Hero Section: Split Layout with Stacked Cards -->

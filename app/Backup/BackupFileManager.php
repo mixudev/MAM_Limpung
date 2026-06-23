@@ -10,9 +10,15 @@ class BackupFileManager
 {
     /**
      * Recursively add all files in a folder to a ZipArchive under the given subdirectory path.
+     * Files are collected first, then added — ensures all handles are closed before zip->close().
      */
     public function addFolderToZip(string $folderPath, ZipArchive $zip, string $zipSubdir): void
     {
+        // Collect all file paths first, then release the iterator.
+        // On Windows, ZipArchive::close() can fail with "ZipArchive::close(): Write error"
+        // if file handles from RecursiveDirectoryIterator are still open when close() is called.
+        $collectedFiles = [];
+
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($folderPath, \RecursiveDirectoryIterator::SKIP_DOTS),
             \RecursiveIteratorIterator::LEAVES_ONLY
@@ -20,9 +26,20 @@ class BackupFileManager
 
         foreach ($files as $file) {
             if (! $file->isDir()) {
-                $filePath = $file->getRealPath();
-                $relativePath = $zipSubdir.'/'.substr($filePath, strlen($folderPath) + 1);
-                $zip->addFile($filePath, $relativePath);
+                $collectedFiles[] = [
+                    'real' => $file->getRealPath(),
+                    'relative' => $zipSubdir.'/'.substr($file->getRealPath(), strlen($folderPath) + 1),
+                ];
+            }
+        }
+
+        // Explicitly destroy the iterator to release all file handles before adding to zip
+        unset($files);
+        gc_collect_cycles();
+
+        foreach ($collectedFiles as $entry) {
+            if (file_exists($entry['real'])) {
+                $zip->addFile($entry['real'], $entry['relative']);
             }
         }
     }

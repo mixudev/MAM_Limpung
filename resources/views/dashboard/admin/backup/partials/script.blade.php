@@ -89,31 +89,50 @@
         statusText.innerText = 'Status: Memproses...';
         content.innerHTML = '';
         logToTerminal('Memulai inisialisasi backup manual...', 'system');
+        logToTerminal('Backup file storage mungkin membutuhkan waktu beberapa menit. Mohon tunggu...', 'warn');
 
+        // Gunakan AbortController tanpa timeout — biarkan server selesai
+        // (timeout default fetch bisa memotong backup storage besar)
         fetch("{{ route('admin.backup.run') }}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
         })
-        .then(r => r.json().then(data => ({ ok: r.ok, data })))
-        .then(({ ok, data }) => {
-            if (!ok) return Promise.reject(data);
+        .then(function(response) {
+            // Ambil raw text dulu untuk menghindari SyntaxError jika response kosong
+            return response.text().then(function(text) {
+                let data = {};
+                try {
+                    data = text ? JSON.parse(text) : {};
+                } catch (e) {
+                    // Response tidak valid JSON — kemungkinan server timeout atau crash
+                    throw new Error('Server tidak merespons dengan benar. Kemungkinan proses backup masih berjalan di background atau terjadi timeout server. Periksa tab Riwayat Backup untuk hasilnya.');
+                }
+                if (!response.ok) throw data;
+                return data;
+            });
+        })
+        .then(function(data) {
             logToTerminal('Inisialisasi berhasil!', 'success');
-            logToTerminal(`Tipe: ${data.log.type}`, 'info');
-            if (data.log.encrypted) logToTerminal('Enkripsi AES-256: AKTIF', 'success');
-            if (data.log.drive_uploaded) logToTerminal(`Google Drive: SUKSES (${data.log.drive_file_id})`, 'success');
-            else if (data.log.drive_error) logToTerminal(`Google Drive: GAGAL (${data.log.drive_error})`, 'error');
-            logToTerminal(`Ukuran: ${data.log.formatted_size} | Durasi: ${data.log.duration}s`, 'system');
-            logToTerminal(`Selesai! File: ${data.log.filename}`, 'success');
+            if (data.log) {
+                logToTerminal(`Tipe: ${data.log.type || '-'}`, 'info');
+                if (data.log.encrypted) logToTerminal('Enkripsi AES-256: AKTIF', 'success');
+                if (data.log.drive_uploaded) logToTerminal(`Google Drive: SUKSES (${data.log.drive_file_id})`, 'success');
+                else if (data.log.drive_error) logToTerminal(`Google Drive: GAGAL (${data.log.drive_error})`, 'error');
+                logToTerminal(`Ukuran: ${data.log.formatted_size} | Durasi: ${data.log.duration}s`, 'system');
+                logToTerminal(`Selesai! File: ${data.log.filename}`, 'success');
+                appendBackupLogToTable(data.log);
+            }
             indicator.className = 'w-2 h-2 rounded-full bg-emerald-500';
             statusText.innerText = 'Status: Sukses!';
-            appendBackupLogToTable(data.log);
             btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); spinner.classList.add('hidden');
         })
-        .catch(err => {
-            logToTerminal(`GAGAL: ${err.message || err}`, 'error');
+        .catch(function(err) {
+            const msg = typeof err === 'string' ? err : (err.message || JSON.stringify(err));
+            logToTerminal(`GAGAL: ${msg}`, 'error');
+            logToTerminal('Jika proses baru pertama kali dilakukan dengan storage besar, coba refresh halaman dan cek tabel Riwayat Backup — backup mungkin berhasil di background.', 'warn');
             indicator.className = 'w-2 h-2 rounded-full bg-rose-500';
             statusText.innerText = 'Status: Error!';
-            if (err.log) appendBackupLogToTable(err.log);
+            if (err && err.log) appendBackupLogToTable(err.log);
             btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); spinner.classList.add('hidden');
         });
     }

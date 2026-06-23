@@ -11,23 +11,6 @@
         </button>
     </div>
 
-    {{-- Topic Filters --}}
-    <div class="px-3 pt-3 pb-1">
-        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Topik</p>
-        <div class="grid grid-cols-2 gap-1.5">
-            @foreach ([['umum', 'circle-nodes', 'indigo'], ['ppdb', 'id-card-clip', 'sky'], ['kegiatan', 'calendar-check', 'amber'], ['bantuan', 'circle-question', 'emerald']] as [$t, $ic, $cl])
-                <button @click="selectTopic('{{ $t }}')"
-                    :class="activeTopic === '{{ $t }}' ?
-                        'bg-indigo-50 border-indigo-200 text-indigo-700 font-bold' :
-                        'bg-white border-gray-200 text-gray-500 hover:border-indigo-200 hover:text-indigo-600'"
-                    class="p-2 rounded-xl border text-center text-[10px] font-semibold transition-all cursor-pointer flex flex-col items-center gap-1">
-                    <i class="fa-solid fa-{{ $ic }} text-sm text-{{ $cl }}-500"></i>
-                    {{ ucfirst($t) }}
-                </button>
-            @endforeach
-        </div>
-    </div>
-
     {{-- Sessions List --}}
     <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1 min-h-0">
         <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 mt-1">Riwayat (Maks. 3)</p>
@@ -39,7 +22,7 @@
                 class="w-full p-2.5 rounded-xl border text-left text-[11px] transition-all cursor-pointer">
                 <div class="font-semibold capitalize truncate flex items-center gap-1.5">
                     <i class="fa-solid fa-comment-dots text-indigo-400 text-[10px]"></i>
-                    <span x-text="sess.topic"></span>
+                    <span>Percakapan AI</span>
                 </div>
                 <div class="text-[9px] text-gray-400 mt-0.5"
                     x-text="new Date(sess.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})">

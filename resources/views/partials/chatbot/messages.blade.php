@@ -8,32 +8,18 @@
             {{-- Bot greeting bubble --}}
             <div class="flex items-start gap-2">
                 <div class="w-7 h-7 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-full flex items-center justify-center text-white text-xs shrink-0 mt-0.5">
-                    <i class="fa-solid fa-robot text-[10px]"></i>
+                    <img src="{{ asset ('assets/img/chatbot.png') }}" alt="">
                 </div>
                 <div class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100 max-w-[88%]">
                     <p class="text-sm text-gray-700 font-medium leading-relaxed">Halo! 👋 Saya asisten AI <strong>MAM Limpung</strong>.</p>
-                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">Silakan pilih kategori topik atau tanyakan rekomendasi pertanyaan di bawah ini.</p>
+                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">Silakan tanyakan apa saja mengenai sekolah kita atau pilih shortcut pertanyaan cepat di bawah ini.</p>
                     <div class="mt-1 text-[10px] text-gray-400">Sekarang · Online</div>
                 </div>
             </div>
 
-            {{-- Topic chips --}}
-            <div class="flex flex-wrap gap-2 ml-9">
-                @foreach ([['umum', 'circle-nodes', 'indigo'], ['ppdb', 'id-card-clip', 'sky'], ['kegiatan', 'calendar-check', 'amber'], ['bantuan', 'circle-question', 'emerald']] as [$t, $ic, $cl])
-                    <button @click="selectTopic('{{ $t }}')"
-                        :class="activeTopic === '{{ $t }}' ?
-                            'bg-indigo-100 text-indigo-700 border-indigo-300 font-bold shadow-xs' :
-                            'bg-white text-gray-600 border-gray-200'"
-                        class="px-3 py-1.5 rounded-full border text-xs transition-all cursor-pointer flex items-center gap-1.5 hover:border-indigo-300">
-                        <i class="fa-solid fa-{{ $ic }} text-{{ $cl }}-500 text-[10px]"></i>
-                        {{ ucfirst($t) }}
-                    </button>
-                @endforeach
-            </div>
-
             {{-- FAQ quick replies (Configurable Recommendations from Dashboard) --}}
             <div class="ml-9 space-y-2">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Rekomendasi Pertanyaan (<span class="capitalize text-indigo-600 font-semibold" x-text="activeTopic"></span>)</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Pertanyaan Populer</p>
                 <div class="space-y-1.5">
                     <template x-for="faq in faqs" :key="faq.id">
                         <button @click="clickFaq(faq)"
@@ -59,7 +45,7 @@
             <div class="flex items-center justify-center">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full text-[10px] text-indigo-600 font-medium shadow-2xs">
                     <i class="fa-solid fa-lock text-[9px]"></i>
-                    Percakapan aktif · Topik: <span class="capitalize font-bold" x-text="activeTopic"></span>
+                    Percakapan Aktif dengan AI Sekolah
                 </span>
             </div>
 
@@ -69,7 +55,7 @@
                     {{-- Bot Avatar --}}
                     <template x-if="msg.sender === 'bot'">
                         <div class="w-7 h-7 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-full flex items-center justify-center text-white text-[10px] shrink-0 mb-0.5">
-                            <i class="fa-solid fa-robot"></i>
+                            <img src="{{ asset ('assets/img/chatbot.png') }}" alt="">
                         </div>
                     </template>
 
@@ -77,19 +63,33 @@
                         {{-- Bubble --}}
                         <div :class="msg.sender === 'user' ?
                             'bg-indigo-600 text-white rounded-2xl rounded-br-sm' :
-                            'bg-white text-gray-800 border border-gray-100 rounded-2xl rounded-tl-sm shadow-sm'"
-                            class="px-4 py-2.5 text-sm leading-relaxed">
-                            <p x-text="msg.message" class="whitespace-pre-wrap"></p>
+                            'bg-white text-gray-800 border border-gray-100 rounded-2xl rounded-bl-xs shadow-sm'"
+                            class="px-4 py-2.5 text-sm leading-relaxed"
+                            x-data="{ parsed: parseMessageButtons(msg.message) }">
+                            <p x-text="parsed.text" class="whitespace-pre-wrap"></p>
+
+                            {{-- Render dynamic links/buttons --}}
+                            <template x-if="msg.sender === 'bot' && parsed.buttons.length > 0">
+                                <div class="mt-3 flex flex-col gap-2">
+                                    <template x-for="btn in parsed.buttons">
+                                        <a :href="btn.url" target="_blank"
+                                            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-100 hover:scale-[1.02] active:scale-95 cursor-pointer w-full text-center">
+                                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                            <span x-text="btn.label"></span>
+                                        </a>
+                                    </template>
+                                </div>
+                            </template>
 
                             {{-- Render physical WhatsApp button if message includes WhatsApp advice and sender is bot --}}
-                            <template x-if="msg.sender === 'bot' && !msg.disliked && (msg.message.includes('WhatsApp') || msg.message.includes('WhatsApp Admin') || msg.message.includes('hubungi admin'))">
+                            <!-- <template x-if="msg.sender === 'bot' && !msg.disliked && (msg.message.includes('WhatsApp') || msg.message.includes('WhatsApp Admin') || msg.message.includes('hubungi admin'))">
                                 <div class="mt-2.5">
                                     <a href="{{ $waUrl }}" target="_blank"
-                                        class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-emerald-100 hover:scale-[1.03] active:scale-95 cursor-pointer">
+                                        class="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-emerald-100 hover:scale-[1.03] active:scale-95 cursor-pointer">
                                         <i class="fa-brands fa-whatsapp text-sm"></i> Tanya WhatsApp Admin
                                     </a>
                                 </div>
-                            </template>
+                            </template> -->
 
                             {{-- Apology & WhatsApp button if user clicks disliked (tidak membantu) --}}
                             <template x-if="msg.sender === 'bot' && msg.disliked">
@@ -135,7 +135,7 @@
             {{-- Typing indicator --}}
             <div x-show="isTyping" class="flex items-end gap-2">
                 <div class="w-7 h-7 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-full flex items-center justify-center text-white text-[10px] shrink-0">
-                    <i class="fa-solid fa-robot"></i>
+                    <img src="{{ asset ('assets/img/chatbot.png') }}" alt="">
                 </div>
                 <div class="bg-white border border-gray-100 rounded-2xl rounded-tl-sm shadow-sm px-4 py-3 flex items-center gap-1.5">
                     <span class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style="animation-delay:0s"></span>

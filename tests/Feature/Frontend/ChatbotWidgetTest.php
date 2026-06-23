@@ -16,45 +16,35 @@ test('guest or user can retrieve active faqs', function () {
     ChatbotFaq::factory()->create([
         'question' => 'Kapan pendaftaran PPDB?',
         'answer' => 'Pendaftaran dibuka tanggal 1 Januari.',
-        'topic' => 'ppdb',
         'is_active' => true,
     ]);
 
     ChatbotFaq::factory()->create([
         'question' => 'Lokasi sekolah dimana?',
         'answer' => 'Lokasi di Jalan Cokronegoro.',
-        'topic' => 'umum',
         'is_active' => true,
     ]);
 
-    // Query general faqs
+    // Query active faqs
     $response = $this->getJson(route('frontend.chatbot.faqs'));
     $response->assertStatus(200)
         ->assertJsonCount(2);
-
-    // Filter by topic
-    $responseFilter = $this->getJson(route('frontend.chatbot.faqs', ['topic' => 'ppdb']));
-    $responseFilter->assertStatus(200)
-        ->assertJsonCount(2); // ppdb and umum combined
 });
 
 test('guest can start new chat session', function () {
-    $response = $this->postJson(route('frontend.chatbot.sessions.start'), [
-        'topic' => 'ppdb',
-    ]);
+    $response = $this->postJson(route('frontend.chatbot.sessions.start'));
 
     $response->assertStatus(200)
-        ->assertJsonStructure(['id', 'topic', 'user_ip']);
+        ->assertJsonStructure(['id', 'user_ip']);
 
     $this->assertDatabaseHas('chatbot_sessions', [
         'id' => $response->json('id'),
-        'topic' => 'ppdb',
     ]);
 });
 
 test('guest can retrieve history from localStorage list', function () {
-    $session1 = ChatbotSession::factory()->create(['topic' => 'ppdb']);
-    $session2 = ChatbotSession::factory()->create(['topic' => 'kegiatan']);
+    $session1 = ChatbotSession::factory()->create();
+    $session2 = ChatbotSession::factory()->create();
 
     $response = $this->postJson(route('frontend.chatbot.history'), [
         'session_ids' => [$session1->id, $session2->id],
@@ -67,7 +57,7 @@ test('guest can retrieve history from localStorage list', function () {
 });
 
 test('sending message returns FAQ answer instantly if matched', function () {
-    $session = ChatbotSession::factory()->create(['topic' => 'ppdb']);
+    $session = ChatbotSession::factory()->create();
 
     ChatbotFaq::factory()->create([
         'question' => 'Berapa biaya pendaftaran?',
@@ -118,7 +108,7 @@ test('sending message calls Gemini AI API when no FAQ matches', function () {
         'is_active' => true,
     ]);
 
-    $session = ChatbotSession::factory()->create(['topic' => 'umum']);
+    $session = ChatbotSession::factory()->create();
 
     $response = $this->postJson(route('frontend.chatbot.sessions.send', $session->id), [
         'message' => 'Tanya hal unik tentang sekolah?',
@@ -170,7 +160,7 @@ test('API key rotates to key 2 if key 1 throws rate limit 429 error', function (
         'error_count' => 0,
     ]);
 
-    $session = ChatbotSession::factory()->create(['topic' => 'umum']);
+    $session = ChatbotSession::factory()->create();
 
     $response = $this->postJson(route('frontend.chatbot.sessions.send', $session->id), [
         'message' => 'Halo AI',
@@ -217,7 +207,7 @@ test('sending message writes activity logs to the database', function () {
         'error_count' => 0,
     ]);
 
-    $session = ChatbotSession::factory()->create(['topic' => 'umum']);
+    $session = ChatbotSession::factory()->create();
 
     $this->postJson(route('frontend.chatbot.sessions.send', $session->id), [
         'message' => 'Halo AI',

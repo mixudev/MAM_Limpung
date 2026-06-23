@@ -20,7 +20,6 @@ class ChatbotFaqFactory extends Factory
     public function definition(): array
     {
         return [
-            'topic' => fake()->randomElement(['ppdb', 'kegiatan', 'bantuan', 'umum']),
             'question' => fake()->sentence(6).'?',
             'answer' => fake()->paragraph(2),
             'order' => fake()->numberBetween(0, 10),

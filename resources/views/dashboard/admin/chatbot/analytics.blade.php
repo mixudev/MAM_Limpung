@@ -54,25 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-    var topicCtx = document.getElementById('topicChart');
-    if (topicCtx) {
-        new Chart(topicCtx, {
-            type: 'doughnut',
-            data: {
-                labels: [@foreach($topicStats as $ts)'{{ strtoupper($ts->topic) }}',@endforeach],
-                datasets: [{
-                    data: [@foreach($topicStats as $ts){{ $ts->count }},@endforeach],
-                    backgroundColor: ['#4f45b2','#06b6d4','#f59e0b','#10b981','#64748b'],
-                    borderWidth: 2, borderColor: '#fff',
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, padding: 12 } } },
-                cutout: '62%',
-            }
-        });
-    }
+
 
     // ── API Provider Daily Line Chart ────────────────────────────────────────
     var apiCtx = document.getElementById('apiProviderChart');
