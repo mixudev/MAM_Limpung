@@ -8,21 +8,31 @@
             '@id' => config('app.url') . '#school',
             'name' => $siteSettings->school_name ?? 'MA Muhammadiyah Limpung',
             'url' => config('app.url'),
-            'logo' => !empty($siteSettings->logo_path)
-                ? asset('storage/' . $siteSettings->logo_path)
-                : asset('images/logo.png'),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => !empty($siteSettings->logo_path)
+                    ? asset('storage/' . $siteSettings->logo_path)
+                    : asset('images/logo.png'),
+            ],
             'description' => $siteSettings->about_short ?? '',
             'telephone' => $siteSettings->phone ?? '',
             'email' => $siteSettings->email ?? '',
             'address' => [
                 '@type' => 'PostalAddress',
                 'streetAddress' => $siteSettings->address ?? '',
+                'addressLocality' => 'Limpung',
+                'addressRegion' => 'Jawa Tengah',
+                'postalCode' => $siteSettings->postal_code ?? '51271',
                 'addressCountry' => 'ID',
+            ],
+            'sameAs' => [
+                $siteSettings->tiktok ?? '',
+                $siteSettings->instagram ?? '',
             ],
         ];
     @endphp
     <script type="application/ld+json">
-  {!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) !!}
+  {!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}
 </script>
 @endsection
 @section('content')

@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\AcademicYear;
 use App\Models\PpdbSetting;
+use App\Models\RegistrationWave;
 use Illuminate\Database\Seeder;
 
 class PpdbSettingSeeder extends Seeder
@@ -12,26 +14,44 @@ class PpdbSettingSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. General Config
+        // 1. Academic Year & Waves
+        $year = (int) date('Y');
+        $academicYear = AcademicYear::firstOrCreate(
+            ['year' => $year],
+            [
+                'name' => $year.'/'.($year + 1),
+                'is_active' => true,
+            ]
+        );
+
+        if ($academicYear->waves()->count() === 0) {
+            RegistrationWave::insert([
+                [
+                    'academic_year_id' => $academicYear->id,
+                    'slug' => 'gelombang-1',
+                    'name' => 'Gelombang 1',
+                    'start_date' => $year.'-01-01',
+                    'end_date' => $year.'-04-30',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'academic_year_id' => $academicYear->id,
+                    'slug' => 'gelombang-2',
+                    'name' => 'Gelombang 2',
+                    'start_date' => $year.'-05-01',
+                    'end_date' => $year.'-08-31',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ]);
+        }
+
+        // 2. General Config (legacy — only is_open, no tahun_ajaran)
         PpdbSetting::setValue('general', [
             'is_open' => true,
-            'tahun_ajaran' => (int) date('Y'),
-        ]);
-
-        // 2. Waves Config
-        PpdbSetting::setValue('waves', [
-            [
-                'id' => 'gelombang-1',
-                'name' => 'Gelombang 1',
-                'start_date' => date('Y').'-01-01',
-                'end_date' => date('Y').'-04-30',
-            ],
-            [
-                'id' => 'gelombang-2',
-                'name' => 'Gelombang 2',
-                'start_date' => date('Y').'-05-01',
-                'end_date' => date('Y').'-08-31',
-            ],
         ]);
 
         // 3. Requirements Config

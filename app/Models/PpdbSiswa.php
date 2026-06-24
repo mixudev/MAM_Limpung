@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -37,6 +38,7 @@ class PpdbSiswa extends Model
         'catatan_admin',
         'additional_fields',
         'submitted_at',
+        'registration_wave_id',
     ];
 
     /**
@@ -99,16 +101,33 @@ class PpdbSiswa extends Model
         });
 
         static::saved(function ($model) {
-            $year = $model->submitted_at ? $model->submitted_at->year : (int) date('Y');
-            Cache::forget("ppdb_stats_{$year}");
+            if ($wave = $model->registrationWave) {
+                Cache::forget("ppdb_stats_{$wave->academicYear->year}");
+            } elseif ($model->submitted_at) {
+                Cache::forget('ppdb_stats_'.$model->submitted_at->year);
+            }
             Cache::forget('ppdb_available_years');
+            Cache::forget('ppdb_is_open');
         });
 
         static::deleted(function ($model) {
-            $year = $model->submitted_at ? $model->submitted_at->year : (int) date('Y');
-            Cache::forget("ppdb_stats_{$year}");
+            if ($wave = $model->registrationWave) {
+                Cache::forget("ppdb_stats_{$wave->academicYear->year}");
+            } elseif ($model->submitted_at) {
+                Cache::forget('ppdb_stats_'.$model->submitted_at->year);
+            }
             Cache::forget('ppdb_available_years');
+            Cache::forget('ppdb_is_open');
         });
+    }
+
+    // -----------------------------------------------------------------------
+    //  Relations
+    // -----------------------------------------------------------------------
+
+    public function registrationWave(): BelongsTo
+    {
+        return $this->belongsTo(RegistrationWave::class);
     }
 
     // -----------------------------------------------------------------------

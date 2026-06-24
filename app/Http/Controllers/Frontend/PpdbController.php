@@ -8,6 +8,7 @@ use App\Jobs\SyncPpdbToGoogleSheetsJob;
 use App\Mail\Ppdb\PpdbRegistrationMail;
 use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
+use App\Services\PpdbService;
 use App\Services\SmtpService;
 use App\Support\PpdbTempUploadManager;
 use Illuminate\Http\RedirectResponse;
@@ -17,49 +18,26 @@ use Illuminate\View\View;
 
 class PpdbController extends Controller
 {
+    public function __construct(protected PpdbService $ppdbService) {}
+
     public function index(): View
     {
-        $general = PpdbSetting::getValue('general', [
-            'is_open' => true,
-            'tahun_ajaran' => (int) date('Y'),
-        ]);
-        $waves = collect(PpdbSetting::getValue('waves', []))
-            ->filter(function ($wave) {
-                return $wave['is_active'] ?? true;
-            })
-            ->values()
-            ->all();
+        $waves = $this->ppdbService->getActiveWaves();
+        $isOpen = $this->ppdbService->isOpen();
 
         $requirements = collect(PpdbSetting::getValue('requirements', []))->filter(function ($req) {
             return $req['is_active'] ?? true;
         })->values()->all();
 
-        return view('front.ppdb.index', compact('general', 'waves', 'requirements'));
+        return view('front.ppdb.index', compact('waves', 'requirements', 'isOpen'));
     }
 
     public function form(): View|RedirectResponse
     {
-        $general = PpdbSetting::getValue('general', [
-            'is_open' => true,
-            'tahun_ajaran' => (int) date('Y'),
-        ]);
-        $waves = PpdbSetting::getValue('waves', []);
+        if (! $this->ppdbService->isOpen()) {
+            $waves = $this->ppdbService->getActiveWaves();
 
-        $today = date('Y-m-d');
-        $isWaveActive = false;
-
-        foreach ($waves as $wave) {
-            if ($today >= $wave['start_date'] && $today <= $wave['end_date']) {
-                $isWaveActive = true;
-                break;
-            }
-        }
-
-        // If waves are empty, we just fallback to general is_open
-        $isOpen = $general['is_open'] && (empty($waves) || $isWaveActive);
-
-        if (! $isOpen) {
-            return view('front.ppdb.closed', compact('general', 'waves'));
+            return view('front.ppdb.closed', compact('waves'));
         }
 
         $formFields = collect(PpdbSetting::getValue('form_fields', []))->filter(function ($field) {
@@ -72,37 +50,18 @@ class PpdbController extends Controller
 
         $ppdbTempUploads = PpdbTempUploadManager::forView();
 
-        return view('front.ppdb.form', compact('general', 'waves', 'formFields', 'requirements', 'ppdbTempUploads'));
+        return view('front.ppdb.form', compact('formFields', 'requirements', 'ppdbTempUploads'));
     }
 
     public function store(PpdbStoreRequest $request): RedirectResponse
     {
-        $general = PpdbSetting::getValue('general', [
-            'is_open' => true,
-            'tahun_ajaran' => (int) date('Y'),
-        ]);
-        $waves = PpdbSetting::getValue('waves', []);
-
-        $today = date('Y-m-d');
-        $isWaveActive = false;
-
-        foreach ($waves as $wave) {
-            if ($today >= $wave['start_date'] && $today <= $wave['end_date']) {
-                $isWaveActive = true;
-                break;
-            }
-        }
-
-        $isOpen = $general['is_open'] && (empty($waves) || $isWaveActive);
-
-        if (! $isOpen) {
+        if (! $this->ppdbService->isOpen()) {
             return redirect()->route('frontend.ppdb.index')
                 ->with('error', 'Mohon maaf, pendaftaran PPDB saat ini sedang ditutup.');
         }
 
         $validated = $request->validated();
 
-        // 1. Process main student photo upload (file baru atau dari sesi sementara)
         if ($request->hasFile('foto_siswa')) {
             $file = $request->file('foto_siswa');
             $filename = 'ppdb_'.uniqid().'.'.$file->getClientOriginalExtension();
@@ -111,10 +70,8 @@ class PpdbController extends Controller
             $validated['foto_siswa'] = $tempFoto;
         }
 
-        // 2. Package dynamic requirements uploads & custom form fields into additional_fields JSON
         $additional = [];
 
-        // Handle dynamic requirement document uploads (except main photo which is 'foto')
         $requirements = PpdbSetting::getValue('requirements', []);
         foreach ($requirements as $req) {
             if ($req['id'] === 'foto' || ! ($req['is_active'] ?? true)) {
@@ -132,7 +89,6 @@ class PpdbController extends Controller
             }
         }
 
-        // Handle custom input fields
         $formFields = PpdbSetting::getValue('form_fields', []);
         foreach ($formFields as $field) {
             if (! ($field['is_active'] ?? true)) {
@@ -145,19 +101,18 @@ class PpdbController extends Controller
         }
 
         $validated['additional_fields'] = $additional;
+        $validated['registration_wave_id'] = $this->ppdbService->detectActiveWaveId();
 
         $ppdbSiswa = PpdbSiswa::create($validated);
 
         PpdbTempUploadManager::clear();
 
-        // Kirim email konfirmasi pendaftaran secara senyap
         app(SmtpService::class)->sendQuiet(
             new PpdbRegistrationMail($ppdbSiswa),
             $ppdbSiswa->email,
             $ppdbSiswa->nama_lengkap
         );
 
-        // Sinkronisasi otomatis ke Google Sheets via background job
         SyncPpdbToGoogleSheetsJob::dispatch($ppdbSiswa);
 
         return redirect()->to(
@@ -167,9 +122,6 @@ class PpdbController extends Controller
 
     public function success(PpdbSiswa $ppdbSiswa): View
     {
-        $general = PpdbSetting::getValue('general', [
-            'tahun_ajaran' => (int) date('Y'),
-        ]);
         $customFields = PpdbSetting::getValue('form_fields', []);
 
         $printDocumentUrl = URL::signedRoute('frontend.ppdb.success', [
@@ -181,14 +133,12 @@ class PpdbController extends Controller
         if (request()->boolean('print') && request()->boolean('embed')) {
             return view('front.ppdb.print-bukti', [
                 'student' => $ppdbSiswa,
-                'general' => $general,
                 'customFields' => $customFields,
             ]);
         }
 
         return view('front.ppdb.success', [
             'ppdb_siswa' => $ppdbSiswa,
-            'general' => $general,
             'printDocumentUrl' => $printDocumentUrl,
         ]);
     }
@@ -219,7 +169,6 @@ class PpdbController extends Controller
         $keyword = trim($request->input('keyword'));
         $keywordUpper = strtoupper($keyword);
 
-        // Cari berdasarkan nomor registrasi, NISN, atau nama lengkap
         $ppdbSiswa = PpdbSiswa::where('nomor_registrasi', $keywordUpper)
             ->orWhere('nisn', $keyword)
             ->orWhere('nama_lengkap', 'like', '%'.$keyword.'%')
@@ -231,7 +180,6 @@ class PpdbController extends Controller
                 ->withErrors(['error' => 'Data tidak ditemukan. Coba masukkan nomor pendaftaran, NISN, atau nama lengkap Anda.']);
         }
 
-        // Hasilkan signed URL untuk cetak kartu pendaftaran dinamis
         $printDocumentUrl = URL::signedRoute('frontend.ppdb.success', [
             'ppdbSiswa' => $ppdbSiswa->nomor_registrasi,
             'print' => 1,

@@ -3,34 +3,23 @@
 namespace App\Services;
 
 use App\Jobs\SyncPpdbToGoogleSheetsJob;
+use App\Models\AcademicYear;
 use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
+use App\Models\RegistrationWave;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PpdbService
 {
-    /**
-     * Get distinct years of registration to populate the filter dropdown.
-     * Defaults to the current year if database is empty.
-     *
-     * @return Collection<int, int>
-     */
     public function getAvailableYears(): Collection
     {
-        /** @var array<int, int> $years */
         $years = Cache::remember('ppdb_available_years', 300, function () {
-            $years = PpdbSiswa::selectRaw('YEAR(submitted_at) as year')
-                ->distinct()
-                ->orderBy('year', 'desc')
+            $years = AcademicYear::orderBy('year', 'desc')
                 ->pluck('year')
-                ->filter()
-                ->map(fn ($y) => (int) $y)
-                ->values()
-                ->all(); // Store as plain PHP array — avoids __PHP_Incomplete_Class on deserialization
+                ->toArray();
 
             return empty($years) ? [(int) date('Y')] : $years;
         });
@@ -38,18 +27,12 @@ class PpdbService
         return collect($years);
     }
 
-    /**
-     * Compile key metrics counts for a specific registration year.
-     *
-     * @return array{total: int, pending: int, verified: int, rejected: int, acceptance_rate: float}
-     */
     public function getStats(int $year): array
     {
         return Cache::remember("ppdb_stats_{$year}", 300, function () use ($year) {
             $start = "{$year}-01-01 00:00:00";
             $end = "{$year}-12-31 23:59:59";
 
-            // Query status counts in a single group-by query
             $counts = PpdbSiswa::whereBetween('submitted_at', [$start, $end])
                 ->select('status', DB::raw('count(*) as count'))
                 ->groupBy('status')
@@ -75,9 +58,6 @@ class PpdbService
         });
     }
 
-    /**
-     * Retrieve paginated and filtered applicant records.
-     */
     public function getApplicants(int $year, ?string $search = null, ?string $status = null, int $perPage = 10): LengthAwarePaginator
     {
         $start = "{$year}-01-01 00:00:00";
@@ -103,31 +83,23 @@ class PpdbService
             ->withQueryString();
     }
 
-    /**
-     * Compute statistics distributions (gender, shirt sizes, and top origin schools).
-     *
-     * @return array{gender: array{L: int, P: int}, sizes: array<string, int>, top_schools: Collection}
-     */
     public function getDistributions(int $year): array
     {
         $start = "{$year}-01-01 00:00:00";
         $end = "{$year}-12-31 23:59:59";
 
-        // 1. Gender breakdown
         $genders = PpdbSiswa::whereBetween('submitted_at', [$start, $end])
             ->select('jenis_kelamin', DB::raw('count(*) as count'))
             ->groupBy('jenis_kelamin')
             ->pluck('count', 'jenis_kelamin')
             ->toArray();
 
-        // 2. Shirt sizes breakdown
         $sizes = PpdbSiswa::whereBetween('submitted_at', [$start, $end])
             ->select('ukuran_baju', DB::raw('count(*) as count'))
             ->groupBy('ukuran_baju')
             ->pluck('count', 'ukuran_baju')
             ->toArray();
 
-        // 3. Top schools
         $topSchools = PpdbSiswa::whereBetween('submitted_at', [$start, $end])
             ->select('sekolah_asal', DB::raw('count(*) as count'))
             ->groupBy('sekolah_asal')
@@ -152,33 +124,24 @@ class PpdbService
         ];
     }
 
-    /**
-     * Store a new student applicant, processing uploads and dynamic fields.
-     *
-     * @param  array<string, mixed>  $data
-     * @param  array<string, mixed>  $files
-     */
     public function storeApplicant(array $data, array $files): PpdbSiswa
     {
-        // 1. Process main student photo upload
         if (isset($files['foto_siswa'])) {
-            /** @var UploadedFile $file */
             $file = $files['foto_siswa'];
             $filename = 'ppdb_'.uniqid().'.'.$file->getClientOriginalExtension();
             $data['foto_siswa'] = $file->storeAs('ppdb/photos', $filename, 'public');
         }
 
-        // 2. Package dynamic requirements uploads & custom form fields into additional_fields JSON
+        $data['registration_wave_id'] = $this->detectActiveWaveId();
+
         $additional = [];
 
-        // Handle dynamic requirement document uploads
         $requirements = PpdbSetting::getValue('requirements', []);
         foreach ($requirements as $req) {
             if ($req['id'] === 'foto') {
                 continue;
             }
             if (isset($files[$req['id']])) {
-                /** @var UploadedFile $file */
                 $file = $files[$req['id']];
                 $filename = 'req_'.$req['id'].'_'.uniqid().'.'.$file->getClientOriginalExtension();
                 $path = $file->storeAs('ppdb/requirements', $filename, 'public');
@@ -187,7 +150,6 @@ class PpdbService
             }
         }
 
-        // Handle custom input fields
         $formFields = PpdbSetting::getValue('form_fields', []);
         foreach ($formFields as $field) {
             if (isset($data[$field['id']])) {
@@ -201,9 +163,53 @@ class PpdbService
 
         $ppdbSiswa = PpdbSiswa::create($data);
 
-        // Sync to Google Sheets
         SyncPpdbToGoogleSheetsJob::dispatch($ppdbSiswa);
 
         return $ppdbSiswa;
+    }
+
+    public function detectActiveWaveId(): ?int
+    {
+        $today = now()->format('Y-m-d');
+
+        $wave = RegistrationWave::where('is_active', true)
+            ->whereDate('start_date', '<=', $today)
+            ->where(function ($q) use ($today) {
+                $q->whereDate('end_date', '>=', $today)
+                    ->orWhereNull('end_date');
+            })
+            ->orderBy('start_date')
+            ->first();
+
+        return $wave?->id;
+    }
+
+    public function isOpen(): bool
+    {
+        return Cache::remember('ppdb_is_open', 300, function () {
+            $general = PpdbSetting::getValue('general', ['is_open' => true]);
+
+            if (! ($general['is_open'] ?? true)) {
+                return false;
+            }
+
+            $hasActiveWave = RegistrationWave::where('is_active', true)
+                ->whereDate('start_date', '<=', now()->format('Y-m-d'))
+                ->where(function ($q) {
+                    $q->whereDate('end_date', '>=', now()->format('Y-m-d'))
+                        ->orWhereNull('end_date');
+                })
+                ->exists();
+
+            return $hasActiveWave;
+        });
+    }
+
+    public function getActiveWaves(): Collection
+    {
+        return RegistrationWave::whereHas('academicYear', fn ($q) => $q->where('is_active', true))
+            ->where(fn ($q) => $q->where('type', 'wave')->where('is_active', true)->orWhere('type', 'date'))
+            ->orderBy('start_date')
+            ->get();
     }
 }

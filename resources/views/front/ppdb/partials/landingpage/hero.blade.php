@@ -110,12 +110,12 @@
                         $today = date('Y-m-d');
                         $isWaveActive = false;
                         foreach ($waves as $wave) {
-                            if ($today >= $wave['start_date'] && $today <= $wave['end_date']) {
+                            $end = $wave->end_date ? $wave->end_date->format('Y-m-d') : null;
+                            if ($today >= $wave->start_date->format('Y-m-d') && (!$end || $today <= $end)) {
                                 $isWaveActive = true;
                                 break;
                             }
                         }
-                        $isOpen = $general['is_open'] && (empty($waves) || $isWaveActive);
                     @endphp
                     @if($isOpen)
                         <a href="{{ route('frontend.ppdb.form') }}" class="bg-blue-600 text-white px-6 py-3.5 font-semibold hover:bg-blue-700 transition-colors text-center text-xs tracking-wide rounded">

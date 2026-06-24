@@ -3,8 +3,11 @@
 @section('content')
 @php
     $today = date('Y-m-d');
-    $isFuture = $today < $general['start_date'];
-    $isPast = $today > $general['end_date'];
+    $upcomingWave = $waves->first(fn($w) => $today < $w->start_date->format('Y-m-d'));
+    $pastWave = $waves->last(fn($w) => $w->end_date && $today > $w->end_date->format('Y-m-d'));
+    $isFuture = $upcomingWave !== null;
+    $isPast = !$isFuture && $pastWave !== null;
+    $activeYear = $waves->first()?->academicYear;
 @endphp
 
 <section class="min-h-[75vh] flex items-center justify-center px-6 py-12 sm:py-16 bg-slate-50">
@@ -24,7 +27,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 @else
-                    <!-- Minimalist Tool Icon -->
                     <svg class="w-8 h-8 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -46,15 +48,15 @@
 
         <!-- Easy to Understand Explanation -->
         <div class="text-slate-600 text-sm leading-relaxed mt-4 mb-8 max-w-md mx-auto">
-            @if($isFuture)
+            @if($isFuture && $activeYear)
                 <p>
                     Halo calon peserta didik baru. Gerbang pendaftaran online Tahun Pelajaran 
-                    <strong>{{ $general['tahun_ajaran'] }}/{{ $general['tahun_ajaran'] + 1 }}</strong> 
+                    <strong>{{ $activeYear->name }}</strong> 
                     belum resmi dibuka. Silakan persiapkan berkas persyaratan administrasi Anda terlebih dahulu sebelum jadwal pelaksanaan dimulai.
                 </p>
             @elseif($isPast)
                 <p class="mb-4">
-                    Masa registrasi pendaftaran online gelombang ini sudah ditutup resmi. Namun, bagi Anda lulusan SMP/MTs yang masih ingin bergabung dengan MAM Limpung, Anda tetap dapat menghubungi panitia kami.
+                    Masa registrasi pendaftaran online sudah ditutup resmi. Namun, bagi Anda lulusan SMP/MTs yang masih ingin bergabung dengan MAM Limpung, Anda tetap dapat menghubungi panitia kami.
                 </p>
                 <div class="text-xs text-left bg-slate-100 border-l-2 border-emerald-800 p-4 text-slate-700">
                     <strong>Peluang Jalur Offline:</strong> Silakan hubungi nomor WhatsApp sekretariat di bawah untuk menanyakan ketersediaan kuota cadangan atau mendaftar langsung di kampus sekolah.
@@ -66,24 +68,29 @@
             @endif
         </div>
 
-        <!-- Simple Tegas Info Box -->
+        @if($waves->isNotEmpty())
         <div class="bg-white border border-slate-200 p-5 mb-8 text-left rounded-none">
-            <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3.5 font-mono">Jadwal PPDB Online</h3>
-            <div class="grid grid-cols-2 gap-4 text-xs">
-                <div>
-                    <span class="text-slate-400 block uppercase font-mono text-[9px]">Tanggal Mulai</span>
-                    <span class="font-bold text-slate-800">
-                        {{ \Carbon\Carbon::parse($general['start_date'])->translatedFormat('d F Y') }}
-                    </span>
+            <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3.5 font-mono">Jadwal Gelombang PPDB</h3>
+            <div class="space-y-3">
+                @foreach($waves as $wave)
+                <div class="grid grid-cols-3 gap-4 text-xs py-2 border-b border-slate-100 last:border-0">
+                    <div>
+                        <span class="text-slate-400 block uppercase font-mono text-[9px]">Gelombang</span>
+                        <span class="font-bold text-slate-800">{{ $wave->name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block uppercase font-mono text-[9px]">Mulai</span>
+                        <span class="font-bold text-slate-800">{{ $wave->start_date->translatedFormat('d M Y') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block uppercase font-mono text-[9px]">Selesai</span>
+                        <span class="font-bold text-slate-800">{{ $wave->end_date?->translatedFormat('d M Y') ?? '—' }}</span>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-slate-400 block uppercase font-mono text-[9px]">Tanggal Selesai</span>
-                    <span class="font-bold text-slate-800">
-                        {{ \Carbon\Carbon::parse($general['end_date'])->translatedFormat('d F Y') }}
-                    </span>
-                </div>
+                @endforeach
             </div>
         </div>
+        @endif
 
         <!-- Professional Accent Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
@@ -103,7 +110,6 @@
             </a>
         </div>
 
-        <!-- Strict School Theme Contact Footer -->
         <div class="mt-12 pt-6 border-t border-slate-200/80 text-center">
             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">Sekretariat Panitia PPDB MAM Limpung</p>
             <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto font-sans">

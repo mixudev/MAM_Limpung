@@ -1,5 +1,5 @@
 @php
-    $tahunAjaran = $general['tahun_ajaran'] ?? ($student->submitted_at?->year ?? (int) date('Y'));
+    $tahunAjaran = $student->registrationWave?->academicYear?->year ?? $student->submitted_at?->year ?? (int) date('Y');
 @endphp
 <x-print.layout
     :title="'BUKTI_PPDB_' . strtoupper($student->nomor_registrasi)"

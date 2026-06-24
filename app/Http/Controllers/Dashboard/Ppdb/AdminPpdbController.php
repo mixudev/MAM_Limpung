@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard\Ppdb;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\Ppdb\StorePpdbApplicantRequest;
 use App\Mail\Ppdb\PpdbRegistrationMail;
+use App\Models\AcademicYear;
 use App\Models\PpdbSetting;
 use App\Models\PpdbSiswa;
 use App\Services\PpdbService;
@@ -17,9 +18,6 @@ class AdminPpdbController extends Controller
 {
     public function __construct(protected PpdbService $ppdbService) {}
 
-    /**
-     * Display the main PPDB admin panel dashboard.
-     */
     public function index(Request $request): View
     {
         $years = $this->ppdbService->getAvailableYears();
@@ -45,9 +43,6 @@ class AdminPpdbController extends Controller
         ]);
     }
 
-    /**
-     * Show candidate details. Returns JSON for dynamic ajax slide-overs.
-     */
     public function show(PpdbSiswa $ppdbSiswa): JsonResponse
     {
         $formFields = PpdbSetting::getValue('form_fields', []);
@@ -56,7 +51,6 @@ class AdminPpdbController extends Controller
         $mappedAdditional = [];
         $additional = $ppdbSiswa->additional_fields ?? [];
 
-        // Map dynamic form fields
         foreach ($formFields as $field) {
             $value = $additional[$field['id']] ?? null;
             if ($value !== null && $value !== '') {
@@ -68,7 +62,6 @@ class AdminPpdbController extends Controller
             }
         }
 
-        // Map dynamic requirement files (except photo which is handled as foto_siswa)
         $mappedRequirements = [];
         foreach ($requirements as $req) {
             if ($req['id'] === 'foto') {
@@ -98,27 +91,19 @@ class AdminPpdbController extends Controller
         ]);
     }
 
-    /**
-     * Show the form to create a new applicant.
-     */
     public function create(): View
     {
         $formFields = PpdbSetting::getValue('form_fields', []);
         $requirements = PpdbSetting::getValue('requirements', []);
-        $general = PpdbSetting::getValue('general', [
-            'tahun_ajaran' => (int) date('Y'),
-        ]);
+        $academicYears = AcademicYear::orderBy('year', 'desc')->get();
 
         return view('dashboard.admin.ppdb.create', [
             'formFields' => $formFields,
             'requirements' => $requirements,
-            'general' => $general,
+            'academicYears' => $academicYears,
         ]);
     }
 
-    /**
-     * Store a newly created applicant.
-     */
     public function store(StorePpdbApplicantRequest $request)
     {
         $validated = $request->validated();
@@ -126,7 +111,6 @@ class AdminPpdbController extends Controller
 
         $ppdbSiswa = $this->ppdbService->storeApplicant($validated, $files);
 
-        // Kirim email konfirmasi pendaftaran secara senyap
         app(SmtpService::class)->sendQuiet(
             new PpdbRegistrationMail($ppdbSiswa),
             $ppdbSiswa->email,

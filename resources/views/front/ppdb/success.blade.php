@@ -8,7 +8,7 @@
 </script>
 
 @php
-    $tahunAjaran = $general['tahun_ajaran'] ?? ($ppdb_siswa->submitted_at?->year ?? (int) date('Y'));
+    $tahunAjaran = $ppdb_siswa->registrationWave?->academicYear?->year ?? $ppdb_siswa->submitted_at?->year ?? (int) date('Y');
 @endphp
 
 <div class="min-h-screen py-10 px-4 bg-slate-50">

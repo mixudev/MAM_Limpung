@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     </div>
                     <div>
                         <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Tanggal Lahir</label>
-                        <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $teacher?->tanggal_lahir?->format('Y-m-d') ?? '') }}"
+                        <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $teacher && $teacher->tanggal_lahir ? $teacher->tanggal_lahir->format('Y-m-d') : '') }}"
                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]"/>
                     </div>
                     <div class="lg:col-span-2">
@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     </div>
                     <div>
                         <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Tanggal Masuk</label>
-                        <input type="date" name="tanggal_masuk" value="{{ old('tanggal_masuk', $teacher?->tanggal_masuk?->format('Y-m-d') ?? '') }}"
+                        <input type="date" name="tanggal_masuk" value="{{ old('tanggal_masuk', $teacher && $teacher->tanggal_masuk ? $teacher->tanggal_masuk->format('Y-m-d') : '') }}"
                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]"/>
                     </div>
                     <div>

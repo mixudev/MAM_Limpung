@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AcademicYear;
 use App\Models\Article;
 use App\Models\ChatbotApiKey;
 use App\Models\ChatbotKnowledgeBase;
@@ -506,20 +507,23 @@ class ChatbotService
 
         // 5. PPDB context
         if ($isPPDBQuery) {
-            $ppdbGeneral = PpdbSetting::getValue('general');
-            $ppdbWaves = PpdbSetting::getValue('waves');
+            $activeYear = AcademicYear::where('is_active', true)->first();
             $ppdbReqs = PpdbSetting::getValue('requirements');
+            $general = PpdbSetting::getValue('general', ['is_open' => true]);
 
             $ppdbText = "INFORMASI PENERIMAAN PESERTA DIDIK BARU (PPDB):\n";
-            if ($ppdbGeneral) {
-                $status = ($ppdbGeneral['is_open'] ?? false) ? 'DIBUKA' : 'DITUTUP';
-                $ppdbText .= "- Status Pendaftaran PPDB: {$status}\n";
-                $ppdbText .= '- Tahun Ajaran: '.($ppdbGeneral['tahun_ajaran'] ?? date('Y'))."\n";
-            }
-            if (! empty($ppdbWaves)) {
-                $ppdbText .= "- Gelombang Pendaftaran:\n";
-                foreach ($ppdbWaves as $wave) {
-                    $ppdbText .= '  * '.($wave['name'] ?? 'Gelombang').': Tanggal '.($wave['start_date'] ?? '').' s/d '.($wave['end_date'] ?? '')."\n";
+            $status = ($general['is_open'] ?? false) ? 'DIBUKA' : 'DITUTUP';
+            $ppdbText .= "- Status Pendaftaran PPDB: {$status}\n";
+            if ($activeYear) {
+                $ppdbText .= '- Tahun Ajaran: '.$activeYear->name."\n";
+                $waves = $activeYear->waves;
+                if ($waves->isNotEmpty()) {
+                    $ppdbText .= "- Gelombang Pendaftaran:\n";
+                    foreach ($waves as $wave) {
+                        $startDate = $wave->start_date->format('d M Y');
+                        $endDate = $wave->end_date?->format('d M Y') ?? 'belum ditentukan';
+                        $ppdbText .= "  * {$wave->name}: Tanggal {$startDate} s/d {$endDate}\n";
+                    }
                 }
             }
             if (! empty($ppdbReqs)) {

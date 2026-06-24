@@ -75,18 +75,18 @@ class AnnouncementSeeder extends Seeder
         }
 
         // 3. Banner Ads (Horizontal Ads)
-        $imagePath = 'announcements/ads/tapak_suci.png';
+        $imagePath = 'announcements/ads/saluran_whatsapp.png';
         if (! Storage::disk('public')->exists($imagePath)) {
             Storage::disk('public')->put($imagePath, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='));
         }
 
         $ads = [
             [
-                'title' => 'Promosi Ekstrakurikuler Tapak Suci',
-                'description' => 'Ikuti latihan rutin beladiri Tapak Suci Putera Muhammadiyah setiap hari Selasa dan Jumat sore di lapangan sekolah.',
+                'title' => 'Ikuti Update Terbaru di WhatsApp Channel',
+                'description' => 'Klik tombol Join Channel untuk bergabung dengan channel whatsapp kami untuk mendapatkan info terbaru seputar MAM Limpung.',
                 'image' => $imagePath,
-                'action_url' => '/ekstrakurikuler',
-                'action_text' => 'Lihat Detail',
+                'action_url' => 'https://whatsapp.com/channel/0029VbCazBu2ER6aqGDc703u',
+                'action_text' => 'Join Channel',
                 'is_active' => true,
                 'start_date' => now()->subDay(),
                 'end_date' => now()->addMonth(),

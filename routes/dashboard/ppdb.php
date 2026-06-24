@@ -21,7 +21,23 @@ Route::middleware(['auth', 'active'])->group(function () {
             // Settings Panel
             Route::get('/settings', [AdminPpdbSettingController::class, 'edit'])->name('settings.edit');
             Route::post('/settings/general', [AdminPpdbSettingController::class, 'updateGeneral'])->name('settings.general');
-            Route::post('/settings/waves', [AdminPpdbSettingController::class, 'updateWaves'])->name('settings.waves');
+
+            // Academic Years CRUD
+            Route::get('/settings/years/{id}', [AdminPpdbSettingController::class, 'showYear'])->name('settings.years.show');
+            Route::post('/settings/years', [AdminPpdbSettingController::class, 'storeYear'])->name('settings.years.store');
+            Route::post('/settings/years/{id}/activate', [AdminPpdbSettingController::class, 'activateYear'])->name('settings.years.activate');
+            Route::delete('/settings/years/{id}', [AdminPpdbSettingController::class, 'destroyYear'])->name('settings.years.destroy');
+
+            // Waves CRUD
+            Route::post('/settings/waves', [AdminPpdbSettingController::class, 'storeWave'])->name('settings.waves.store');
+            Route::post('/settings/waves/{id}/toggle', [AdminPpdbSettingController::class, 'toggleWave'])->name('settings.waves.toggle');
+            Route::put('/settings/waves/{id}', [AdminPpdbSettingController::class, 'updateWave'])->name('settings.waves.update');
+            Route::delete('/settings/waves/{id}', [AdminPpdbSettingController::class, 'destroyWave'])->name('settings.waves.destroy');
+
+            // Wave Dates CRUD
+            Route::post('/settings/wave-dates', [AdminPpdbSettingController::class, 'storeWaveDate'])->name('settings.wave-dates.store');
+            Route::delete('/settings/wave-dates/{id}', [AdminPpdbSettingController::class, 'destroyWaveDate'])->name('settings.wave-dates.destroy');
+
             Route::post('/settings/requirements', [AdminPpdbSettingController::class, 'updateRequirements'])->name('settings.requirements');
             Route::post('/settings/fields', [AdminPpdbSettingController::class, 'updateFields'])->name('settings.fields.update');
 
