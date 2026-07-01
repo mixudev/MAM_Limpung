@@ -21,7 +21,7 @@ class TeacherController extends Controller
     {
         Gate::authorize('view-teachers');
 
-        $query = Teacher::with(['user', 'category']);
+        $query = Teacher::with(['user', 'categories']);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -33,7 +33,7 @@ class TeacherController extends Controller
         }
 
         if ($request->filled('category')) {
-            $query->where('teacher_category_id', $request->input('category'));
+            $query->whereHas('categories', fn ($q) => $q->where('teacher_categories.id', $request->input('category')));
         }
 
         if ($request->filled('status')) {
@@ -84,14 +84,17 @@ class TeacherController extends Controller
             'tanggal_masuk' => $data['tanggal_masuk'] ?? null,
             'status' => $data['status'],
             'quote' => $data['quote'] ?? null,
-            'teacher_category_id' => $data['teacher_category_id'] ?? null,
         ];
 
         if ($request->hasFile('foto')) {
             $teacherData['foto'] = $request->file('foto')->store('teachers', 'public');
         }
 
-        Teacher::create($teacherData);
+        $teacher = Teacher::create($teacherData);
+
+        if (! empty($data['category_ids'])) {
+            $teacher->categories()->sync($data['category_ids']);
+        }
 
         return redirect()->route('admin.teachers.index')
             ->with('success', 'Guru '.$data['nama'].' berhasil ditambahkan.');
@@ -101,7 +104,7 @@ class TeacherController extends Controller
     {
         Gate::authorize('edit-teachers');
 
-        $teacher->load(['user', 'category']);
+        $teacher->load(['user', 'categories']);
         $categories = TeacherCategory::orderBy('name')->get();
 
         return view('dashboard.admin.academic.teachers.form', compact('teacher', 'categories'));
@@ -133,7 +136,6 @@ class TeacherController extends Controller
             'tanggal_masuk' => $data['tanggal_masuk'] ?? null,
             'status' => $data['status'],
             'quote' => $data['quote'] ?? null,
-            'teacher_category_id' => $data['teacher_category_id'] ?? null,
         ];
 
         if ($request->hasFile('foto')) {
@@ -144,6 +146,10 @@ class TeacherController extends Controller
         }
 
         $teacher->update($teacherData);
+
+        if (! empty($data['category_ids'])) {
+            $teacher->categories()->sync($data['category_ids']);
+        }
 
         return redirect()->route('admin.teachers.index')
             ->with('success', 'Data guru '.$data['nama'].' berhasil diperbarui.');

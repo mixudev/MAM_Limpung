@@ -91,7 +91,15 @@ Route::name('frontend.')->group(function () {
     // -------------------------------------------------------------------------
     Route::get('/prestasi', [PrestasiController::class, 'index'])->name('prestasi');
     Route::get('/galeri', [GaleriController::class, 'index'])->name('galeri');
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'index'])->name('index');
+        Route::get('/selayang-pandang', [ProfileController::class, 'selayangPandang'])->name('selayang-pandang');
+        Route::get('/visi-misi', [ProfileController::class, 'visiMisi'])->name('visi-misi');
+        Route::get('/periodisasi-kepala', [ProfileController::class, 'periodisasiKepala'])->name('periodisasi-kepala');
+        Route::get('/struktur-organisasi', [ProfileController::class, 'strukturOrganisasi'])->name('struktur-organisasi');
+        Route::get('/program-madrasah', [ProfileController::class, 'programMadrasah'])->name('program-madrasah');
+        Route::get('/mmc', [ProfileController::class, 'mmc'])->name('mmc');
+    });
     Route::get('/kontak', [ContactController::class, 'index'])->name('contact');
 
     Route::get('/pegawai', [PegawaiController::class, 'index'])->name('pegawai.index');

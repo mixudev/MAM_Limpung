@@ -430,7 +430,7 @@ class ChatbotService
                     'Halaman Artikel & Berita Terbaru' => route('frontend.article.index'),
                     'Halaman Prestasi Sekolah' => route('frontend.prestasi'),
                     'Halaman Galeri Foto Kegiatan' => route('frontend.galeri'),
-                    'Halaman Profil Sekolah (Visi Misi, Sejarah, dsb)' => route('frontend.profile'),
+                    'Halaman Profil Sekolah (Visi Misi, Sejarah, dsb)' => route('frontend.profile.index'),
                     'Halaman Hubungi Kami (Kontak)' => route('frontend.contact'),
                     'Halaman Kurikulum' => route('frontend.kurikulum'),
                     'Halaman Ekstrakurikuler' => route('frontend.ekstrakurikuler'),

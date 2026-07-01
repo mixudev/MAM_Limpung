@@ -59,7 +59,7 @@
                     <h4 class="text-xl font-semibold mb-6 text-amber-400">Menu Utama</h4>
                     <ul class="space-y-3">
                         <li><a href="{{ route('frontend.home') }}" class="text-blue-100 hover:text-amber-400 transition-colors text-sm flex items-center space-x-2"><i class="fas fa-chevron-right text-xs"></i><span>Beranda</span></a></li>
-                        <li><a href="{{ route('frontend.profile') }}" class="text-blue-100 hover:text-amber-400 transition-colors text-sm flex items-center space-x-2"><i class="fas fa-chevron-right text-xs"></i><span>Profil Sekolah</span></a></li>
+                        <li><a href="{{ route('frontend.profile.index') }}" class="text-blue-100 hover:text-amber-400 transition-colors text-sm flex items-center space-x-2"><i class="fas fa-chevron-right text-xs"></i><span>Profil Sekolah</span></a></li>
                         <li><a href="{{ route('frontend.jurusan') }}" class="text-blue-100 hover:text-amber-400 transition-colors text-sm flex items-center space-x-2"><i class="fas fa-chevron-right text-xs"></i><span>Program Akademik</span></a></li>
                         <li><a href="{{ route('frontend.kurikulum') }}" class="text-blue-100 hover:text-amber-400 transition-colors text-sm flex items-center space-x-2"><i class="fas fa-chevron-right text-xs"></i><span>Kurikulum & Fasilitas</span></a></li>
                         <li><a href="{{ route('frontend.article.index') }}" class="text-blue-100 hover:text-amber-400 transition-colors text-sm flex items-center space-x-2"><i class="fas fa-chevron-right text-xs"></i><span>Berita & Artikel</span></a></li>

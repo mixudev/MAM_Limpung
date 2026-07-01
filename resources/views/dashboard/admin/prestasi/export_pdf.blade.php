@@ -77,13 +77,13 @@
             <thead>
                 <tr>
                     <th style="width: 5%; text-align: center;">No</th>
-                    <th style="width: 25%;">Judul Prestasi</th>
-                    <th style="width: 20%;">Peraih (Siswa / Tim)</th>
-                    <th style="width: 10%; text-align: center;">Juara</th>
+                    <th style="width: 22%;">Judul Prestasi</th>
+                    <th style="width: 16%;">Peraih (Siswa / Tim)</th>
+                    <th style="width: 8%; text-align: center;">Kelas</th>
                     <th style="width: 10%; text-align: center;">Tingkat</th>
                     <th style="width: 10%; text-align: center;">Jenis</th>
-                    <th style="width: 10%; text-align: center;">Tahun</th>
-                    <th style="width: 15%;">Penyelenggara</th>
+                    <th style="width: 8%; text-align: center;">Tahun</th>
+                    <th style="width: 16%;">Penyelenggara</th>
                 </tr>
             </thead>
             <tbody>
@@ -92,7 +92,7 @@
                         <td class="text-center">{{ $index + 1 }}</td>
                         <td class="font-bold">{{ $pres->judul }}</td>
                         <td>{{ $pres->peraih }}</td>
-                        <td class="text-center">{{ $pres->juara ?? '-' }}</td>
+                        <td class="text-center">{{ $pres->kelas ?? '-' }}</td>
                         <td class="text-center">{{ $pres->tingkatLabel() }}</td>
                         <td class="text-center">{{ $pres->jenis === 'akademik' ? 'Akademik' : 'Non-Akademik' }}</td>
                         <td class="text-center font-mono">{{ $pres->tahun }}</td>

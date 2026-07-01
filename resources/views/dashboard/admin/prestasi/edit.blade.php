@@ -56,6 +56,13 @@
                             class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
                     </div>
 
+                    <!-- Kelas -->
+                    <div>
+                        <label class="block text-xs font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Kelas <span class="text-slate-400">(Opsional)</span></label>
+                        <input type="text" name="kelas" value="{{ old('kelas', $prestasi->kelas) }}" placeholder="Contoh: XII A, XI B"
+                            class="w-full px-3 py-2.5 text-sm bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]" />
+                    </div>
+
                     <!-- Juara & Penyelenggara -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -78,9 +85,11 @@
                                 class="w-full px-3 py-2.5 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#4f45b2]/20 focus:border-[#4f45b2]">
                                 <option value="sekolah" {{ old('tingkat', $prestasi->tingkat) === 'sekolah' ? 'selected' : '' }}>Sekolah</option>
                                 <option value="kabupaten" {{ old('tingkat', $prestasi->tingkat) === 'kabupaten' ? 'selected' : '' }}>Kabupaten/Kota</option>
+                                <option value="kwarda" {{ old('tingkat', $prestasi->tingkat) === 'kwarda' ? 'selected' : '' }}>Kwarda</option>
                                 <option value="provinsi" {{ old('tingkat', $prestasi->tingkat) === 'provinsi' ? 'selected' : '' }}>Provinsi</option>
                                 <option value="nasional" {{ old('tingkat', $prestasi->tingkat) === 'nasional' ? 'selected' : '' }}>Nasional</option>
                                 <option value="internasional" {{ old('tingkat', $prestasi->tingkat) === 'internasional' ? 'selected' : '' }}>Internasional</option>
+                                <option value="umum" {{ old('tingkat', $prestasi->tingkat) === 'umum' ? 'selected' : '' }}>Umum</option>
                             </select>
                         </div>
                         <div>

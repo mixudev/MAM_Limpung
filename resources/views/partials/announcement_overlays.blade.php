@@ -23,7 +23,7 @@
         if ($target === 'frontend.ekstrakurikuler' && Route::is('frontend.ekstrakurikuler')) return true;
         if ($target === 'frontend.prestasi' && Route::is('frontend.prestasi')) return true;
         if ($target === 'frontend.galeri' && Route::is('frontend.galeri')) return true;
-        if ($target === 'frontend.profile' && Route::is('frontend.profile')) return true;
+        if ($target === 'frontend.profile.index' && Route::is('frontend.profile.*')) return true;
         if ($target === 'frontend.contact' && Route::is('frontend.contact')) return true;
         
         return false;

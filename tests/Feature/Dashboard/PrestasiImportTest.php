@@ -76,8 +76,8 @@ test('admin can successfully import achievements from preview data', function ()
         'judul' => 'Juara 1 Lomba Pidato',
         'peraih' => 'Ahmad Fauzi',
         'tingkat' => 'kabupaten',
-        'jenis' => 'non_akademik',
-        'is_featured' => true,
+        'jenis' => 'akademik',
+        'is_featured' => false,
     ]);
 
     $this->assertDatabaseHas('prestasis', [
@@ -137,7 +137,7 @@ test('admin import handles partial failures and returns detailed error reasons',
     expect($result['failed_rows'])->toHaveCount(1);
     expect($result['failed_rows'][0]['row_number'])->toBe(6);
     expect($result['failed_rows'][0]['errors'])->toContain('Judul Prestasi tidak boleh kosong.');
-    expect($result['failed_rows'][0]['errors'])->toContain('Tingkat tidak valid (Pilihan: Sekolah, Kabupaten, Provinsi, Nasional, Internasional).');
+    expect($result['failed_rows'][0]['errors'])->toContain('Tingkat tidak valid (Pilihan: Sekolah, Kabupaten, Kwarda, Provinsi, Nasional, Internasional, Umum).');
 
     // Fauzi should be saved
     $this->assertDatabaseHas('prestasis', [

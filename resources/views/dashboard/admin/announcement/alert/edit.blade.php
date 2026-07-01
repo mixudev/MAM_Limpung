@@ -191,7 +191,7 @@
                                 'frontend.ekstrakurikuler' => 'Halaman Ekstrakurikuler',
                                 'frontend.prestasi' => 'Halaman Prestasi',
                                 'frontend.galeri' => 'Halaman Galeri',
-                                'frontend.profile' => 'Halaman Profil',
+                                'frontend.profile.index' => 'Halaman Profil',
                                 'frontend.contact' => 'Halaman Kontak',
                             ];
                         @endphp

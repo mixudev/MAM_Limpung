@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 class TeacherCategory extends Model
@@ -14,9 +14,9 @@ class TeacherCategory extends Model
         'description',
     ];
 
-    public function teachers(): HasMany
+    public function teachers(): BelongsToMany
     {
-        return $this->hasMany(Teacher::class, 'teacher_category_id');
+        return $this->belongsToMany(Teacher::class, 'category_teacher');
     }
 
     protected static function booted(): void

@@ -21,6 +21,7 @@ class Prestasi extends Model
         'jenis',
         'penyelenggara',
         'peraih',
+        'kelas',
         'juara',
         'tahun',
         'tanggal_prestasi',
@@ -85,8 +86,10 @@ class Prestasi extends Model
         return match ($this->tingkat) {
             'internasional' => 'Internasional',
             'nasional' => 'Nasional',
+            'kwarda' => 'Kwarda',
             'provinsi' => 'Provinsi',
             'kabupaten' => 'Kabupaten/Kota',
+            'umum' => 'Umum',
             default => 'Sekolah',
         };
     }

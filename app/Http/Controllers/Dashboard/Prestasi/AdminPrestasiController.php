@@ -16,16 +16,12 @@ use Illuminate\View\View;
 
 class AdminPrestasiController extends Controller
 {
-    /**
-     * Display a listing of the achievements.
-     */
     public function index(Request $request): View
     {
         Gate::authorize('viewAny', Prestasi::class);
 
         $query = Prestasi::query()->with('pelapor');
 
-        // Apply filters
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
@@ -51,9 +47,6 @@ class AdminPrestasiController extends Controller
         return view('dashboard.admin.prestasi.index', compact('prestasis'));
     }
 
-    /**
-     * Show the form for creating a new achievement.
-     */
     public function create(): View
     {
         Gate::authorize('create', Prestasi::class);
@@ -61,9 +54,6 @@ class AdminPrestasiController extends Controller
         return view('dashboard.admin.prestasi.create');
     }
 
-    /**
-     * Upload a temporary photo for achievement.
-     */
     public function uploadTemp(Request $request): JsonResponse
     {
         Gate::authorize('create', Prestasi::class);
@@ -86,16 +76,12 @@ class AdminPrestasiController extends Controller
         return response()->json(['error' => 'Berkas tidak ditemukan.'], 400);
     }
 
-    /**
-     * Store a newly created achievement in storage.
-     */
     public function store(StorePrestasiRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $data['user_id'] = $request->user()->id;
         $data['is_featured'] = $request->boolean('is_featured', false);
 
-        // Handle File Upload
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
             $safeName = Str::random(40).'.'.$file->guessExtension();
@@ -119,9 +105,6 @@ class AdminPrestasiController extends Controller
             ->with('success', 'Data prestasi berhasil ditambahkan.');
     }
 
-    /**
-     * Show the form for editing the specified achievement.
-     */
     public function edit(Prestasi $prestasi): View
     {
         Gate::authorize('update', $prestasi);
@@ -129,19 +112,14 @@ class AdminPrestasiController extends Controller
         return view('dashboard.admin.prestasi.edit', compact('prestasi'));
     }
 
-    /**
-     * Update the specified achievement in storage.
-     */
     public function update(UpdatePrestasiRequest $request, Prestasi $prestasi): RedirectResponse
     {
         $data = $request->validated();
         $data['is_featured'] = $request->boolean('is_featured', false);
 
-        // Handle File Upload
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
 
-            // Delete old file if exists
             if ($prestasi->foto) {
                 Storage::disk('public')->delete($prestasi->foto);
             }
@@ -153,7 +131,6 @@ class AdminPrestasiController extends Controller
             $tempPath = $request->input('temp_foto');
             if (str_starts_with($tempPath, 'temp/') && ! str_contains($tempPath, '..')) {
                 if (Storage::disk('public')->exists($tempPath)) {
-                    // Delete old file if exists
                     if ($prestasi->foto) {
                         Storage::disk('public')->delete($prestasi->foto);
                     }
@@ -172,9 +149,6 @@ class AdminPrestasiController extends Controller
             ->with('success', 'Data prestasi berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified achievement from storage.
-     */
     public function destroy(Prestasi $prestasi): RedirectResponse
     {
         Gate::authorize('delete', $prestasi);
@@ -183,5 +157,20 @@ class AdminPrestasiController extends Controller
 
         return redirect()->route('admin.prestasi.index')
             ->with('success', 'Data prestasi berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        Gate::authorize('delete', Prestasi::class);
+
+        $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['exists:prestasis,id'],
+        ]);
+
+        $count = Prestasi::whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('admin.prestasi.index')
+            ->with('success', $count.' data prestasi berhasil dihapus.');
     }
 }

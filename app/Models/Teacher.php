@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Teacher extends Model
@@ -25,7 +26,6 @@ class Teacher extends Model
         'tanggal_masuk',
         'status',
         'quote',
-        'teacher_category_id',
         'foto',
     ];
 
@@ -45,8 +45,8 @@ class Teacher extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function category(): BelongsTo
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(TeacherCategory::class, 'teacher_category_id');
+        return $this->belongsToMany(TeacherCategory::class, 'category_teacher');
     }
 }

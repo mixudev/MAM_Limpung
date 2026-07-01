@@ -7,75 +7,106 @@
         Beranda
     </a>
 
-    {{-- Profil Sekolah --}}
-    <a href="{{ route('frontend.profile') }}"
-       class="h-16 px-4 flex items-center text-[14px] font-semibold border-b-2 transition-all duration-300 {{ request()->routeIs('frontend.profile') ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-600 hover:text-blue-900' }}">
-        Profil
-    </a>
-
     {{-- Akademik Dropdown: Show active line only when a sub-route is active, but not on hover --}}
     <div class="relative h-16 flex items-center" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
-        <button class="group h-full px-4 flex items-center text-[14px] font-semibold border-b-2 transition-all duration-300 gap-1.5 focus:outline-none {{ request()->routeIs('frontend.jurusan') || request()->routeIs('frontend.kurikulum') || request()->routeIs('frontend.ekstrakurikuler') ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-600 hover:text-blue-900' }}">
-            Akademik
-            <svg class="w-3 h-3 transition-all duration-300 ease-out transform" 
-                 :class="open ? 'rotate-180 translate-y-0.5 text-blue-900' : 'text-gray-400 group-hover:translate-y-0.5 group-hover:text-blue-900'" 
-                 fill="none" 
-                 viewBox="0 0 24 24" 
-                 stroke="currentColor" 
-                 stroke-width="2.5">
+        <button class="group h-full px-4 flex items-center text-[14px] font-semibold border-b-2 transition-all duration-300 gap-1.5 focus:outline-none {{ request()->routeIs('frontend.profile.*') ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-600 hover:text-blue-900' }}">
+            Profil
+            <svg class="w-3 h-3 transition-all duration-300 ease-out transform"
+                :class="open ? 'rotate-180 translate-y-0.5 text-blue-900' : 'text-gray-400 group-hover:translate-y-0.5 group-hover:text-blue-900'"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
         </button>
-        
-        {{-- Dropdown Container: Wide, Sharp Box, Premium Accent top --}}
+
+        {{-- Dropdown Container: Wide 2-column grid, Sharp Box, Premium Accent top --}}
         <div x-show="open"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-y-2"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 translate-y-2"
-             class="absolute top-full left-0 w-80 bg-white border border-gray-200 border-t-4 border-t-blue-900 shadow-2xl z-50 rounded-none py-2"
-             style="display:none">
-            
-            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-4 py-1.5 block">Program & Pelajaran</span>
-            
-            {{-- Jurusan --}}
-            <a href="{{ route('frontend.jurusan') }}"
-               class="group flex items-start gap-4 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-gray-50 rounded-none">
-                <div class="w-9 h-9 bg-blue-50 text-blue-900 flex items-center justify-center shrink-0 rounded-none group-hover:bg-blue-900 group-hover:text-white transition-colors">
-                    <i class="fa-solid fa-graduation-cap text-sm"></i>
-                </div>
-                <div>
-                    <span class="text-xs font-semibold text-gray-900 block group-hover:text-blue-900 transition-colors">Jurusan Spesialisasi</span>
-                    <span class="text-[11px] text-gray-400 font-medium block mt-0.5 leading-normal">Pilihan jurusan MIPA, IPS, dan Keagamaan.</span>
-                </div>
-            </a>
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-2"
+            class="absolute top-full left-1/2 -translate-x-1/2 w-[480px] bg-white border border-gray-200 border-t-4 border-t-blue-900 shadow-2xl z-50 rounded-none py-3">
 
-            {{-- Kurikulum --}}
-            <a href="{{ route('frontend.kurikulum') }}"
-               class="group flex items-start gap-4 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-gray-50 rounded-none">
-                <div class="w-9 h-9 bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 rounded-none group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                    <i class="fa-solid fa-book text-sm"></i>
-                </div>
-                <div>
-                    <span class="text-xs font-semibold text-gray-900 block group-hover:text-blue-900 transition-colors">Kurikulum Belajar</span>
-                    <span class="text-[11px] text-gray-400 font-medium block mt-0.5 leading-normal">Pembelajaran modern berbasis akhlak mulia.</span>
-                </div>
-            </a>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-4 py-1.5 block mb-1">Profil Sekolah</span>
 
-            {{-- Ekstrakurikuler --}}
-            <a href="{{ route('frontend.ekstrakurikuler') }}"
-               class="group flex items-start gap-4 px-4 py-3 hover:bg-slate-50 transition-colors rounded-none">
-                <div class="w-9 h-9 bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 rounded-none group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                    <i class="fa-solid fa-volleyball text-sm"></i>
-                </div>
-                <div>
-                    <span class="text-xs font-semibold text-gray-900 block group-hover:text-blue-900 transition-colors">Ekstrakurikuler</span>
-                    <span class="text-[11px] text-gray-400 font-medium block mt-0.5 leading-normal">Wadah minat, bakat, olahraga, & seni.</span>
-                </div>
-            </a>
+            <div class="grid grid-cols-2 gap-x-2 gap-y-1 px-2">
 
+                {{-- Selayang Pandang --}}
+                <a href="{{ route('frontend.profile.selayang-pandang') }}"
+                class="group flex items-start gap-3 px-2 py-3 hover:bg-slate-50 transition-colors rounded-none">
+                    <div class="w-9 h-9 bg-blue-50 text-blue-900 flex items-center justify-center shrink-0 rounded-none group-hover:bg-blue-900 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-compass text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-900 block group-hover:text-blue-900 transition-colors">Selayang Pandang</span>
+                        <span class="text-[11px] text-gray-400 font-medium block mt-0.5 leading-normal">Sekilas sejarah madrasah.</span>
+                    </div>
+                </a>
+
+                {{-- Visi dan Misi --}}
+                <a href="{{ route('frontend.profile.visi-misi') }}"
+                class="group flex items-start gap-3 px-2 py-3 hover:bg-slate-50 transition-colors rounded-none">
+                    <div class="w-9 h-9 bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 rounded-none group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-bullseye text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-900 block group-hover:text-blue-900 transition-colors">Visi dan Misi</span>
+                        <span class="text-[11px] text-gray-400 font-medium block mt-0.5 leading-normal">Arah dan tujuan pendidikan.</span>
+                    </div>
+                </a>
+
+                {{-- Periodisasi Kepala --}}
+                <a href="{{ route('frontend.profile.periodisasi-kepala') }}"
+                class="group flex items-start gap-3 px-2 py-3 hover:bg-slate-50 transition-colors rounded-none">
+                    <div class="w-9 h-9 bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 rounded-none group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-900 block group-hover:text-blue-900 transition-colors">Periodisasi Kepala</span>
+                        <span class="text-[11px] text-gray-400 font-medium block mt-0.5 leading-normal">Rekam jejak kepemimpinan.</span>
+                    </div>
+                </a>
+
+                {{-- Struktur Organisasi --}}
+                <a href="{{ route('frontend.profile.struktur-organisasi') }}"
+                class="group flex items-start gap-3 px-2 py-3 hover:bg-slate-50 transition-colors rounded-none">
+                    <div class="w-9 h-9 bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 rounded-none group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-sitemap text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-900 block group-hover:text-blue-900 transition-colors">Struktur Organisasi</span>
+                        <span class="text-[11px] text-gray-400 font-medium block mt-0.5 leading-normal">Susunan pengurus madrasah.</span>
+                    </div>
+                </a>
+
+                {{-- Program Madrasah --}}
+                <a href="{{ route('frontend.profile.program-madrasah') }}"
+                class="group flex items-start gap-3 px-2 py-3 hover:bg-slate-50 transition-colors rounded-none">
+                    <div class="w-9 h-9 bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 rounded-none group-hover:bg-slate-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-layer-group text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-900 block group-hover:text-blue-900 transition-colors">Program Madrasah</span>
+                        <span class="text-[11px] text-gray-400 font-medium block mt-0.5 leading-normal">Program unggulan madrasah.</span>
+                    </div>
+                </a>
+
+                {{-- Mualim Master Class (MMC) - ditonjolkan sebagai program unggulan --}}
+                <a href="{{ route('frontend.profile.mmc') }}"
+                class="group flex items-start gap-3 px-2 py-3 hover:bg-amber-50/60 transition-colors rounded-none">
+                    <div class="w-9 h-9 bg-amber-400 text-blue-950 flex items-center justify-center shrink-0 rounded-none group-hover:bg-blue-900 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-crown text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-900 block group-hover:text-blue-900 transition-colors">Mualim Master Class</span>
+                        <span class="text-[11px] text-gray-400 font-medium block mt-0.5 leading-normal">Kelas unggulan (MMC).</span>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 

@@ -17,29 +17,20 @@ use OpenSpout\Writer\XLSX\Writer;
 
 class PrestasiExportService
 {
-    /**
-     * Generate Excel file for Achievements and return the temp file path.
-     */
     public function exportExcel(Collection $achievements): string
     {
         $tempFile = tempnam(sys_get_temp_dir(), 'prestasi_export_').'.xlsx';
 
-        // Column labels
         $headers = [
             'NO',
-            'TANGGAL',
-            'TAHUN',
-            'PERAIH (SISWA/TIM)',
+            'PERAIH',
+            'KELAS',
             'JUDUL PRESTASI',
-            'JUARA',
+            'TANGGAL',
             'TINGKAT',
-            'JENIS',
             'PENYELENGGARA',
-            'UNGGULAN',
-            'DESKRIPSI',
         ];
 
-        // Determine column widths
         $lengths = [];
         foreach ($headers as $idx => $header) {
             $lengths[$idx + 1] = strlen($header);
@@ -47,17 +38,13 @@ class PrestasiExportService
 
         foreach ($achievements as $achievement) {
             $rowValues = [
-                '', // NO
-                $achievement->tanggal_prestasi?->format('d-m-Y') ?? '-',
-                $achievement->tahun,
+                '',
                 $achievement->peraih,
+                $achievement->kelas ?? '-',
                 $achievement->judul,
-                $achievement->juara ?? '-',
+                $achievement->tanggal_prestasi?->format('d-m-Y') ?? '-',
                 $achievement->tingkatLabel(),
-                $achievement->jenis === 'akademik' ? 'Akademik' : 'Non-Akademik',
                 $achievement->penyelenggara ?? '-',
-                $achievement->is_featured ? 'Ya' : 'Tidak',
-                strip_tags($achievement->deskripsi ?? '-'),
             ];
 
             foreach ($rowValues as $idx => $val) {
@@ -67,7 +54,6 @@ class PrestasiExportService
         }
 
         $options = new Options;
-        // Merge cells for title block
         $totalCols = count($headers);
         $options->mergeCells(0, 1, $totalCols - 1, 1, 0);
         $options->mergeCells(0, 2, $totalCols - 1, 2, 0);
@@ -78,13 +64,11 @@ class PrestasiExportService
         $sheet = $writer->getCurrentSheet();
         $sheet->setName('Data Prestasi');
 
-        // Apply widths
         foreach ($lengths as $colIdx => $maxLength) {
             $width = max(min($maxLength + 4, 50), 8);
             $sheet->setColumnWidth($width, $colIdx);
         }
 
-        // Define borders
         $thinBorder = new Border(
             new BorderPart(BorderName::BOTTOM, 'CCCCCC', BorderWidth::THIN, BorderStyle::SOLID),
             new BorderPart(BorderName::TOP, 'CCCCCC', BorderWidth::THIN, BorderStyle::SOLID),
@@ -92,7 +76,6 @@ class PrestasiExportService
             new BorderPart(BorderName::RIGHT, 'CCCCCC', BorderWidth::THIN, BorderStyle::SOLID)
         );
 
-        // Styles
         $titleStyle = (new Style)
             ->withFontBold(true)
             ->withFontSize(14)
@@ -111,7 +94,7 @@ class PrestasiExportService
             ->withFontSize(10)
             ->withFontName('Arial')
             ->withFontColor('FFFFFF')
-            ->withBackgroundColor('4F45B2') // MAM Limpung Signature Accent
+            ->withBackgroundColor('4F45B2')
             ->withCellAlignment(CellAlignment::CENTER)
             ->withBorder($thinBorder);
 
@@ -127,7 +110,6 @@ class PrestasiExportService
             ->withBorder($thinBorder)
             ->withCellAlignment(CellAlignment::CENTER);
 
-        // Title Block
         $writer->addRow(new Row([
             Cell::fromValue('DAFTAR PRESTASI SISWA & TIM MA MUHAMMADIYAH LIMPUNG', $titleStyle),
         ]));
@@ -136,29 +118,23 @@ class PrestasiExportService
             Cell::fromValue('Tanggal Unduh: '.date('d-m-Y H:i:s').' | Total Data: '.count($achievements), $subTitleStyle),
         ]));
 
-        $writer->addRow(new Row([])); // Spacing
+        $writer->addRow(new Row([]));
 
-        // Headers row
         $headerCells = [];
         foreach ($headers as $h) {
             $headerCells[] = Cell::fromValue($h, $headerStyle);
         }
         $writer->addRow(new Row($headerCells));
 
-        // Data rows
         foreach ($achievements as $index => $achievement) {
             $rowCells = [
                 Cell::fromValue($index + 1, $dataStyleCenter),
-                Cell::fromValue($achievement->tanggal_prestasi?->format('d-m-Y') ?? '-', $dataStyleCenter),
-                Cell::fromValue($achievement->tahun, $dataStyleCenter),
                 Cell::fromValue(strtoupper($achievement->peraih), $dataStyleLeft),
+                Cell::fromValue($achievement->kelas ?? '-', $dataStyleCenter),
                 Cell::fromValue($achievement->judul, $dataStyleLeft),
-                Cell::fromValue($achievement->juara ?? '-', $dataStyleCenter),
+                Cell::fromValue($achievement->tanggal_prestasi?->format('d-m-Y') ?? '-', $dataStyleCenter),
                 Cell::fromValue($achievement->tingkatLabel(), $dataStyleCenter),
-                Cell::fromValue($achievement->jenis === 'akademik' ? 'Akademik' : 'Non-Akademik', $dataStyleCenter),
                 Cell::fromValue($achievement->penyelenggara ?? '-', $dataStyleLeft),
-                Cell::fromValue($achievement->is_featured ? 'Ya' : 'Tidak', $dataStyleCenter),
-                Cell::fromValue(strip_tags($achievement->deskripsi ?? '-'), $dataStyleLeft),
             ];
             $writer->addRow(new Row($rowCells));
         }
@@ -168,27 +144,18 @@ class PrestasiExportService
         return $tempFile;
     }
 
-    /**
-     * Generate a blank Excel template for achievement import.
-     *
-     * @return string Temp file path
-     */
     public function generateTemplate(): string
     {
         $tempFile = tempnam(sys_get_temp_dir(), 'prestasi_template_').'.xlsx';
 
         $headers = [
             'NO',
-            'TANGGAL',
-            'TAHUN',
-            'PERAIH (SISWA/TIM)',
+            'PERAIH',
+            'KELAS',
             'JUDUL PRESTASI',
-            'JUARA',
+            'TANGGAL',
             'TINGKAT',
-            'JENIS',
             'PENYELENGGARA',
-            'UNGGULAN',
-            'DESKRIPSI',
         ];
 
         $options = new Options;
@@ -202,13 +169,11 @@ class PrestasiExportService
         $sheet = $writer->getCurrentSheet();
         $sheet->setName('Template Import Prestasi');
 
-        // Column widths
-        $widths = [6, 14, 8, 28, 36, 16, 16, 16, 28, 12, 40];
+        $widths = [6, 28, 12, 36, 14, 16, 28];
         foreach ($widths as $i => $w) {
             $sheet->setColumnWidth($w, $i + 1);
         }
 
-        // Borders
         $thinBorder = new Border(
             new BorderPart(BorderName::BOTTOM, 'CCCCCC', BorderWidth::THIN, BorderStyle::SOLID),
             new BorderPart(BorderName::TOP, 'CCCCCC', BorderWidth::THIN, BorderStyle::SOLID),
@@ -245,57 +210,45 @@ class PrestasiExportService
             ->withBorder($thinBorder)
             ->withCellAlignment(CellAlignment::LEFT);
 
-        // Row 1: Title
         $writer->addRow(new Row([
             Cell::fromValue('TEMPLATE IMPORT DATA PRESTASI - MA MUHAMMADIYAH LIMPUNG', $titleStyle),
         ]));
 
-        // Row 2: Instructions (importer skips rows 1-4, data starts at row 5)
         $writer->addRow(new Row([
             Cell::fromValue(
                 'PETUNJUK: Isi data mulai BARIS KE-5. '
-                .'TINGKAT: Sekolah | Kabupaten | Provinsi | Nasional | Internasional. '
-                .'JENIS: Akademik | Non-Akademik. '
-                .'UNGGULAN: Ya | Tidak. '
-                .'TANGGAL: YYYY-MM-DD (contoh: 2025-06-15). TAHUN: angka (contoh: 2025).',
+                .'TINGKAT: Sekolah | Kabupaten | Kwarda | Provinsi | Nasional | Internasional | Umum. '
+                .'TANGGAL: YYYY-MM-DD (contoh: 2025-06-15).',
                 $infoStyle
             ),
         ]));
 
-        // Row 3: Empty spacing
         $writer->addRow(new Row([]));
 
-        // Row 4: Column headers
         $headerCells = [];
         foreach ($headers as $h) {
             $headerCells[] = Cell::fromValue($h, $headerStyle);
         }
         $writer->addRow(new Row($headerCells));
 
-        // Row 5: EXAMPLE DATA (users can see the format)
         $exampleStyle = (new Style)
             ->withFontSize(10)
             ->withFontName('Arial')
             ->withBorder($thinBorder)
             ->withCellAlignment(CellAlignment::LEFT)
-            ->withBackgroundColor('F0F9FF'); // Light blue background to indicate it's an example
+            ->withBackgroundColor('F0F9FF');
 
         $exampleCells = [
             Cell::fromValue('1', $exampleStyle->withCellAlignment(CellAlignment::CENTER)),
-            Cell::fromValue('2025-06-15', $exampleStyle->withCellAlignment(CellAlignment::CENTER)),
-            Cell::fromValue('2025', $exampleStyle->withCellAlignment(CellAlignment::CENTER)),
             Cell::fromValue('Ahmad Fauzan', $exampleStyle),
+            Cell::fromValue('XI A', $exampleStyle->withCellAlignment(CellAlignment::CENTER)),
             Cell::fromValue('Juara 1 Olimpiade Matematika', $exampleStyle),
-            Cell::fromValue('Juara 1', $exampleStyle->withCellAlignment(CellAlignment::CENTER)),
+            Cell::fromValue('2025-06-15', $exampleStyle->withCellAlignment(CellAlignment::CENTER)),
             Cell::fromValue('Provinsi', $exampleStyle->withCellAlignment(CellAlignment::CENTER)),
-            Cell::fromValue('Akademik', $exampleStyle->withCellAlignment(CellAlignment::CENTER)),
             Cell::fromValue('Dinas Pendidikan Jawa Tengah', $exampleStyle),
-            Cell::fromValue('Ya', $exampleStyle->withCellAlignment(CellAlignment::CENTER)),
-            Cell::fromValue('Olimpiade Sains Nasional tingkat Provinsi Jawa Tengah 2025', $exampleStyle),
         ];
         $writer->addRow(new Row($exampleCells));
 
-        // Rows 6-14: 9 blank data rows ready to fill
         for ($i = 0; $i < 9; $i++) {
             $blankCells = [];
             foreach ($headers as $h) {

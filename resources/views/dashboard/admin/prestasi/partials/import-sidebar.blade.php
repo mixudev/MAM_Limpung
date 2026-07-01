@@ -42,17 +42,8 @@
     <div class="divide-y divide-slate-50 dark:divide-zinc-800/50">
         <div class="px-4 py-3">
             <p class="text-[10px] font-mono font-bold text-[#4f45b2] dark:text-indigo-400 mb-1">TINGKAT</p>
-            <p class="text-[10px] text-slate-500 dark:text-zinc-400">Sekolah | Kabupaten | Provinsi |
-                Nasional | Internasional</p>
-        </div>
-        <div class="px-4 py-3">
-            <p class="text-[10px] font-mono font-bold text-[#4f45b2] dark:text-indigo-400 mb-1">JENIS</p>
-            <p class="text-[10px] text-slate-500 dark:text-zinc-400">Akademik | Non-Akademik</p>
-        </div>
-        <div class="px-4 py-3">
-            <p class="text-[10px] font-mono font-bold text-[#4f45b2] dark:text-indigo-400 mb-1">UNGGULAN
-            </p>
-            <p class="text-[10px] text-slate-500 dark:text-zinc-400">Ya | Tidak</p>
+            <p class="text-[10px] text-slate-500 dark:text-zinc-400">Sekolah | Kabupaten | Kwarda | Provinsi |
+                Nasional | Internasional | Umum</p>
         </div>
     </div>
 </div>

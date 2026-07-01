@@ -23,10 +23,46 @@ class SeoController extends Controller
                 'priority' => '1.0',
             ],
             [
-                'loc' => route('frontend.profile'),
+                'loc' => route('frontend.profile.index'),
                 'lastmod' => now()->startOfMonth()->toAtomString(),
                 'changefreq' => 'monthly',
                 'priority' => '0.8',
+            ],
+            [
+                'loc' => route('frontend.profile.selayang-pandang'),
+                'lastmod' => now()->startOfMonth()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6',
+            ],
+            [
+                'loc' => route('frontend.profile.visi-misi'),
+                'lastmod' => now()->startOfMonth()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6',
+            ],
+            [
+                'loc' => route('frontend.profile.periodisasi-kepala'),
+                'lastmod' => now()->startOfMonth()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.5',
+            ],
+            [
+                'loc' => route('frontend.profile.struktur-organisasi'),
+                'lastmod' => now()->startOfMonth()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.5',
+            ],
+            [
+                'loc' => route('frontend.profile.program-madrasah'),
+                'lastmod' => now()->startOfMonth()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6',
+            ],
+            [
+                'loc' => route('frontend.profile.mmc'),
+                'lastmod' => now()->startOfMonth()->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
             ],
             [
                 'loc' => route('frontend.ppdb.index'),
@@ -95,7 +131,7 @@ class SeoController extends Controller
             ];
         }
 
-        $xml = view('front.seo.sitemap', compact('urls'))->render();
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n".view('front.seo.sitemap', compact('urls'))->render();
 
         return response($xml, 200)
             ->header('Content-Type', 'text/xml');

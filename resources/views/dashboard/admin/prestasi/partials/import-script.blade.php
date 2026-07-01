@@ -131,13 +131,10 @@
                                 tanggal: r.tanggal_normalized || r.tanggal || '',
                                 tahun: r.tahun || '',
                                 peraih: r.peraih || '',
+                                kelas: r.kelas || '',
                                 judul: r.judul || '',
-                                juara: r.juara || '',
                                 tingkat: r.tingkat_normalized || r.tingkat || '',
-                                jenis: r.jenis_normalized || r.jenis || '',
                                 penyelenggara: r.penyelenggara || '',
-                                unggulan: ['ya', '1', 'yes', 'true', 'ya'].includes(String(r.unggulan).toLowerCase().trim()) ? 'Ya' : 'Tidak',
-                                deskripsi: r.deskripsi || '',
                                 is_duplicate: r.is_duplicate || false,
                                 is_file_duplicate: r.is_file_duplicate || false,
                                 serverErrors: []
@@ -183,25 +180,12 @@
                 const c = v.toLowerCase().replace(/[-_\/ ]/g, '');
                 if (['sekolah'].includes(c)) return 'sekolah';
                 if (['kabupatenkota', 'kabupaten', 'kota'].includes(c)) return 'kabupaten';
+                if (['kwarda'].includes(c)) return 'kwarda';
                 if (['provinsi', 'prov'].includes(c)) return 'provinsi';
                 if (['nasional', 'nas'].includes(c)) return 'nasional';
                 if (['internasional', 'intl', 'int'].includes(c)) return 'internasional';
+                if (['umum'].includes(c)) return 'umum';
                 return '';
-            },
-
-            normalizeJenis(v) {
-                if (!v) return '';
-                const c = v.toLowerCase().replace(/[-_\/ ]/g, '');
-                if (['akademik', 'akademis'].includes(c)) return 'akademik';
-                if (['nonakademik', 'non', 'non_akademik'].includes(c)) return 'non_akademik';
-                return '';
-            },
-
-            normalizeUnggulan(v) {
-                if (!v) return 'Tidak';
-                const c = String(v).toLowerCase().trim();
-                if (['ya', '1', 'yes', 'true', 'unggulan'].includes(c)) return 'Ya';
-                return 'Tidak';
             },
 
             validateRow(row) {
@@ -225,14 +209,9 @@
                     }
                 }
 
-                const validTingkat = ['sekolah', 'kabupaten', 'provinsi', 'nasional', 'internasional'];
+                const validTingkat = ['sekolah', 'kabupaten', 'kwarda', 'provinsi', 'nasional', 'internasional', 'umum'];
                 if (!row.tingkat || !validTingkat.includes(row.tingkat)) {
                     errors.tingkat = 'Pilih tingkat valid';
-                }
-
-                const validJenis = ['akademik', 'non_akademik'];
-                if (!row.jenis || !validJenis.includes(row.jenis)) {
-                    errors.jenis = 'Pilih jenis akademik/non-akademik';
                 }
 
                 return errors;
@@ -289,13 +268,10 @@
                                         tanggal: f.tanggal || '',
                                         tahun: f.tahun || '',
                                         peraih: f.peraih || '',
+                                        kelas: f.kelas || '',
                                         judul: f.judul || '',
-                                        juara: f.juara || '',
                                         tingkat: f.tingkat || '',
-                                        jenis: f.jenis || '',
                                         penyelenggara: f.penyelenggara || '',
-                                        unggulan: ['ya', '1', 'yes', 'true', 'ya'].includes(String(f.unggulan).toLowerCase().trim()) ? 'Ya' : 'Tidak',
-                                        deskripsi: f.deskripsi || '',
                                         is_duplicate: f.is_duplicate || false,
                                         is_file_duplicate: f.is_file_duplicate || false,
                                         serverErrors: f.errors || []

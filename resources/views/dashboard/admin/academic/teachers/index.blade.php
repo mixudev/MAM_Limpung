@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <th class="py-3.5 px-4">Foto</th>
                         <th class="py-3.5 px-4">Nama</th>
                         <th class="py-3.5 px-4">NIP</th>
-                        <th class="py-3.5 px-4">Kategori</th>
+                        <th class="py-3.5 px-4">Kategori / Jabatan</th>
                         <th class="py-3.5 px-4">JK</th>
                         <th class="py-3.5 px-4">No. Telepon</th>
                         <th class="py-3.5 px-4 text-center">Status</th>
@@ -146,11 +146,15 @@ document.addEventListener("DOMContentLoaded", function() {
                             @endif
                         </td>
                         <td class="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-zinc-400">{{ $teacher->nip ?? '-' }}</td>
-                        <td class="py-3 px-4 font-mono text-[11px]">
-                            @if($teacher->category)
-                                <span class="px-2 py-0.5 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 text-[10px] font-bold font-mono">{{ $teacher->category->name }}</span>
+                        <td class="py-3 px-4">
+                            @if($teacher->categories->isNotEmpty())
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach($teacher->categories as $cat)
+                                        <span class="px-2 py-0.5 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 text-[10px] font-bold font-mono whitespace-nowrap">{{ $cat->name }}</span>
+                                    @endforeach
+                                </div>
                             @else
-                                <span class="text-slate-400">—</span>
+                                <span class="font-mono text-[11px] text-slate-400">—</span>
                             @endif
                         </td>
                         <td class="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-zinc-400">{{ $teacher->jenis_kelamin }}</td>

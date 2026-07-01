@@ -181,15 +181,19 @@ document.addEventListener("DOMContentLoaded", function() {
                                placeholder="Pendidikan Matematika"
                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]"/>
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Kategori</label>
-                        <select name="teacher_category_id"
-                                class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]">
-                            <option value="">Pilih Kategori</option>
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Kategori / Jabatan <span class="text-rose-500">*</span></label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                            @php $selectedIds = old('category_ids', $teacher?->categories?->pluck('id')->toArray() ?? []) @endphp
                             @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ old('teacher_category_id', $teacher->teacher_category_id ?? '') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                <label class="flex items-center gap-2 px-3 py-2 border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 cursor-pointer hover:border-[#4f45b2] transition-colors {{ in_array($cat->id, (array) $selectedIds) ? 'border-[#4f45b2] bg-[#4f45b2]/5' : '' }}">
+                                    <input type="checkbox" name="category_ids[]" value="{{ $cat->id }}"
+                                           {{ in_array($cat->id, (array) $selectedIds) ? 'checked' : '' }}
+                                           class="accent-[#4f45b2]">
+                                    <span class="text-[11px] font-medium text-slate-700 dark:text-zinc-300">{{ $cat->name }}</span>
+                                </label>
                             @endforeach
-                        </select>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Tanggal Masuk</label>

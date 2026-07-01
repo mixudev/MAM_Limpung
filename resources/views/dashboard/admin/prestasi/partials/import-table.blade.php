@@ -83,9 +83,10 @@
             <thead>
                 <tr class="bg-slate-50 dark:bg-zinc-800/60 border-b border-slate-200 dark:border-zinc-700">
                     <th class="px-4 py-3.5 text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-zinc-400 w-16 text-center">#</th>
-                    <th class="px-4 py-3.5 text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-zinc-400 w-48">Peraih (Siswa/Tim)</th>
+                    <th class="px-4 py-3.5 text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-zinc-400 w-44">Peraih (Siswa/Tim)</th>
+                    <th class="px-4 py-3.5 text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-zinc-400 w-20 text-center">Kelas</th>
                     <th class="px-4 py-3.5 text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-zinc-400">Judul Prestasi</th>
-                    <th class="px-4 py-3.5 text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-zinc-400 w-24 text-center">Tahun</th>
+                    <th class="px-4 py-3.5 text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-zinc-400 w-24 text-center">Tingkat</th>
                     <th class="px-4 py-3.5 text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-zinc-400 w-44 text-center">Status</th>
                     <th class="px-4 py-3.5 text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-zinc-400 w-32 text-center">Aksi</th>
                 </tr>
@@ -106,14 +107,19 @@
                             <span class="font-normal text-slate-700 dark:text-zinc-300" x-text="row.peraih || '(Kosong)'"></span>
                         </td>
 
+                        {{-- Kelas --}}
+                        <td class="px-4 py-3 text-center text-slate-600 dark:text-zinc-400 font-mono">
+                            <span x-text="row.kelas || '-'"></span>
+                        </td>
+
                         {{-- Judul (Regular text) --}}
                         <td class="px-4 py-3 truncate">
                             <span class="text-slate-700 dark:text-zinc-300 font-normal" x-text="row.judul || '(Kosong)'"></span>
                         </td>
 
-                        {{-- Tahun --}}
+                        {{-- Tingkat --}}
                         <td class="px-4 py-3 text-center text-slate-600 dark:text-zinc-400 font-mono">
-                            <span x-text="row.tahun || '-'"></span>
+                            <span x-text="row.tingkat ? row.tingkat.charAt(0).toUpperCase() + row.tingkat.slice(1) : '-'"></span>
                         </td>
 
                         {{-- Status Badges --}}
@@ -163,7 +169,7 @@
                 {{-- Empty state --}}
                 <template x-if="filteredRows().length === 0">
                     <tr>
-                        <td colspan="6" class="py-12 text-center text-slate-400 dark:text-zinc-500 italic text-xs">
+                        <td colspan="7" class="py-12 text-center text-slate-400 dark:text-zinc-500 italic text-xs">
                             Tidak ada data pratinjau yang cocok dengan filter atau pencarian.
                         </td>
                     </tr>
@@ -221,9 +227,6 @@
                             <template x-if="validateRow(editingRow).tingkat">
                                 <li x-text="validateRow(editingRow).tingkat"></li>
                             </template>
-                            <template x-if="validateRow(editingRow).jenis">
-                                <li x-text="validateRow(editingRow).jenis"></li>
-                            </template>
                             <template x-for="serr in editingRow.serverErrors">
                                 <li x-text="serr"></li>
                             </template>
@@ -253,10 +256,10 @@
                             class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-none focus:outline-none focus:border-[#4f45b2]">
                     </div>
 
-                    {{-- Juara --}}
+                    {{-- Kelas --}}
                     <div>
-                        <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">Juara (contoh: Juara 1, Harapan 2)</label>
-                        <input type="text" x-model="editingRow.juara" @input="onRowFieldChange(editingRow)"
+                        <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">Kelas</label>
+                        <input type="text" x-model="editingRow.kelas" @input="onRowFieldChange(editingRow)"
                             class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-none focus:outline-none focus:border-[#4f45b2]">
                     </div>
 
@@ -282,20 +285,11 @@
                             <option value="">-- Pilih Tingkat --</option>
                             <option value="sekolah">Sekolah</option>
                             <option value="kabupaten">Kabupaten/Kota</option>
+                            <option value="kwarda">Kwarda</option>
                             <option value="provinsi">Provinsi</option>
                             <option value="nasional">Nasional</option>
                             <option value="internasional">Internasional</option>
-                        </select>
-                    </div>
-
-                    {{-- Jenis --}}
-                    <div>
-                        <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">Jenis Prestasi *</label>
-                        <select x-model="editingRow.jenis" @change="onRowFieldChange(editingRow)"
-                            class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-none focus:outline-none focus:border-[#4f45b2]">
-                            <option value="">-- Pilih Jenis --</option>
-                            <option value="akademik">Akademik</option>
-                            <option value="non_akademik">Non-Akademik</option>
+                            <option value="umum">Umum</option>
                         </select>
                     </div>
 
@@ -304,23 +298,6 @@
                         <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">Penyelenggara Kegiatan</label>
                         <input type="text" x-model="editingRow.penyelenggara" @input="onRowFieldChange(editingRow)"
                             class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-none focus:outline-none focus:border-[#4f45b2]">
-                    </div>
-
-                    {{-- Unggulan --}}
-                    <div>
-                        <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">Jadikan Prestasi Unggulan?</label>
-                        <select x-model="editingRow.unggulan" @change="onRowFieldChange(editingRow)"
-                            class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-none focus:outline-none focus:border-[#4f45b2]">
-                            <option value="Ya">Ya (Ditampilkan di slider utama)</option>
-                            <option value="Tidak">Tidak</option>
-                        </select>
-                    </div>
-
-                    {{-- Deskripsi --}}
-                    <div class="md:col-span-2">
-                        <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">Deskripsi & Catatan Prestasi</label>
-                        <textarea x-model="editingRow.deskripsi" @input="onRowFieldChange(editingRow)" rows="2" placeholder="Detail deskripsi kegiatan prestasi..."
-                            class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-none focus:outline-none focus:border-[#4f45b2]"></textarea>
                     </div>
                 </div>
             </div>

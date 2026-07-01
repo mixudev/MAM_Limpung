@@ -8,50 +8,23 @@ use OpenSpout\Reader\XLSX\Reader;
 
 class PrestasiImportService
 {
-    /**
-     * Normalize and validate Tingkat (case-insensitive, flexible matching).
-     *
-     * @return string|null Normalized tingkat value or null if invalid
-     */
     public function normalizeTingkat(string $input): ?string
     {
         $clean = strtolower(trim($input));
         $clean = str_replace(['-', '_', ' '], '', $clean);
 
-        // Map variations to standard values
         return match ($clean) {
             'sekolah' => 'sekolah',
             'kabupatenkota', 'kabupaten/kota', 'kabupaten', 'kota' => 'kabupaten',
             'provinsi', 'prov' => 'provinsi',
+            'kwarda' => 'kwarda',
             'nasional', 'nas' => 'nasional',
             'internasional', 'intl', 'int' => 'internasional',
+            'umum' => 'umum',
             default => null
         };
     }
 
-    /**
-     * Normalize and validate Jenis (case-insensitive, flexible matching).
-     *
-     * @return string|null Normalized jenis value or null if invalid
-     */
-    public function normalizeJenis(string $input): ?string
-    {
-        $clean = strtolower(trim($input));
-        $clean = str_replace(['-', '_', ' '], '', $clean);
-
-        return match ($clean) {
-            'akademik', 'akademis' => 'akademik',
-            'nonakademik', 'non' => 'non_akademik',
-            default => null
-        };
-    }
-
-    /**
-     * Parse date from multiple formats flexibly.
-     * Supports: YYYY-MM-DD, DD-MM-YYYY, M/D/YYYY, DD/MM/YYYY, YYYY/MM/DD, DateTime objects, and numeric timestamps.
-     *
-     * @return string|null Date in Y-m-d format or null if parsing fails
-     */
     public function parseDate(mixed $dateInput): ?string
     {
         if ($dateInput === null || $dateInput === '') {
@@ -59,24 +32,19 @@ class PrestasiImportService
         }
 
         try {
-            // Handle DateTime objects
-            if ($dateInput instanceof \DateTime) {
+            if ($dateInput instanceof \DateTimeInterface) {
                 return $dateInput->format('Y-m-d');
             }
 
-            // Convert to string
             $dateString = trim((string) $dateInput);
 
             if (empty($dateString)) {
                 return null;
             }
 
-            // Handle numeric timestamps (from Excel)
             if (is_numeric($dateString)) {
                 $timestamp = (int) $dateString;
-                // Excel timestamps are in days since 1900-01-01
                 if ($timestamp > 30000) {
-                    // Likely Excel timestamp
                     $excelEpoch = new \DateTime('1900-01-01');
                     $excelEpoch->modify('+'.($timestamp - 2).' days');
 
@@ -84,22 +52,21 @@ class PrestasiImportService
                 }
             }
 
-            // Try common date formats in order of likelihood
             $formats = [
-                'Y-m-d',           // 2026-05-19
-                'Y/m/d',           // 2026/05/19
-                'd-m-Y',           // 19-05-2026
-                'd/m/Y',           // 19/05/2026
-                'm/d/Y',           // 05/19/2026
-                'm-d-Y',           // 05-19-2026
-                'j/n/Y',           // 5/19/2026 (no leading zeros)
-                'j-n-Y',           // 5-19-2026 (no leading zeros)
-                'Y-m-d H:i:s',     // 2026-05-19 14:30:00
-                'Y/m/d H:i:s',     // 2026/05/19 14:30:00
-                'd-m-Y H:i:s',     // 19-05-2026 14:30:00
-                'd/m/Y H:i:s',     // 19/05/2026 14:30:00
-                'm/d/Y H:i:s',     // 05/19/2026 14:30:00
-                'j/n/Y H:i:s',     // 5/19/2026 14:30:00
+                'Y-m-d',
+                'Y/m/d',
+                'd-m-Y',
+                'd/m/Y',
+                'm/d/Y',
+                'm-d-Y',
+                'j/n/Y',
+                'j-n-Y',
+                'Y-m-d H:i:s',
+                'Y/m/d H:i:s',
+                'd-m-Y H:i:s',
+                'd/m/Y H:i:s',
+                'm/d/Y H:i:s',
+                'j/n/Y H:i:s',
             ];
 
             foreach ($formats as $format) {
@@ -109,8 +76,9 @@ class PrestasiImportService
                 }
             }
 
-            // Last resort: use strtotime with lenient parsing
-            $time = strtotime($dateString);
+            $normalized = $this->normalizeDateString($dateString);
+
+            $time = strtotime($normalized);
             if ($time !== false) {
                 return date('Y-m-d', $time);
             }
@@ -121,11 +89,51 @@ class PrestasiImportService
         }
     }
 
-    /**
-     * Import achievements from an Excel file.
-     *
-     * @return array{success: bool, imported_count: int, errors: array<string>}
-     */
+    private function normalizeDateString(string $dateString): string
+    {
+        // Handle date ranges: "21-23 Oktober 2022" -> "21 Oktober 2022"
+        $dateString = preg_replace('/^(\d{1,2})\s*[-\/]\s*\d{1,2}\s+/', '$1 ', $dateString);
+
+        // Map Indonesian month names (full & abbreviated) to English
+        $monthMap = [
+            '/\bjanuari\b/i' => 'January',
+            '/\bfebruari\b/i' => 'February',
+            '/\bmaret\b/i' => 'March',
+            '/\bapril\b/i' => 'April',
+            '/\bmei\b/i' => 'May',
+            '/\bjuni\b/i' => 'June',
+            '/\bjuli\b/i' => 'July',
+            '/\bagustus\b/i' => 'August',
+            '/\bseptember\b/i' => 'September',
+            '/\boktober\b/i' => 'October',
+            '/\bnovember\b/i' => 'November',
+            '/\bdesember\b/i' => 'December',
+            '/\bjan\b/i' => 'January',
+            '/\bfeb\b/i' => 'February',
+            '/\bmar\b/i' => 'March',
+            '/\bapr\b/i' => 'April',
+            '/\bjun\b/i' => 'June',
+            '/\bjul\b/i' => 'July',
+            '/\bag[us]?\b/i' => 'August',
+            '/\bsep\b/i' => 'September',
+            '/\bokt\b/i' => 'October',
+            '/\bnov\b/i' => 'November',
+            '/\bdes\b/i' => 'December',
+        ];
+        $dateString = preg_replace(array_keys($monthMap), array_values($monthMap), $dateString);
+
+        // Replace remaining dashes/slashes between parts with spaces
+        $dateString = preg_replace('/\s*[-\/]\s*/', ' ', $dateString);
+        $dateString = preg_replace('/\s+/', ' ', trim($dateString));
+
+        // Convert 2-digit years at end: "22" -> "2022", "25" -> "2025"
+        $dateString = preg_replace_callback('/\b(\d{2})$/', function ($matches) {
+            return '20'.$matches[1];
+        }, $dateString);
+
+        return $dateString;
+    }
+
     public function importExcel(string $filePath, int $userId): array
     {
         $reader = new Reader;
@@ -144,12 +152,9 @@ class PrestasiImportService
         $errors = [];
         $rowCount = 0;
 
-        // Valid values for tingkat and jenis
-        $validTingkat = ['sekolah', 'kabupaten', 'provinsi', 'nasional', 'internasional'];
-        $validJenis = ['akademik', 'non_akademik'];
+        $validTingkat = ['sekolah', 'kabupaten', 'kwarda', 'provinsi', 'nasional', 'internasional', 'umum'];
 
         foreach ($reader->getSheetIterator() as $sheet) {
-            // We only read the first sheet
             if ($sheet->getIndex() !== 0) {
                 continue;
             }
@@ -157,24 +162,16 @@ class PrestasiImportService
             foreach ($sheet->getRowIterator() as $row) {
                 $rowCount++;
 
-                // Skip the title block and spacing rows (first 4 rows)
-                // Row 1: Title
-                // Row 2: Metadata / Date
-                // Row 3: Empty spacing row
-                // Row 4: Table Headers
                 if ($rowCount <= 4) {
                     continue;
                 }
 
-                // Extract cell values - OpenSpout v5.7 API
                 $values = [];
                 try {
-                    // OpenSpout v5: Row is iterable directly
                     foreach ($row as $cell) {
                         $values[] = $cell->getValue();
                     }
                 } catch (\Throwable $e1) {
-                    // Fallback: Try using reflection to access internal cells
                     try {
                         $reflection = new \ReflectionClass($row);
                         if ($reflection->hasProperty('cells')) {
@@ -185,63 +182,39 @@ class PrestasiImportService
                                 $values[] = $cell->getValue();
                             }
                         } else {
-                            // No cells property found
                             throw new \Exception('Cannot access cells');
                         }
                     } catch (\Throwable $e2) {
-                        // Last resort: log error and skip this row
                         $errors[] = 'Baris '.$rowCount.' gagal dibaca: Tidak dapat mengakses sel Excel.';
 
                         continue;
                     }
                 }
 
-                // If the row is empty, skip it
                 if (empty($values) || (count($values) === 1 && $values[0] === null)) {
                     continue;
                 }
 
-                // Map values to columns (checking offsets to prevent array index errors)
-                // Column 0: NO (ignored)
-                // Column 1: TANGGAL
-                // Column 2: TAHUN
-                // Column 3: PERAIH (SISWA/TIM)
-                // Column 4: JUDUL PRESTASI
-                // Column 5: JUARA
-                // Column 6: TINGKAT
-                // Column 7: JENIS
-                // Column 8: PENYELENGGARA
-                // Column 9: UNGGULAN
-                // Column 10: DESKRIPSI
+                // New column mapping (7 columns)
+                // 0: NO, 1: PERAIH, 2: KELAS, 3: JUDUL PRESTASI
+                // 4: TANGGAL, 5: TINGKAT, 6: PENYELENGGARA
 
-                $tanggalRaw = $values[1] ?? null;
-                $tahunRaw = $values[2] ?? null;
-                $peraih = trim((string) ($values[3] ?? ''));
-                $judul = trim((string) ($values[4] ?? ''));
-                $juara = trim((string) ($values[5] ?? ''));
-                $tingkatRaw = strtolower(trim((string) ($values[6] ?? '')));
-                $jenisRaw = strtolower(trim((string) ($values[7] ?? '')));
-                $penyelenggara = trim((string) ($values[8] ?? ''));
-                $featuredRaw = strtolower(trim((string) ($values[9] ?? '')));
-                $deskripsi = trim((string) ($values[10] ?? ''));
+                $peraih = trim((string) ($values[1] ?? ''));
+                $kelas = trim((string) ($values[2] ?? ''));
+                $judul = trim((string) ($values[3] ?? ''));
+                $tanggalRaw = $values[4] ?? null;
+                $tingkatRaw = strtolower(trim((string) ($values[5] ?? '')));
+                $penyelenggara = trim((string) ($values[6] ?? ''));
 
-                // Validation
                 $rowErrors = [];
 
                 if (empty($judul)) {
                     $rowErrors[] = '[Kolom Judul Prestasi] Tidak boleh kosong.';
                 }
                 if (empty($peraih)) {
-                    $rowErrors[] = '[Kolom Peraih Prestasi] Tidak boleh kosong.';
+                    $rowErrors[] = '[Kolom Peraih] Tidak boleh kosong.';
                 }
 
-                // Parse & validate Tahun
-                $tahun = (int) $tahunRaw;
-                if ($tahun < 2000 || $tahun > 2100) {
-                    $rowErrors[] = '[Kolom Tahun] Nilai tidak valid: "'.$tahunRaw.'". Harus berada di antara 2000 - 2100.';
-                }
-
-                // Parse & validate Tanggal
                 $tanggal = null;
                 if (! empty($tanggalRaw)) {
                     $tanggal = $this->parseDate($tanggalRaw);
@@ -250,48 +223,27 @@ class PrestasiImportService
                     }
                 }
 
-                // Normalize and validate Tingkat (FLEXIBLE - case-insensitive)
                 $tingkat = null;
                 if (! empty($tingkatRaw)) {
                     $tingkat = $this->normalizeTingkat($tingkatRaw);
                 }
 
                 if ($tingkat === null && ! empty($tingkatRaw)) {
-                    $rowErrors[] = '[Kolom Tingkat] Nilai tidak valid: "'.$tingkatRaw.'". Pilihan: Sekolah, Kabupaten/Kota, Provinsi, Nasional, Internasional.';
+                    $rowErrors[] = '[Kolom Tingkat] Nilai tidak valid: "'.$tingkatRaw.'". Pilihan: Sekolah, Kabupaten/Kota, Kwarda, Provinsi, Nasional, Internasional, Umum.';
                 } elseif ($tingkat === null) {
-                    $rowErrors[] = '[Kolom Tingkat] Tidak boleh kosong. Pilihan: Sekolah, Kabupaten/Kota, Provinsi, Nasional, Internasional.';
+                    $rowErrors[] = '[Kolom Tingkat] Tidak boleh kosong. Pilihan: Sekolah, Kabupaten/Kota, Kwarda, Provinsi, Nasional, Internasional, Umum.';
                 }
 
-                // Normalize and validate Jenis (FLEXIBLE - case-insensitive)
-                $jenis = null;
-                if (! empty($jenisRaw)) {
-                    $jenis = $this->normalizeJenis($jenisRaw);
-                }
-
-                if ($jenis === null && ! empty($jenisRaw)) {
-                    $rowErrors[] = '[Kolom Jenis] Nilai tidak valid: "'.$jenisRaw.'". Pilihan: Akademik, Non-Akademik.';
-                } elseif ($jenis === null) {
-                    $rowErrors[] = '[Kolom Jenis] Tidak boleh kosong. Pilihan: Akademik, Non-Akademik.';
-                }
-
-                // Parse Featured
-                $isFeatured = false;
-                if (! empty($featuredRaw)) {
-                    if ($featuredRaw === 'ya' || $featuredRaw === '1' || $featuredRaw === 'yes' || $featuredRaw === 'true') {
-                        $isFeatured = true;
-                    }
-                }
-
-                // If there are errors on this row, log them and skip saving
                 if (! empty($rowErrors)) {
                     $errors[] = 'Baris '.$rowCount.' ('.($judul ?: 'Tanpa Judul').'): '.implode(' ', $rowErrors);
 
                     continue;
                 }
 
-                // Save or update to database
+                $tahun = $tanggal ? (int) date('Y', strtotime($tanggal)) : (int) date('Y');
+
                 try {
-                    DB::transaction(function () use ($userId, $judul, $deskripsi, $tingkat, $jenis, $penyelenggara, $peraih, $juara, $tahun, $tanggal, $isFeatured) {
+                    DB::transaction(function () use ($userId, $judul, $peraih, $kelas, $tahun, $tanggal, $tingkat, $penyelenggara) {
                         Prestasi::updateOrCreate(
                             [
                                 'judul' => $judul,
@@ -300,13 +252,11 @@ class PrestasiImportService
                             ],
                             [
                                 'user_id' => $userId,
-                                'deskripsi' => $deskripsi ?: null,
-                                'tingkat' => $tingkat,
-                                'jenis' => $jenis,
-                                'penyelenggara' => $penyelenggara ?: null,
-                                'juara' => $juara ?: null,
+                                'kelas' => $kelas ?: null,
                                 'tanggal_prestasi' => $tanggal,
-                                'is_featured' => $isFeatured,
+                                'tingkat' => $tingkat,
+                                'penyelenggara' => $penyelenggara ?: null,
+                                'jenis' => 'akademik',
                             ]
                         );
                     });
@@ -315,7 +265,7 @@ class PrestasiImportService
                     $errors[] = 'Baris '.$rowCount.' gagal disimpan ke database: '.$dbEx->getMessage();
                 }
             }
-            break; // Read first sheet only
+            break;
         }
 
         $reader->close();
@@ -328,12 +278,6 @@ class PrestasiImportService
         ];
     }
 
-    /**
-     * Preview Excel data without strict validation.
-     * Returns processed data for user to review and edit before import.
-     *
-     * @return array{success: bool, total_rows: int, preview_data: array, errors: array<string>}
-     */
     public function previewExcel(string $filePath): array
     {
         $reader = new Reader;
@@ -352,10 +296,8 @@ class PrestasiImportService
         $previewData = [];
         $rowCount = 0;
         $errors = [];
-        $seen = [];
 
         foreach ($reader->getSheetIterator() as $sheet) {
-            // Only read first sheet
             if ($sheet->getIndex() !== 0) {
                 continue;
             }
@@ -363,12 +305,10 @@ class PrestasiImportService
             foreach ($sheet->getRowIterator() as $row) {
                 $rowCount++;
 
-                // Skip title rows (1-4)
                 if ($rowCount <= 4) {
                     continue;
                 }
 
-                // Extract cell values
                 $values = [];
                 try {
                     foreach ($row as $cell) {
@@ -392,40 +332,31 @@ class PrestasiImportService
                     }
                 }
 
-                // Skip empty rows
                 if (empty($values) || (count($values) === 1 && $values[0] === null)) {
                     continue;
                 }
 
-                // Extract values (lenient - don't validate yet)
-                $tanggalVal = $values[1] ?? '';
+                $tanggalVal = $values[4] ?? '';
                 if ($tanggalVal instanceof \DateTimeInterface) {
                     $tanggalVal = $tanggalVal->format('Y-m-d');
                 }
 
-                $tahunVal = $values[2] ?? '';
-                if ($tahunVal instanceof \DateTimeInterface) {
-                    $tahunVal = $tahunVal->format('Y');
-                }
+                $parsedDate = $this->parseDate($tanggalVal);
+                $tahun = $parsedDate ? (int) date('Y', strtotime($parsedDate)) : (int) date('Y');
 
                 $rowData = [
                     'row_number' => $rowCount,
+                    'peraih' => trim((string) ($values[1] ?? '')),
+                    'kelas' => trim((string) ($values[2] ?? '')),
+                    'judul' => trim((string) ($values[3] ?? '')),
                     'tanggal' => $tanggalVal,
-                    'tahun' => $tahunVal,
-                    'peraih' => trim((string) ($values[3] ?? '')),
-                    'judul' => trim((string) ($values[4] ?? '')),
-                    'juara' => trim((string) ($values[5] ?? '')),
-                    'tingkat' => trim((string) ($values[6] ?? '')),
-                    'jenis' => trim((string) ($values[7] ?? '')),
-                    'penyelenggara' => trim((string) ($values[8] ?? '')),
-                    'unggulan' => trim((string) ($values[9] ?? '')),
-                    'deskripsi' => trim((string) ($values[10] ?? '')),
+                    'tahun' => $tahun,
+                    'tingkat' => trim((string) ($values[5] ?? '')),
+                    'penyelenggara' => trim((string) ($values[6] ?? '')),
                 ];
 
-                // Try to normalize some fields for preview
                 $rowData['tingkat_normalized'] = $this->normalizeTingkat($rowData['tingkat']) ?? $rowData['tingkat'];
-                $rowData['jenis_normalized'] = $this->normalizeJenis($rowData['jenis']) ?? $rowData['jenis'];
-                $rowData['tanggal_normalized'] = $this->parseDate($rowData['tanggal']) ?? $rowData['tanggal'];
+                $rowData['tanggal_normalized'] = $parsedDate ?? $rowData['tanggal'];
 
                 $previewData[] = $rowData;
             }
@@ -434,11 +365,10 @@ class PrestasiImportService
 
         $reader->close();
 
-        // Pass 2: Query existing records from DB in a single lightweight batch request
         $years = [];
         foreach ($previewData as $row) {
-            if (! empty($row['tahun'])) {
-                $years[] = (int) $row['tahun'];
+            if (! empty($row['tanggal_normalized'])) {
+                $years[] = (int) date('Y', strtotime($row['tanggal_normalized']));
             }
         }
         $years = array_unique($years);
@@ -455,22 +385,20 @@ class PrestasiImportService
             }
         }
 
-        // Pass 3: Process duplicates (file-level and db-level)
         $seen = [];
         foreach ($previewData as &$row) {
             $isDuplicate = false;
             $isFileDuplicate = false;
 
-            if (! empty($row['judul']) && ! empty($row['peraih']) && ! empty($row['tahun'])) {
-                // Check file duplicate
-                $fileKey = strtolower($row['judul'].'|'.$row['peraih'].'|'.$row['tahun']);
+            if (! empty($row['judul']) && ! empty($row['peraih'])) {
+                $tahun = $row['tanggal_normalized'] ? (int) date('Y', strtotime($row['tanggal_normalized'])) : (int) date('Y');
+                $fileKey = strtolower($row['judul'].'|'.$row['peraih'].'|'.$tahun);
                 if (isset($seen[$fileKey])) {
                     $isFileDuplicate = true;
                 } else {
                     $seen[$fileKey] = true;
                 }
 
-                // Check DB duplicate using our in-memory lookup map
                 if (isset($existingMap[$fileKey])) {
                     $isDuplicate = true;
                 }
@@ -479,7 +407,7 @@ class PrestasiImportService
             $row['is_duplicate'] = $isDuplicate;
             $row['is_file_duplicate'] = $isFileDuplicate;
         }
-        unset($row); // break reference
+        unset($row);
 
         return [
             'success' => count($errors) === 0,

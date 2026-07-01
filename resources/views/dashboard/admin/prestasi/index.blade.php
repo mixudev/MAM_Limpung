@@ -96,11 +96,13 @@
                 <label class="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Tingkat</label>
                 <select name="tingkat" class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-none text-slate-700 dark:text-zinc-300 focus:outline-none focus:border-[#4f45b2]">
                     <option value="">Semua Tingkat</option>
-                    <option value="sekolah" {{ request('tingkat') === 'sekolah' ? 'selected' : '' }}>Sekolah</option>
-                    <option value="kabupaten" {{ request('tingkat') === 'kabupaten' ? 'selected' : '' }}>Kabupaten/Kota</option>
-                    <option value="provinsi" {{ request('tingkat') === 'provinsi' ? 'selected' : '' }}>Provinsi</option>
-                    <option value="nasional" {{ request('tingkat') === 'nasional' ? 'selected' : '' }}>Nasional</option>
-                    <option value="internasional" {{ request('tingkat') === 'internasional' ? 'selected' : '' }}>Internasional</option>
+                                    <option value="sekolah" {{ request('tingkat') === 'sekolah' ? 'selected' : '' }}>Sekolah</option>
+                                    <option value="kabupaten" {{ request('tingkat') === 'kabupaten' ? 'selected' : '' }}>Kabupaten/Kota</option>
+                                    <option value="kwarda" {{ request('tingkat') === 'kwarda' ? 'selected' : '' }}>Kwarda</option>
+                                    <option value="provinsi" {{ request('tingkat') === 'provinsi' ? 'selected' : '' }}>Provinsi</option>
+                                    <option value="nasional" {{ request('tingkat') === 'nasional' ? 'selected' : '' }}>Nasional</option>
+                                    <option value="internasional" {{ request('tingkat') === 'internasional' ? 'selected' : '' }}>Internasional</option>
+                                    <option value="umum" {{ request('tingkat') === 'umum' ? 'selected' : '' }}>Umum</option>
                 </select>
             </div>
 
@@ -127,6 +129,7 @@
             </div>
         </form>
     </div>
+    </div>
 
     <!-- Table Section -->
     <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 shadow-sm flex flex-col space-y-4">
@@ -141,24 +144,39 @@
                 </a>
             </div>
         </div>
+
+        <div class="flex items-center gap-2 pb-2">
+            <button type="button" onclick="confirmBulkDelete()"
+                class="py-1.5 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 font-bold text-[10px] uppercase font-mono tracking-wider disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                id="bulk-delete-btn" disabled>
+                HAPUS TERPILIH (<span id="selected-count">0</span>)
+            </button>
+        </div>
         
         <div class="overflow-x-auto border border-slate-100 dark:border-zinc-800">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 text-[10px] font-mono uppercase font-bold tracking-wider text-slate-500 dark:text-zinc-400">
+                        <th class="py-3.5 px-4 w-12 text-center">
+                            <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"
+                                class="w-4 h-4 text-[#4f45b2] border-slate-350 focus:ring-[#4f45b2] rounded-none">
+                        </th>
                         <th class="py-3.5 px-4 w-16 text-center">Foto</th>
                         <th class="py-3.5 px-4">Judul & Peraih</th>
+                        <th class="py-3.5 px-4 w-20 text-center">Kelas</th>
                         <th class="py-3.5 px-4 w-28 text-center">Tingkat</th>
                         <th class="py-3.5 px-4 w-28 text-center">Jenis</th>
-                        <th class="py-3.5 px-4 w-28">Juara</th>
                         <th class="py-3.5 px-4 w-20 text-center">Tahun</th>
-                        <th class="py-3.5 px-4 w-24 text-center">Utama</th>
                         <th class="py-3.5 px-4 w-36 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
                     @forelse($prestasis as $pres)
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                            <td class="py-3 px-4 text-center">
+                                <input type="checkbox" name="ids[]" value="{{ $pres->id }}" onchange="updateBulkDeleteBtn()"
+                                    class="row-checkbox w-4 h-4 text-[#4f45b2] border-slate-350 focus:ring-[#4f45b2] rounded-none">
+                            </td>
                             <td class="py-3 px-4">
                                 <div class="w-12 h-9 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 overflow-hidden flex items-center justify-center">
                                     @if($pres->foto)
@@ -177,12 +195,17 @@
                                     <div class="text-[9px] text-slate-400 italic">Penyelenggara: {{ $pres->penyelenggara }}</div>
                                 @endif
                             </td>
+                            <td class="py-3 px-4 text-center text-slate-600 dark:text-zinc-400 font-mono">
+                                {{ $pres->kelas ?: '-' }}
+                            </td>
                             <td class="py-3 px-4 text-center">
                                 <span class="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase border 
                                     @if($pres->tingkat === 'internasional') bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/20 dark:text-purple-400 dark:border-purple-800/40
                                     @elseif($pres->tingkat === 'nasional') bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-800/40
+                                    @elseif($pres->tingkat === 'kwarda') bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/20 dark:text-cyan-400 dark:border-cyan-800/40
                                     @elseif($pres->tingkat === 'provinsi') bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-800/40
                                     @elseif($pres->tingkat === 'kabupaten') bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-800/40
+                                    @elseif($pres->tingkat === 'umum') bg-zinc-50 text-zinc-700 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700
                                     @else bg-slate-50 text-slate-700 border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700
                                     @endif">
                                     {{ $pres->tingkatLabel() }}
@@ -196,18 +219,8 @@
                                     {{ $pres->jenis === 'akademik' ? 'Akademik' : 'Non-Akad' }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 font-semibold text-slate-700 dark:text-zinc-300">
-                                {{ $pres->juara ?: '-' }}
-                            </td>
                             <td class="py-3 px-4 text-center text-slate-500 dark:text-zinc-400 font-mono">
                                 {{ $pres->tahun }}
-                            </td>
-                            <td class="py-3 px-4 text-center">
-                                @if($pres->is_featured)
-                                    <span class="inline-flex w-2.5 h-2.5 bg-amber-500 rounded-full" title="Featured"></span>
-                                @else
-                                    <span class="inline-flex w-2.5 h-2.5 bg-slate-200 dark:bg-zinc-700 rounded-full" title="Standard"></span>
-                                @endif
                             </td>
                             <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
                                 <a href="{{ route('admin.prestasi.edit', $pres->id) }}" 
@@ -237,7 +250,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="py-8 text-center text-slate-400 dark:text-zinc-500 italic">
+                            <td colspan="9" class="py-8 text-center text-slate-400 dark:text-zinc-500 italic">
                                 Tidak ada data prestasi yang ditemukan.
                             </td>
                         </tr>
@@ -252,4 +265,56 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleSelectAll(source) {
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+    updateBulkDeleteBtn();
+}
+
+function updateBulkDeleteBtn() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const count = checked.length;
+    const btn = document.getElementById('bulk-delete-btn');
+    const counter = document.getElementById('selected-count');
+    counter.textContent = count;
+    btn.disabled = count === 0;
+}
+
+function confirmBulkDelete() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    if (checked.length === 0) return;
+
+    AppPopup.confirm({
+        title: 'Hapus Massal',
+        description: `Apakah Anda yakin ingin menghapus ${checked.length} data prestasi yang dipilih?`,
+        confirmText: 'Ya, Hapus Semua',
+        cancelText: 'Batal',
+        onConfirm: function() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("admin.prestasi.bulk-destroy") }}';
+            form.style.display = 'none';
+
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_token';
+            csrf.value = '{{ csrf_token() }}';
+            form.appendChild(csrf);
+
+            checked.forEach(cb => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = cb.value;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
+</script>
 @endsection

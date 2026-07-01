@@ -145,7 +145,7 @@
                         <option value="frontend.ekstrakurikuler">Halaman Ekstrakurikuler</option>
                         <option value="frontend.prestasi">Halaman Prestasi</option>
                         <option value="frontend.galeri">Halaman Galeri</option>
-                        <option value="frontend.profile">Halaman Profil</option>
+                        <option value="frontend.profile.index">Halaman Profil</option>
                         <option value="frontend.contact">Halaman Kontak</option>
                     </select>
                 </div>

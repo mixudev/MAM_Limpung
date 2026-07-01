@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             TeacherCategorySeeder::class,
+            TeacherSeeder::class,
             PpdbSettingSeeder::class,
             ArticleCategorySeeder::class,
             ArticleSeeder::class,

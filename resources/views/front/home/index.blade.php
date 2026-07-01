@@ -38,113 +38,170 @@
 @section('content')
     <div class="overflow-x-hidden">
         <!-- Hero Section: Split Layout with Stacked Cards -->
-        <section class="relative min-h-[85vh] flex items-center overflow-hidden bg-white pt-20 pb-12">
-            <!-- Background Decor -->
-            <div
-                class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[700px] h-[700px] bg-blue-50 rounded-full blur-[120px] opacity-60 -z-0">
-            </div>
+        <!-- Hero Section: Sambutan Kepala Madrasah, Background Gedung Beranimasi -->
+<section class="relative min-h-[92vh] md:min-h-[90vh] flex items-center overflow-hidden bg-blue-950">
 
-            <div class="container mx-auto px-6 relative z-10">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <!-- Background: Foto Gedung dengan animasi zoom perlahan -->
+    <div class="absolute inset-0 z-0">
+        <img src="{{ asset('assets/img/school-1.png') }}"
+            class="w-full h-full object-cover motion-safe:animate-hero-zoom"
+            alt="Gedung Madrasah Aliyah Muhammadiyah Limpung"
+            fetchpriority="high" loading="eager">
+        <!-- Overlay ganda: gradasi + vignette agar teks tetap kontras di segala kondisi foto -->
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-950/95 via-blue-950/80 to-blue-950/95"></div>
+        <div class="absolute inset-0 bg-blue-950/20"></div>
+    </div>
 
-                    <!-- Sisi Kiri: Teks & CTA -->
-                    <div class="z-20" data-aos="fade-right">
-                        {{-- <span class="inline-block text-blue-700 font-bold tracking-[0.4em] text-[10px] uppercase mb-6 border-l-4 border-blue-700 pl-3">
-                        Pendidikan Masa Depan
-                    </span> --}}
-                        <h1
-                            class="text-5xl md:text-6xl font-black text-gray-900 leading-[1.1] tracking-tighter mb-8 uppercase">
-                            MADRASAH ALIYAH MUHAMMADIYAH <br />
-                            <span class="text-blue-700">LIMPUNG</span>
-                        </h1>
-                        <p class="text-lg text-gray-500 max-w-xl mb-12 leading-relaxed font-regular">
-                            MAM Limpung menghadirkan harmoni antara kemajuan teknologi dan kekuatan akhlak.
-                        </p>
-                        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
-                            <a href="{{ route('frontend.ppdb.form') }}"
-                                class="bg-blue-900 text-white px-12 py-5 font-bold hover:bg-black transition-all duration-300 uppercase tracking-widest text-xs inline-flex items-center group shadow-xl shadow-blue-900/10">
-                                Daftar Sekarang
-                                <i
-                                    class="fa-solid fa-arrow-right ml-3 transform group-hover:translate-x-1 transition-transform"></i>
-                            </a>
-                            <a href="/profile"
-                                class="border-2 border-gray-200 text-gray-800 px-12 py-5 font-bold hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-300 uppercase tracking-widest text-xs">
-                                Sejarah Sekolah
-                            </a>
-                        </div>
-                        <div class="mt-5">
-                            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">
-                                Sudah mendaftar?
-                                <a href="{{ route('frontend.ppdb.status') }}"
-                                    class="text-blue-700 font-bold hover:text-blue-900 hover:underline transition-colors ml-1">
-                                    Cek Status Pendaftaran Anda di sini <i
-                                        class="fa-solid fa-chevron-right text-[8px] ml-0.5"></i>
-                                </a>
-                            </p>
-                        </div>
+    <!-- Aksen bulatan blur mengambang (dekorasi ringan, tidak ganggu keterbacaan) -->
+    <div class="absolute top-10 left-10 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] motion-safe:animate-float-slow -z-0"></div>
+    <div class="absolute bottom-10 right-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-[100px] motion-safe:animate-float-slow-reverse -z-0"></div>
 
-                        <!-- Trusted Label -->
-                        <div class="mt-16 flex items-center space-x-4 opacity-50">
-                            <div class="flex -space-x-2">
-                                <div class="w-8 h-8 rounded-none bg-blue-100 border-2 border-white"></div>
-                                <div class="w-8 h-8 rounded-none bg-blue-200 border-2 border-white"></div>
-                                <div class="w-8 h-8 rounded-none bg-blue-300 border-2 border-white"></div>
+    <div class="container mx-auto px-6 relative z-10 py-14">
+        <div class="max-w-4xl mx-auto">
+
+            <!-- 2 Box: Sambutan (kiri) & Foto Kepala Madrasah (kanan) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-6 items-center mb-10">
+
+                <!-- Box Kiri: Teks Sambutan -->
+                <div class="text-center md:text-right" data-aos="fade-right">
+                    <span class="inline-block text-blue-300 font-bold tracking-[0.35em] text-[10px] uppercase mb-4">
+                        Selamat Datang di
+                    </span>
+                    <h1 class="font-black text-white leading-[1.15] tracking-tighter mb-4 uppercase"
+                        style="font-size: clamp(1.75rem, 4vw, 2.5rem);">
+                        Madrasah Aliyah Muhammadiyah <span class="text-blue-400">Limpung</span>
+                    </h1>
+                    <p class="text-blue-100/80 leading-relaxed font-medium" style="font-size: clamp(0.85rem, 1.5vw, 1rem);">
+                        {{ $siteSettings->tagline ?? 'Unggul dalam Ilmu, Kreatif, dan Anggun dalam Perilaku' }}
+                    </p>
+                </div>
+
+                <!-- Box Kanan: Foto Kepala Madrasah -->
+                <div class="flex justify-center md:justify-start" data-aos="fade-left">
+                    <div class="relative w-[220px] md:w-[260px] group">
+                        <!-- Pulse ring halus -->
+                        <div class="absolute -inset-3 rounded-3xl bg-blue-400/10 motion-safe:animate-ping-slow"></div>
+
+                        <!-- Foto portrait -->
+                        <div class="relative aspect-[4/5] rounded-3xl overflow-hidden border-4 border-white/90 shadow-2xl">
+                            <img src="{{ $kepalaSekolah?->foto ? asset('storage/' . $kepalaSekolah->foto) : asset('assets/img/kepala-sekolah.png') }}"
+                                class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                                alt="{{ $kepalaSekolah?->nama ?? 'Kepala Madrasah' }} - Kepala Madrasah Aliyah Muhammadiyah Limpung"
+                                loading="eager">
+
+                            <!-- Gradasi agar teks di bawah tetap terbaca -->
+                            <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/85 via-black/40 to-transparent"></div>
+
+                            <!-- Nama & Jabatan (overlay di dalam foto) -->
+                            <div class="absolute inset-x-0 bottom-0 p-4 text-left">
+                                <h4 class="text-sm md:text-base font-black text-white uppercase tracking-wide leading-tight mb-0.5">
+                                    {{ $kepalaSekolah?->nama ?? 'Nama Kepala Madrasah' }}
+                                </h4>
+                                <p class="text-[9px] text-blue-200/90 uppercase tracking-widest font-bold">
+                                    Kepala Madrasah
+                                </p>
+                                {{-- @if($kepalaSekolah?->quote)
+                                    <p class="text-[8px] text-blue-300/70 italic mt-1 leading-tight max-w-[200px] truncate">
+                                        "{{ $kepalaSekolah->quote }}"
+                                    </p>
+                                @endif --}}
                             </div>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Terakreditasi A &
-                                Dipercaya Ribuan Orang Tua</p>
                         </div>
-                    </div>
 
-                    <!-- Sisi Kanan: Stacked Card Slider (Dynamic with Alpine.js) -->
-                    <div class="relative flex lg:flex justify-center items-center h-[400px] md:h-[500px] mt-12 lg:mt-0"
-                        x-data="{
-                            active: 0,
-                            cards: [
-                                { img: '{{ asset('assets/img/hero/hero-1.JPG') }}', title: 'Lingkungan yang Nyaman dan Islami' },
-                                { img: '{{ asset('assets/img/hero/hero-2.JPG') }}', title: 'Fasilitas Modern' },
-                                { img: '{{ asset('assets/img/hero/hero-3.JPG') }}', title: 'Prestasi Gemilang' }
-                            ],
-                            init() {
-                                setInterval(() => {
-                                    this.active = (this.active + 1) % this.cards.length;
-                                }, 4000);
-                            }
-                        }" data-aos="fade-up" lg:data-aos="fade-left">
-
-                        <template x-for="(card, index) in cards" :key="index">
-                            <div class="absolute w-[260px] md:w-[320px] h-[340px] md:h-[420px] bg-white shadow-2xl border border-gray-100 overflow-hidden transition-all duration-700 ease-in-out"
-                                :style="`z-index: ${active === index ? 30 : (active + 1) % cards.length === index ? 20 : 10};`"
-                                :class="{
-                                    'rotate-0 translate-x-0 translate-y-0 opacity-100 scale-100': active === index,
-                                    'rotate-[6deg] translate-x-4 md:translate-x-8 translate-y-2 md:translate-y-4 opacity-50 scale-95': (
-                                        active + 1) % cards.length === index,
-                                    'rotate-[12deg] translate-x-8 md:translate-x-16 translate-y-4 md:translate-y-8 opacity-20 scale-90 grayscale': (
-                                        active + 2) % cards.length === index
-                                }">
-                                <img :src="card.img" class="w-full h-full object-cover" :alt="card.title">
-                                <div class="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent"
-                                    x-show="active === index" x-transition></div>
-                                {{-- <div class="absolute bottom-0 left-0 p-6 md:p-8 w-full" x-show="active === index"
-                                    x-transition>
-                                    <div
-                                        class="bg-white/90 backdrop-blur-md p-3 md:p-4 shadow-lg border-l-4 border-blue-700">
-                                        <span
-                                            class="text-[8px] font-bold text-blue-700 uppercase tracking-[0.2em] block mb-1">MAM
-                                            Limpung</span>
-                                        <h4 class="text-[10px] md:text-sm font-black text-gray-900 uppercase"
-                                            x-text="card.title"></h4>
-                                    </div>
-                                </div> --}}
-                            </div>
-                        </template>
-
-                        <!-- Decorative Elements -->
-                        <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-blue-900/5 -z-10"></div>
-                        <div class="absolute top-0 right-0 w-48 h-48 bg-blue-50 -z-10 blur-3xl opacity-50"></div>
+                        <!-- Badge Akreditasi mengambang -->
+                        {{-- <div class="absolute -bottom-3 -right-3 bg-amber-400 text-blue-950 text-[10px] font-black w-11 h-11 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
+                            data-aos="zoom-in" data-aos-delay="400" title="Terakreditasi A">
+                            B
+                        </div> --}}
                     </div>
                 </div>
             </div>
-        </section>
+
+            <!-- 2 Tombol (center, touch-friendly) -->
+            <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-9" data-aos="fade-up" data-aos-delay="150">
+                <a href="{{ route('frontend.ppdb.form') }}"
+                    class="min-h-[48px] bg-white text-blue-900 px-10 py-3.5 font-bold hover:bg-blue-50 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 transition-all duration-300 uppercase tracking-widest text-xs inline-flex items-center justify-center gap-2 group focus-visible:outline focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2">
+                    Daftar Sekarang
+                    <i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform" aria-hidden="true"></i>
+                </a>
+                <a href="/profile"
+                    class="min-h-[48px] border-2 border-white/40 text-white px-10 py-3.5 font-bold hover:bg-white hover:text-blue-900 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 uppercase tracking-widest text-xs inline-flex items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2">
+                    Sejarah Sekolah
+                </a>
+            </div>
+
+            <!-- Alamat & Admin: chip style, lebih mudah di-scan -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 border-t border-white/10 pt-6"
+                data-aos="fade-up" data-aos-delay="250">
+                <div class="flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-colors px-4 py-2 rounded-full">
+                    <i class="fa-solid fa-location-dot text-blue-300 text-xs" aria-hidden="true"></i>
+                    <p class="text-xs text-blue-100/80 font-semibold">
+                        {{ $siteSettings->address ?? 'Jl. Raya Limpung, Kab. Batang, Jawa Tengah' }}
+                    </p>
+                </div>
+                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $siteSettings->whatsapp ?? $siteSettings->phone ?? '') }}"
+                    target="_blank" rel="noopener"
+                    aria-label="Hubungi admin PPDB via WhatsApp"
+                    class="flex items-center gap-2 bg-white/5 hover:bg-emerald-500/20 transition-colors px-4 py-2 rounded-full min-h-[36px]">
+                    <i class="fa-brands fa-whatsapp text-emerald-400 text-xs" aria-hidden="true"></i>
+                    <span class="text-xs text-blue-100/80 font-semibold">
+                        {{ $siteSettings->whatsapp ?? $siteSettings->phone ?? '0812-xxxx-xxxx' }}
+                    </span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+</section>
+
+<style>
+    /* Zoom perlahan background gedung */
+    @keyframes heroZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    .animate-hero-zoom {
+        animation: heroZoom 22s ease-in-out infinite alternate;
+    }
+
+    /* Bulatan dekorasi mengambang */
+    @keyframes floatSlow {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(20px, -20px); }
+    }
+    @keyframes floatSlowReverse {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-20px, 20px); }
+    }
+    .animate-float-slow { animation: floatSlow 12s ease-in-out infinite; }
+    .animate-float-slow-reverse { animation: floatSlowReverse 14s ease-in-out infinite; }
+
+    /* Pulse ring di belakang foto kepala madrasah */
+    @keyframes pingSlow {
+        0% { transform: scale(1); opacity: 0.6; }
+        100% { transform: scale(1.35); opacity: 0; }
+    }
+    .animate-ping-slow { animation: pingSlow 2.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+    /* Scroll indicator bounce */
+    @keyframes bounceSlow {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(6px); }
+    }
+    .animate-bounce-slow { animation: bounceSlow 1.8s ease-in-out infinite; }
+
+    /* Hormati preferensi pengguna yang sensitif terhadap animasi */
+    @media (prefers-reduced-motion: reduce) {
+        .animate-hero-zoom,
+        .animate-float-slow,
+        .animate-float-slow-reverse,
+        .animate-ping-slow,
+        .animate-bounce-slow {
+            animation: none !important;
+        }
+    }
+</style>
 
         <x-announcement.ad-horizontal />
 

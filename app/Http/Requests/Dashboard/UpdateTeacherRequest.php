@@ -33,7 +33,8 @@ class UpdateTeacherRequest extends FormRequest
             'tanggal_masuk' => ['nullable', 'date'],
             'status' => ['required', 'in:aktif,nonaktif'],
             'quote' => ['nullable', 'string', 'max:500'],
-            'teacher_category_id' => ['nullable', 'exists:teacher_categories,id'],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['exists:teacher_categories,id'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ];
     }
@@ -42,31 +43,25 @@ class UpdateTeacherRequest extends FormRequest
     {
         return [
             function (Validator $validator) {
-                if (! $this->filled('teacher_category_id')) {
-                    return;
-                }
+                $categoryIds = $this->input('category_ids', []);
 
-                $category = TeacherCategory::find($this->teacher_category_id);
-
-                if (! in_array($category?->slug, ['kepala-sekolah', 'wakil-kepala-sekolah'], true)) {
-                    return;
-                }
-
-                $label = $category->slug === 'kepala-sekolah'
-                    ? 'Kepala Sekolah'
-                    : 'Wakil Kepala Sekolah';
-
-                $teacherId = $this->route('teacher')?->id ?? $this->route('teacher');
-
-                $exists = Teacher::where('teacher_category_id', $category->id)
-                    ->when($teacherId, fn ($q) => $q->where('id', '!=', $teacherId))
+                $slug = TeacherCategory::whereIn('id', $categoryIds)
+                    ->where('slug', 'kepala-madrasah')
                     ->exists();
 
-                if ($exists) {
-                    $validator->errors()->add(
-                        'teacher_category_id',
-                        "Kategori {$label} sudah terisi oleh guru lain. Hanya satu guru yang boleh memiliki kategori ini.",
-                    );
+                if ($slug) {
+                    $teacherId = $this->route('teacher')?->id ?? $this->route('teacher');
+
+                    $exists = Teacher::where('id', '!=', $teacherId)
+                        ->whereHas('categories', fn ($q) => $q->where('slug', 'kepala-madrasah'))
+                        ->exists();
+
+                    if ($exists) {
+                        $validator->errors()->add(
+                            'category_ids',
+                            'Kategori Kepala Madrasah sudah terisi oleh guru lain. Hanya satu guru yang boleh memiliki kategori ini.',
+                        );
+                    }
                 }
             },
         ];

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'active'])->group(function () {
 
-    // -------------------------------------------------------------------------
-    //  Prestasi CRUD & Import/Export (Admin / Super Admin)
-    // -------------------------------------------------------------------------
     Route::prefix('admin/prestasi')
         ->name('admin.prestasi.')
         ->middleware('permission:access-admin-dashboard|access-super-admin-dashboard')
@@ -21,6 +18,7 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::put('/{prestasi}', [AdminPrestasiController::class, 'update'])->name('update');
             Route::delete('/{prestasi}', [AdminPrestasiController::class, 'destroy'])->name('destroy');
             Route::post('/upload-temp', [AdminPrestasiController::class, 'uploadTemp'])->name('upload-temp');
+            Route::post('/bulk-delete', [AdminPrestasiController::class, 'bulkDestroy'])->name('bulk-destroy');
 
             // IO operations
             Route::get('/export/excel', [AdminPrestasiIOController::class, 'exportExcel'])->name('export.excel');
